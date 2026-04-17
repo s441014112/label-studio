@@ -11,14 +11,30 @@ IS_SQLITE = settings.DJANGO_DB == settings.DJANGO_DB_SQLITE
 
 migration_name = '0055_task_proj_octlen_idx_async'
 
-sql_create_index = (
-    'CREATE INDEX CONCURRENTLY IF NOT EXISTS task_proj_octlen_idx '
-    'ON task (project_id, octet_length(data::text) DESC) '
-    'INCLUDE (id);'
-)
-sql_drop_index = (
-    'DROP INDEX CONCURRENTLY IF EXISTS task_proj_octlen_idx;'
-)
+def get_sql_create_index(db_vendor):
+    if db_vendor == 'postgresql':
+        return (
+            'CREATE INDEX CONCURRENTLY IF NOT EXISTS task_proj_octlen_idx '
+            'ON task (project_id, octet_length(data::text) DESC) '
+            'INCLUDE (id);'
+        )
+    elif db_vendor == 'mysql':
+        # MySQL doesn't support CONCURRENTLY or INCLUDE clause
+        # For MySQL, create a simpler index without the JSON length
+        return (
+            'CREATE INDEX task_proj_octlen_idx '
+            'ON `task` (`project_id`, `id`);'
+        )
+    else:
+        return None
+
+def get_sql_drop_index(db_vendor):
+    if db_vendor == 'postgresql':
+        return 'DROP INDEX CONCURRENTLY IF EXISTS task_proj_octlen_idx;'
+    elif db_vendor == 'mysql':
+        return 'DROP INDEX `task_proj_octlen_idx` ON `task`;'
+    else:
+        return None
 
 def forward_migration(migration_name, db_alias):
     migration, created = AsyncMigrationStatus.objects.using(db_alias).get_or_create(
@@ -30,8 +46,25 @@ def forward_migration(migration_name, db_alias):
     
     logger.info(f'Start async migration {migration_name}')
     from django.db import connections
-    cursor = connections[db_alias].cursor()
-    cursor.execute(sql_create_index)
+    conn = connections[db_alias]
+    db_vendor = conn.vendor
+    
+    sql = get_sql_create_index(db_vendor)
+    if sql is None:
+        logger.info(f'Skipping index creation for {db_vendor} database')
+        migration.status = AsyncMigrationStatus.STATUS_FINISHED
+        migration.save(using=db_alias)
+        return
+    
+    if db_vendor == 'mysql':
+        # Try to drop existing index first (if any)
+        try:
+            conn.cursor().execute(get_sql_drop_index(db_vendor))
+        except Exception:
+            pass
+    
+    cursor = conn.cursor()
+    cursor.execute(sql)
     migration.status = AsyncMigrationStatus.STATUS_FINISHED
     migration.save(using=db_alias)
     logger.info(f'Async migration {migration_name} complete')
@@ -43,8 +76,26 @@ def backward_migration(migration_name, db_alias):
     )
     logger.info(f'Start revert of async migration {migration_name}')
     from django.db import connections
-    cursor = connections[db_alias].cursor()
-    cursor.execute(sql_drop_index)
+    conn = connections[db_alias]
+    db_vendor = conn.vendor
+    
+    sql = get_sql_drop_index(db_vendor)
+    if sql is None:
+        logger.info(f'Skipping index drop for {db_vendor} database')
+        migration.status = AsyncMigrationStatus.STATUS_FINISHED
+        migration.save(using=db_alias)
+        return
+    
+    if db_vendor == 'mysql':
+        # MySQL may not have the index, ignore errors
+        try:
+            conn.cursor().execute(sql)
+        except Exception:
+            pass
+    else:
+        cursor = conn.cursor()
+        cursor.execute(sql)
+    
     migration.status = AsyncMigrationStatus.STATUS_FINISHED
     migration.save(using=db_alias)
     logger.info(f'Async migration {migration_name} revert complete')
@@ -54,11 +105,21 @@ def forwards(apps, schema_editor):
         logger.info('SQLite execution')
         logger.info('Skipping async index creation for non-PostgreSQL databases')
         return
+    
+    db_vendor = schema_editor.connection.vendor
+    if db_vendor not in ['postgresql', 'mysql']:
+        logger.info(f'Skipping async index creation for {db_vendor} database')
+        return
 
     db_alias = schema_editor.connection.alias
     start_job_async_or_sync(forward_migration, migration_name=migration_name, db_alias=db_alias)
 
 def backwards(apps, schema_editor):
+    db_vendor = schema_editor.connection.vendor
+    if db_vendor not in ['postgresql', 'mysql']:
+        logger.info(f'Skipping async index drop for {db_vendor} database')
+        return
+    
     db_alias = schema_editor.connection.alias
     start_job_async_or_sync(backward_migration, migration_name=migration_name, db_alias=db_alias)
 

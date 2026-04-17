@@ -12,6 +12,34 @@ logger = logging.getLogger(__name__)
 def execute_sql_job(*, migration_name: str, sql: str, apply_on_sqlite: bool = False, reverse: bool = False) -> None:
     from core.models import AsyncMigrationStatus
 
+    # Handle database-specific SQL modifications
+    def adjust_sql_for_db(sql: str) -> str:
+        if connection.vendor == 'mysql':
+            # MySQL doesn't support CONCURRENTLY keyword
+            sql = sql.replace('CONCURRENTLY ', '')
+            # MySQL 8.0.19+ supports IF NOT EXISTS, but to support older versions,
+            # we need to handle this differently
+            # For CREATE INDEX, remove IF NOT EXISTS and use DROP first approach
+            if 'CREATE INDEX' in sql and 'IF NOT EXISTS' in sql:
+                # Extract index name
+                import re
+                match = re.search(r'CREATE INDEX\s+(?:IF NOT EXISTS\s+)?(\S+)', sql, re.IGNORECASE)
+                if match:
+                    index_name = match.group(1)
+                    # Need special handling for MySQL - will drop first if exists
+                    # This is handled in the calling code
+                    pass
+                # Remove IF NOT EXISTS for MySQL compatibility
+                sql = sql.replace('IF NOT EXISTS ', '')
+            # MySQL also doesn't support IF NOT EXISTS in DROP INDEX
+            sql = sql.replace('DROP INDEX CONCURRENTLY IF EXISTS ', 'DROP INDEX ')
+            sql = sql.replace('DROP INDEX IF EXISTS ', 'DROP INDEX ')
+            # MySQL uses backticks for identifiers instead of double quotes
+            sql = sql.replace('"', '`')
+        return sql
+
+    adjusted_sql = adjust_sql_for_db(sql)
+
     if not reverse:
         migration, created = AsyncMigrationStatus.objects.get_or_create(
             name=migration_name,
@@ -29,7 +57,18 @@ def execute_sql_job(*, migration_name: str, sql: str, apply_on_sqlite: bool = Fa
                 logger.info('SQLite detected; skipping SQL execution as requested')
             else:
                 with connection.cursor() as cursor:
-                    cursor.execute(sql)
+                    # For MySQL, try to drop index first if creating one
+                    if connection.vendor == 'mysql' and 'CREATE INDEX' in adjusted_sql.upper():
+                        import re
+                        match = re.search(r'CREATE INDEX\s+(\S+)', adjusted_sql, re.IGNORECASE)
+                        if match:
+                            index_name = match.group(1)
+                            # Try to drop the index first (ignore errors if not exists)
+                            try:
+                                cursor.execute(f'DROP INDEX `{index_name}`')
+                            except Exception:
+                                pass
+                    cursor.execute(adjusted_sql)
             migration.status = AsyncMigrationStatus.STATUS_FINISHED
             migration.save()
         except Exception as e:
@@ -47,7 +86,14 @@ def execute_sql_job(*, migration_name: str, sql: str, apply_on_sqlite: bool = Fa
                 logger.info('SQLite detected; skipping SQL execution as requested (reverse)')
                 return
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                # For MySQL, ignore errors when dropping non-existent indexes
+                if connection.vendor == 'mysql' and 'DROP INDEX' in adjusted_sql.upper():
+                    try:
+                        cursor.execute(adjusted_sql)
+                    except Exception:
+                        logger.info(f'Ignoring error during reverse migration {migration_name} on MySQL')
+                else:
+                    cursor.execute(adjusted_sql)
         except Exception as e:
             logger.exception(f'Reverse migration {migration_name} failed: {e}')
             raise
@@ -71,6 +117,9 @@ def make_sql_migration(
     mig_key = migration_name
 
     def forwards(apps, schema_editor):  # noqa: ARG001
+        # Early return for linter to not actually run code
+        if getattr(schema_editor, 'collect_sql', False) is True:
+            return
         if schema_editor.connection.vendor == 'sqlite' and not apply_on_sqlite:
             logger.info('Skipping migration for SQLite (apply_on_sqlite=False)')
             return
@@ -92,6 +141,9 @@ def make_sql_migration(
             )
 
     def backwards(apps, schema_editor):  # noqa: ARG001
+        # Early return for linter to not actually run code
+        if getattr(schema_editor, 'collect_sql', False) is True:
+            return
         start_job_async_or_sync(
             execute_sql_job,
             migration_name=mig_key,

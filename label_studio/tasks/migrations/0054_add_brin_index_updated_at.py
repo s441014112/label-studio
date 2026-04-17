@@ -25,6 +25,20 @@ def forward_migration(migration_name, db_alias):
         CREATE INDEX CONCURRENTLY IF NOT EXISTS "task_updated_at_brin_idx" 
         ON "task" USING BRIN ("updated_at");
         '''
+    elif conn.vendor == 'mysql':
+        # MySQL uses backticks for identifiers
+        # MySQL 8.0.19+ supports CREATE INDEX IF NOT EXISTS
+        # MySQL 8.0.29+ supports DROP INDEX IF EXISTS
+        # For older versions, we try to drop and ignore errors
+        with conn.cursor() as cursor:
+            try:
+                cursor.execute('DROP INDEX `task_updated_at_brin_idx` ON `task`;')
+            except Exception:
+                pass
+        sql = '''
+        CREATE INDEX `task_updated_at_brin_idx` 
+        ON `task` (`updated_at`);
+        '''
     else:
         # SQLite fallback - regular B-tree index
         sql = '''
@@ -50,6 +64,8 @@ def reverse_migration(migration_name, db_alias):
     conn = connections[db_alias]
     if conn.vendor == 'postgresql':
         sql = 'DROP INDEX CONCURRENTLY IF EXISTS "task_updated_at_brin_idx";'
+    elif conn.vendor == 'mysql':
+        sql = 'DROP INDEX IF EXISTS `task_updated_at_brin_idx`;'
     else:
         sql = 'DROP INDEX IF EXISTS "task_updated_at_brin_idx";'
     

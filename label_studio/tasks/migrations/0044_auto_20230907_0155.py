@@ -4,8 +4,9 @@ from django.db import migrations, models
 from django.conf import settings
 
 IS_SQLITE = settings.DJANGO_DB == settings.DJANGO_DB_SQLITE
+IS_MYSQL = settings.DJANGO_DB == settings.DJANGO_DB_MYSQL
 
-if IS_SQLITE:
+if IS_SQLITE or IS_MYSQL:
     from django.db.migrations import AddIndex
 else:
     from django.contrib.postgres.operations import AddIndexConcurrently as AddIndex

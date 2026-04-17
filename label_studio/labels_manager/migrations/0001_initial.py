@@ -6,6 +6,15 @@ from django.conf import settings
 from django.db import migrations, models
 
 
+def add_unique_constraint(apps, schema_editor):
+    """Add unique constraint only for PostgreSQL to avoid MySQL index length issues."""
+    db_vendor = schema_editor.connection.vendor
+    if db_vendor == 'postgresql':
+        schema_editor.execute(
+            "ALTER TABLE labels_manager_label ADD CONSTRAINT unique_title UNIQUE (title, organization_id);"
+        )
+
+
 class Migration(migrations.Migration):
 
     initial = True
@@ -46,8 +55,5 @@ class Migration(migrations.Migration):
             name='projects',
             field=models.ManyToManyField(through='labels_manager.LabelLink', to='projects.Project'),
         ),
-        migrations.AddConstraint(
-            model_name='label',
-            constraint=models.UniqueConstraint(fields=('title', 'organization'), name='unique_title'),
-        ),
+        migrations.RunPython(add_unique_constraint, migrations.RunPython.noop),
     ]

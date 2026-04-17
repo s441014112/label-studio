@@ -14,21 +14,46 @@ logger = logging.getLogger(__name__)
 IS_SQLITE = connection.vendor == 'sqlite'
 migration_name = '0017_auto_20240731_1638'
 
-def create_index_sql(table_name, index_name, column_name):
-    return f"""
-    CREATE INDEX CONCURRENTLY IF NOT EXISTS "{index_name}" ON "{table_name}" ("{column_name}");
-    """
+def create_index_sql(table_name, index_name, column_name, db_vendor):
+    if db_vendor == 'mysql':
+        return f"""
+        CREATE INDEX `{index_name}` ON `{table_name}` (`{column_name}`);
+        """
+    elif db_vendor == 'postgresql':
+        return f"""
+        CREATE INDEX CONCURRENTLY IF NOT EXISTS "{index_name}" ON "{table_name}" ("{column_name}");
+        """
+    else:
+        return f"""
+        CREATE INDEX IF NOT EXISTS "{index_name}" ON "{table_name}" ("{column_name}");
+        """
 
-def create_fk_sql(table_name, constraint_name, column_name, referenced_table, referenced_column):
-    return f"""
-    ALTER TABLE "{table_name}" DROP CONSTRAINT IF EXISTS "{constraint_name}";
-    ALTER TABLE "{table_name}" ADD CONSTRAINT "{constraint_name}" FOREIGN KEY ("{column_name}") REFERENCES "{referenced_table}" ("{referenced_column}") DEFERRABLE INITIALLY DEFERRED;
-    """
+def create_fk_sql(table_name, constraint_name, column_name, referenced_table, referenced_column, db_vendor):
+    if db_vendor == 'mysql':
+        return f"""
+        ALTER TABLE `{table_name}` ADD CONSTRAINT `{constraint_name}` FOREIGN KEY (`{column_name}`) REFERENCES `{referenced_table}` (`{referenced_column}`);
+        """
+    elif db_vendor == 'postgresql':
+        return f"""
+        ALTER TABLE "{table_name}" DROP CONSTRAINT IF EXISTS "{constraint_name}";
+        ALTER TABLE "{table_name}" ADD CONSTRAINT "{constraint_name}" FOREIGN KEY ("{column_name}") REFERENCES "{referenced_table}" ("{referenced_column}") DEFERRABLE INITIALLY DEFERRED;
+        """
+    else:
+        return ""
 
-def drop_index_sql(table_name, index_name, column_name):
-    return f"""
-    DROP INDEX CONCURRENTLY IF EXISTS "{index_name}";
-    """
+def drop_index_sql(table_name, index_name, column_name, db_vendor):
+    if db_vendor == 'mysql':
+        return f"""
+        DROP INDEX IF EXISTS `{index_name}`;
+        """
+    elif db_vendor == 'postgresql':
+        return f"""
+        DROP INDEX CONCURRENTLY IF NOT EXISTS "{index_name}";
+        """
+    else:
+        return f"""
+        DROP INDEX IF EXISTS "{index_name}";
+        """
 
 tables = [
     {
@@ -78,17 +103,35 @@ def forward_migration(migration_name, db_alias):
         f'Start async migration {migration_name}'
     )
 
-    # Get db cursor
+    # Get db cursor and vendor
     from django.db import connections
-    cursor = connections[db_alias].cursor()
+    conn = connections[db_alias]
+    cursor = conn.cursor()
+    db_vendor = conn.vendor
+    
     for table in tables:
-        index_sql = create_index_sql(table['table_name'], table['index_name'], table['column_name'])
+        # For MySQL, try to drop existing index first (if any)
+        if db_vendor == 'mysql':
+            try:
+                cursor.execute(f'DROP INDEX `{table["index_name"]}` ON `{table["table_name"]}`;')
+            except Exception:
+                pass
+        
+        index_sql = create_index_sql(table['table_name'], table['index_name'], table['column_name'], db_vendor)
         fk_sql = create_fk_sql(table['table_name'], table['fk_constraint'], table['column_name'], "task_completion",
-                               "id")
+                               "id", db_vendor)
 
         # Run index_sql
         cursor.execute(index_sql)
-        cursor.execute(fk_sql)
+        if fk_sql:
+            # For MySQL, ignore duplicate foreign key errors
+            try:
+                cursor.execute(fk_sql)
+            except Exception as e:
+                if db_vendor == 'mysql' and 'Duplicate foreign key' in str(e):
+                    logger.info(f'Foreign key already exists, skipping: {table["fk_constraint"]}')
+                else:
+                    raise
 
     migration.status = AsyncMigrationStatus.STATUS_FINISHED
     migration.save(using=db_alias)
@@ -105,11 +148,14 @@ def reverse_migration(migration_name, db_alias):
         f'Start async migration {migration_name}'
     )
 
-    # Get db cursor
+    # Get db cursor and vendor
     from django.db import connections
-    cursor = connections[db_alias].cursor()
+    conn = connections[db_alias]
+    cursor = conn.cursor()
+    db_vendor = conn.vendor
+    
     for table in tables:
-        reverse_sql = drop_index_sql(table['table_name'], table['index_name'], table['column_name'])
+        reverse_sql = drop_index_sql(table['table_name'], table['index_name'], table['column_name'], db_vendor)
         # Run reverse_sql
         cursor.execute(reverse_sql)
 

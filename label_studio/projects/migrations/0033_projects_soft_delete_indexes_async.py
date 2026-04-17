@@ -10,11 +10,33 @@ migration_name = '0033_projects_soft_delete_indexes_async'
 def forward_migration(migration_name, db_alias):
     rec = AsyncMigrationStatus.objects.using(db_alias).create(name=migration_name, status=AsyncMigrationStatus.STATUS_STARTED)
     conn = connections[db_alias]
+    
+    index_names = [
+        'project_org_deleted_idx',
+        'project_deleted_at_idx',
+        'project_purge_at_idx',
+    ]
+    
     if conn.vendor == 'postgresql':
         sqls = [
             'CREATE INDEX CONCURRENTLY IF NOT EXISTS project_org_deleted_idx ON project (organization_id, deleted_at)',
             'CREATE INDEX CONCURRENTLY IF NOT EXISTS project_deleted_at_idx ON project (deleted_at)',
             'CREATE INDEX CONCURRENTLY IF NOT EXISTS project_purge_at_idx ON project (purge_at)',
+        ]
+    elif conn.vendor == 'mysql':
+        # MySQL doesn't support IF NOT EXISTS in CREATE INDEX
+        # Drop existing indexes first (ignore errors if they don't exist)
+        with conn.cursor() as c:
+            for index_name in index_names:
+                try:
+                    c.execute(f'DROP INDEX `{index_name}` ON `project`;')
+                except Exception:
+                    pass
+        
+        sqls = [
+            'CREATE INDEX `project_org_deleted_idx` ON `project` (`organization_id`, `deleted_at`);',
+            'CREATE INDEX `project_deleted_at_idx` ON `project` (`deleted_at`);',
+            'CREATE INDEX `project_purge_at_idx` ON `project` (`purge_at`);',
         ]
     else:
         sqls = [
@@ -32,11 +54,19 @@ def forward_migration(migration_name, db_alias):
 def reverse_migration(migration_name, db_alias):
     rec = AsyncMigrationStatus.objects.using(db_alias).create(name=migration_name, status=AsyncMigrationStatus.STATUS_STARTED)
     conn = connections[db_alias]
+    
     if conn.vendor == 'postgresql':
         sqls = [
             'DROP INDEX CONCURRENTLY IF EXISTS project_org_deleted_idx',
             'DROP INDEX CONCURRENTLY IF EXISTS project_deleted_at_idx',
             'DROP INDEX CONCURRENTLY IF EXISTS project_purge_at_idx',
+        ]
+    elif conn.vendor == 'mysql':
+        # MySQL doesn't support IF NOT EXISTS in DROP INDEX, ignore errors
+        sqls = [
+            'DROP INDEX `project_org_deleted_idx` ON `project`;',
+            'DROP INDEX `project_deleted_at_idx` ON `project`;',
+            'DROP INDEX `project_purge_at_idx` ON `project`;',
         ]
     else:
         sqls = [
@@ -44,9 +74,16 @@ def reverse_migration(migration_name, db_alias):
             'DROP INDEX IF EXISTS project_deleted_at_idx',
             'DROP INDEX IF EXISTS project_purge_at_idx',
         ]
+    
     with conn.cursor() as c:
         for sql in sqls:
-            c.execute(sql)
+            try:
+                c.execute(sql)
+            except Exception as e:
+                if conn.vendor == 'mysql':
+                    logger.info(f'Ignoring error during reverse migration on MySQL: {e}')
+                else:
+                    raise
     rec.status = AsyncMigrationStatus.STATUS_FINISHED
     rec.save(using=db_alias)
 
