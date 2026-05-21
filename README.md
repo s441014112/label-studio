@@ -257,3 +257,35 @@ Include a citation for Label Studio in the **References** section of your articl
 This software is licensed under the [Apache 2.0 LICENSE](/LICENSE) © [Heartex](https://www.heartex.com/). 2020-2025
 
 <img src="https://user-images.githubusercontent.com/12534576/192582529-cf628f58-abc5-479b-a0d4-8a3542a4b35e.png" title="Hey everyone!" width="180" />
+
+
+#### i18n instructions
+
+1.当前汉化仅限于2025.12月之前的代码版本，后续更新未纳入此次i18n范围
+2.当前国际化版本非官方版本，仅为个人使用，未经允许不得商用
+
+## start instructions
+
+本地开发启动流程
+1.web目录
+yarn install --legacy-peer-deps   (node版本用22.13.0)
+
+2.控制台(powershell 或者 node bash 窗口)，启动前端服务，进行前端打包
+yarn run build
+
+3.新建一个控制台，启动后端python 服务(python 窗口)
+python -m venv venv
+venv\Scripts\activate
+
+安装库
+pip install -e .
+
+执行数据库迁移
+python label_studio/manage.py migrate
+
+收集静态文件
+python label_studio/manage.py collectstatic --noinput
+
+启动后端
+python label_studio/manage.py runserver
+

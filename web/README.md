@@ -100,29 +100,5 @@ This software is licensed under the [Apache 2.0 LICENSE](../LICENSE) © [HumanSi
 
 
 
-本地开发启动流程
-1.web目录
-yarn install --legacy-peer-deps   (node版本用22.13.0)
-
-2.控制台(powershell 或者 node bash 窗口)，启动前端服务，进行前端打包
-yarn run build
-
-3.新建一个控制台，启动后端python 服务(python 窗口)
-python -m venv venv
-venv\Scripts\activate
-
-安装库
-pip install -e .
-
-执行数据库迁移
-python label_studio/manage.py migrate
-
-收集静态文件
-python label_studio/manage.py collectstatic --noinput
-
-启动后端
-python label_studio/manage.py runserver
-
-
 
 
