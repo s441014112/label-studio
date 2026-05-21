@@ -22,6 +22,9 @@ import "./ViewControls.scss";
 import { observer } from "mobx-react";
 import { FF_DEV_3873, isFF } from "../../../utils/feature-flags";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 export type GroupingOptions = "manual" | "label" | "type";
 
 export type OrderingOptions = "score" | "date" | "mediaStartTime";
@@ -60,6 +63,8 @@ export const ViewControls: FC<ViewControlsProps> = observer(
       });
     }, [regions.annotation?.names]);
 
+    const { t } = useTranslation();
+
     // Auto-fallback to "date" if current ordering is "mediaStartTime" but no media-time support in config
     useEffect(() => {
       if (ordering === "mediaStartTime" && mediaTimeSupport === false) {
@@ -73,34 +78,34 @@ export const ViewControls: FC<ViewControlsProps> = observer(
           return {
             label: (
               <>
-                <IconList /> Group Manually
+                <IconList /> { t("editor.components.sidepanels.manual_grouping") }
               </>
             ),
-            selectedLabel: isFF(FF_DEV_3873) ? "Manual" : "Manual Grouping",
+            selectedLabel: isFF(FF_DEV_3873) ? t("editor.components.sidepanels.manual") : t("editor.components.sidepanels.manual_grouping"),
             icon: <IconList width={16} height={16} />,
-            tooltip: "Manually Grouped",
+            tooltip: t("editor.components.sidepanels.manually_grouped"),
           };
         case "label":
           return {
             label: (
               <>
-                <IconBoundingBox /> Group by Label
+                <IconBoundingBox /> { t("editor.components.sidepanels.grouped_by_label") }
               </>
             ),
-            selectedLabel: isFF(FF_DEV_3873) ? "By Label" : "Grouped by Label",
+            selectedLabel: isFF(FF_DEV_3873) ? t("editor.components.sidepanels.by_label") : t("editor.components.sidepanels.grouped_by_label"),
             icon: <IconBoundingBox width={16} height={16} />,
-            tooltip: "Grouped by Label",
+            tooltip: t("editor.components.sidepanels.grouped_by_label"),
           };
         case "type":
           return {
             label: (
               <>
-                <IconCursor /> Group by Tool
+                <IconCursor /> { t("editor.components.sidepanels.grouped_by_tool") }
               </>
             ),
-            selectedLabel: isFF(FF_DEV_3873) ? "By Tool" : "Grouped by Tool",
+            selectedLabel: isFF(FF_DEV_3873) ? t("editor.components.sidepanels.by_tool") : t("editor.components.sidepanels.grouped_by_tool"),
             icon: <IconCursor width={16} height={16} />,
-            tooltip: "Grouped by Tool",
+            tooltip: t("editor.components.sidepanels.grouped_by_tool"),
           };
       }
     }, []);
@@ -111,30 +116,30 @@ export const ViewControls: FC<ViewControlsProps> = observer(
           return {
             label: (
               <>
-                <IconClockTimeFourOutline /> Order by Time
+                <IconClockTimeFourOutline /> { t("editor.components.sidepanels.order_by_time") }
               </>
             ),
-            selectedLabel: "By Time",
+            selectedLabel: t("editor.components.sidepanels.by_time"),
             icon: <IconClockTimeFourOutline width={16} height={16} />,
           };
         case "score":
           return {
             label: (
               <>
-                <IconPredictions /> Order by Score
+                <IconPredictions /> { t("editor.components.sidepanels.order_by_score") }
               </>
             ),
-            selectedLabel: "By Score",
+            selectedLabel: t("editor.components.sidepanels.by_score"),
             icon: <IconPredictions width={16} height={16} />,
           };
         case "mediaStartTime":
           return {
             label: (
               <>
-                <IconTimelineRegion /> Order by Media Start Time
+                <IconTimelineRegion /> { t("editor.components.sidepanels.order_by_media_start_time") }
               </>
             ),
-            selectedLabel: "By Media Start Time",
+            selectedLabel: t("editor.components.sidepanels.by_media_start_time"),
             icon: <IconTimelineRegion width={16} height={16} />,
           };
       }
@@ -306,6 +311,8 @@ const ToggleRegionsVisibilityButton = observer<FC<ToggleRegionsVisibilityButton>
   const isDisabled = !regions?.regions?.length;
   const isAllHidden = !isDisabled && regions.isAllHidden;
 
+  const { t } = useTranslation();
+
   return (
     <Button
       variant="neutral"
@@ -313,8 +320,8 @@ const ToggleRegionsVisibilityButton = observer<FC<ToggleRegionsVisibilityButton>
       look="string"
       disabled={isDisabled}
       onClick={toggleRegionsVisibility}
-      aria-label={isAllHidden ? "Show all regions" : "Hide all regions"}
-      tooltip={isAllHidden ? "Show all regions" : "Hide all regions"}
+      aria-label={isAllHidden ? t("editor.components.sidepanels.show_all_regions") : t("editor.components.sidepanels.hide_all_regions")}
+      tooltip={isAllHidden ? t("editor.components.sidepanels.show_all_regions") : t("editor.components.sidepanels.hide_all_regions")}
     >
       {isAllHidden ? (
         <IconOutlinerEyeClosed width={16} height={16} />

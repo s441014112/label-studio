@@ -38,6 +38,9 @@ import { confirm } from "../../common/Modal/Modal";
 import { type ContextMenuAction, ContextMenu, type MenuActionOnClick } from "../ContextMenu";
 import "./AnnotationButton.scss";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 // Constants for name truncation
 const NAME_TRUNCATE_START = 8;
 const NAME_TRUNCATE_END = 6;
@@ -90,10 +93,10 @@ const renderCommentIcon = (ent: any) => {
 
 const renderCommentTooltip = (ent: any) => {
   if (ent.unresolved_comment_count > 0) {
-    return "Unresolved Comments";
+    return i18n.t("editor.components.annotation.unresolved_comments");
   }
   if (ent.comment_count > 0) {
-    return "All Comments Resolved";
+    return i18n.t("editor.components.annotation.all_comments_resolved");
   }
 
   return "";
@@ -196,6 +199,9 @@ function AnnotationButtonTooltip({
   onMouseLeave?: (e: React.MouseEvent) => void;
   position?: { top: number; left: number };
 }) {
+
+  const { t } = useTranslation();
+
   // Determine status badge (only for annotations, not predictions)
   // Draft/Submitted are separate from Skipped/Ground Truth
   const statusBadge = useMemo(() => {
@@ -251,24 +257,24 @@ function AnnotationButtonTooltip({
 
     // Add Annotation ID first if available
     if (annotationId) {
-      rows.push({ label: "Annotation ID", value: String(annotationId) });
+      rows.push({ label: i18n.t("editor.components.annotation.annotation_id"), value: String(annotationId) });
     }
 
     // Add Type for all annotations/predictions
     if (isPrediction) {
-      rows.push({ label: "Type", value: "Prediction" });
+      rows.push({ label: i18n.t("editor.components.annotation.type"), value: "Prediction" });
       if (isDefined(predictionScore)) {
-        rows.push({ label: "Prediction Score", value: `${(predictionScore * 100).toFixed(2)}%` });
+        rows.push({ label: i18n.t("editor.components.annotation.prediction_score"), value: `${(predictionScore * 100).toFixed(2)}%` });
       }
     } else {
-      rows.push({ label: "Type", value: "Annotation" });
+      rows.push({ label: i18n.t("editor.components.annotation.type"), value: "Annotation" });
     }
 
     // Add Last Updated after Type
     if (lastUpdated) {
       const formattedDate = formatDate(lastUpdated);
       if (formattedDate) {
-        rows.push({ label: "Last Updated", value: formattedDate });
+        rows.push({ label: i18n.t("editor.components.annotation.last_updated"), value: formattedDate });
       }
     }
 
@@ -382,6 +388,8 @@ const AnnotationButtonContextMenu = injector(
       // Check if entity is alive - must be done before any hooks
       const entityIsAlive = isAlive(entity);
 
+      const { t } = useTranslation();
+
       const annotationLink = useMemo(() => {
         if (!entityIsAlive || !entity.pk) {
           return "";
@@ -395,6 +403,7 @@ const AnnotationButtonContextMenu = injector(
         url.searchParams.delete("region");
         return url.toString();
       }, [entityIsAlive, entity.pk]);
+
       const [copyLink] = useCopyText({ defaultText: annotationLink });
       const toast = useToast();
       const dropdown = useDropdown();
@@ -402,10 +411,12 @@ const AnnotationButtonContextMenu = injector(
         onAnnotationChange?.();
         dropdown?.close();
       };
+
       const setGroundTruth = useCallback<MenuActionOnClick>(() => {
         entity.setGroundTruth(!isGroundTruth);
         clickHandler();
       }, [entity, isGroundTruth]);
+
       const duplicateAnnotation = useCallback<MenuActionOnClick>(() => {
         const c = annotationStore.addAnnotationFromPrediction(entity);
 
@@ -414,23 +425,27 @@ const AnnotationButtonContextMenu = injector(
           clickHandler();
         });
       }, [entity, annotationStore]);
+
       const linkAnnotation = useCallback<MenuActionOnClick>(() => {
         copyLink();
         dropdown?.close();
         toast?.show({
-          message: "Annotation link copied to clipboard",
+          message: i18n.t("editor.components.annotation.link_copied_to_clipboard"),
           type: ToastType.info,
         });
       }, [copyLink, toast, dropdown]);
+
       const [copyAnnotationId] = useCopyText({ defaultText: entity.pk?.toString() ?? entity.id?.toString() ?? "" });
+      
       const copyAnnotationIdHandler = useCallback<MenuActionOnClick>(() => {
         copyAnnotationId();
         dropdown?.close();
         toast?.show({
-          message: "Annotation ID copied to clipboard",
+          message: i18n.t("editor.components.annotation.id_copied_to_clipboard"),
           type: ToastType.info,
         });
       }, [copyAnnotationId, toast, dropdown]);
+
       const openPerformanceDashboard = useCallback<MenuActionOnClick>(() => {
         // Only available in LSE
         const isLSE = (window as any).APP_SETTINGS?.version?.edition === "Enterprise";
@@ -459,28 +474,32 @@ const AnnotationButtonContextMenu = injector(
         window.open(url.toString(), "_blank");
         dropdown?.close();
       }, [entity, dropdown]);
+
       const showOtherAnnotations = useCallback<MenuActionOnClick>(() => {
         annotationStore.toggleViewingAllAnnotations();
         clickHandler();
       }, [annotationStore, onAnnotationChange]);
+
       const deleteAnnotation = useCallback(() => {
         clickHandler();
         confirm({
-          title: "Delete annotation?",
+          title: i18n.t("editor.components.annotation.delete_annotation"),
           body: (
             <>
-              This will <strong>delete all existing regions</strong>. Are you sure you want to delete them?
+              { i18n.t("editor.components.annotation.delete_confirm") }
               <br />
-              This action cannot be undone.
+              { i18n.t("editor.components.annotation.action_cannot_undo") }
             </>
           ),
           buttonLook: "negative",
-          okText: "Delete",
+          cancelText: i18n.t("editor.components.annotation.cancel"),
+          okText: i18n.t("editor.components.annotation.delete"),
           onOk: () => {
             entity.list.deleteAnnotation(entity);
           },
         });
       }, [entity, onAnnotationChange]);
+
       const isPrediction = entity.type === "prediction";
       const isDraft = !isDefined(entity.pk);
       const showGroundTruth = capabilities.groundTruthEnabled && !isPrediction && !isDraft;
@@ -493,13 +512,13 @@ const AnnotationButtonContextMenu = injector(
       const actions = useMemo<ContextMenuAction[]>(
         () => [
           {
-            label: "Copy Annotation ID",
+            label: i18n.t("editor.components.annotation.copy_annotation_id"),
             onClick: copyAnnotationIdHandler,
             icon: <IconClipboardCheck width={20} height={20} />,
             enabled: !isDraft,
           },
           {
-            label: `${isGroundTruth ? "Unset " : "Set "} as Ground Truth`,
+            label: isGroundTruth ? i18n.t("editor.components.annotation.unset_as_ground") : i18n.t("editor.components.annotation.set_as_ground"),
             onClick: setGroundTruth,
             icon: isGroundTruth ? (
               <IconStar color="#FFC53D" width={iconSize} height={iconSize} />
@@ -509,31 +528,31 @@ const AnnotationButtonContextMenu = injector(
             enabled: showGroundTruth,
           },
           {
-            label: "Duplicate Annotation",
+            label: i18n.t("editor.components.annotation.duplicate_annotation"),
             onClick: duplicateAnnotation,
             icon: <IconDuplicate width={20} height={20} />,
             enabled: showDuplicateAnnotation,
           },
           {
-            label: "Copy Annotation Link",
+            label: i18n.t("editor.components.annotation.copy_annotation_link"),
             onClick: linkAnnotation,
             icon: <IconLink />,
             enabled: !isDraft && store.hasInterface("annotations:copy-link"),
           },
           {
-            label: "Open Performance Dashboard",
+            label: i18n.t("editor.components.annotation.open_performance_board"),
             onClick: openPerformanceDashboard,
             icon: <IconAnalytics width={20} height={20} />,
             enabled: isLSE && hasProjectId && !isDraft && !isPrediction,
           },
           {
-            label: "Show Other Annotations",
+            label: i18n.t("editor.components.annotation.show_other_annotations"),
             onClick: showOtherAnnotations,
             icon: <IconViewAll width={20} height={20} />,
             enabled: true,
           },
           {
-            label: "Delete Annotation",
+            label: i18n.t("editor.components.annotation.delete_annotation"),
             onClick: deleteAnnotation,
             icon: <IconTrashRect />,
             separator: true,
@@ -607,6 +626,8 @@ export const AnnotationButton = observer(
     const [isTooltipOpen, setTooltipOpen] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number } | undefined>(undefined);
     const [isContextMenuOpen, setContextMenuOpen] = useState(false);
+
+    const { t } = useTranslation();
 
     if (infoIsHidden && entityIsAlive) {
       // this data can be missing in tests, but we don't have `infoIsHidden` there, so hiding logic like this
@@ -972,19 +993,7 @@ export const AnnotationButton = observer(
             >
               {isPrediction && <IconSparks style={{ width: 18, height: 18 }} />}
             </Userpic>
-            {/* TODO: Remove block. Selenium is using this anchor that was mistakenly propagated into this element. */}
-            {/* to do: return these icons when we have a better way to grab the history action type */}
-            {/* {historyActionType === 'accepted' && <Elem name='status' mod={{ approved: true }}><IconCheckBold /></Elem>}
-          {historyActionType && (
-            <Elem name='status' mod={{ skipped: true }}>
-              <IconCrossBold />
-            </Elem>
-          )}
-          {entity.history.canUndo && (
-            <Elem name='status' mod={{ updated: true }}>
-              <IconCheckBold />
-            </Elem>
-          )} */}
+
           </div>
           <div className={cn("annotation-button").elem("main").toClassName()}>
             <div className={cn("annotation-button").elem("user").toClassName()}>
@@ -994,7 +1003,7 @@ export const AnnotationButton = observer(
               <div className={cn("annotation-button").elem("info").toClassName()}>
                 <TimeAgo className={cn("annotation-button").elem("date").toClassName()} date={entity.createdDate} />
                 {isPrediction && isDefined(entity.score) && (
-                  <span title={`Prediction score = ${entity.score}`}>
+                  <span title={`${ i18n.t("editor.components.annotation.prediction_score") } = ${entity.score}`}>
                     {" · "} {(entity.score * 100).toFixed(2)}%
                   </span>
                 )}
@@ -1004,21 +1013,21 @@ export const AnnotationButton = observer(
           {!isPrediction && (
             <div className={cn("annotation-button").elem("icons").toClassName()}>
               {(entity.draftId > 0 || isDraft) && (
-                <Tooltip title="Draft">
+                <Tooltip title={ i18n.t("editor.components.annotation.draft") }>
                   <div className={cn("annotation-button").elem("icon").mod({ draft: true }).toClassName()}>
                     <IconDraftCreated2 color="#617ADA" />
                   </div>
                 </Tooltip>
               )}
               {entity.skipped && (
-                <Tooltip title="Skipped">
+                <Tooltip title={ i18n.t("editor.components.annotation.skipped") }>
                   <div className={cn("annotation-button").elem("icon").mod({ skipped: true }).toClassName()}>
                     <IconAnnotationSkipped2 color="#DD0000" />
                   </div>
                 </Tooltip>
               )}
               {isGroundTruth && (
-                <Tooltip title="Ground-truth">
+                <Tooltip title={ i18n.t("editor.components.annotation.ground_truth") }>
                   <div className={cn("annotation-button").elem("icon").mod({ groundTruth: true }).toClassName()}>
                     <IconAnnotationGroundTruth />
                   </div>

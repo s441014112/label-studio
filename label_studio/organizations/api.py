@@ -4,6 +4,7 @@ import logging
 
 from core.feature_flags import flag_set
 from core.mixins import GetParentObjectMixin
+from core.translations import get_response_message, TranslatableString as _S
 from core.utils.common import load_func
 from django.conf import settings
 from django.urls import reverse
@@ -11,6 +12,7 @@ from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+
 from organizations.models import Organization, OrganizationMember
 from organizations.serializers import (
     OrganizationIdSerializer,
@@ -37,6 +39,15 @@ from label_studio.core.permissions import ViewClassPermission, all_permissions
 from label_studio.core.utils.params import bool_from_request
 
 logger = logging.getLogger(__name__)
+
+
+def _detect_lang(request):
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
 
 HasObjectPermission = load_func(settings.MEMBER_PERM)
 
@@ -100,13 +111,13 @@ class OrganizationMemberListPagination(PageNumberPagination):
     decorator=extend_schema(
         tags=['Organizations'],
         summary='Get organization members list',
-        description='Retrieve a list of the organization members and their IDs.',
+        description=_S('schema.action.list_org_members'),
         parameters=[
             OpenApiParameter(
                 name='contributed_to_projects',
                 type=OpenApiTypes.BOOL,
                 location='query',
-                description='Whether to include projects created and contributed to by the members.',
+                description=_S('schema.param.include_projects'),
             ),
         ],
         extensions={
@@ -217,19 +228,19 @@ class OrganizationMemberListAPI(generics.ListAPIView):
     decorator=extend_schema(
         tags=['Organizations'],
         summary='Get organization member details',
-        description='Get organization member details by user ID.',
+        description=_S('schema.action.get_org_member'),
         parameters=[
             OpenApiParameter(
                 name='user_pk',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying the user to get organization details for.',
+                description=_S('schema.param.user_id'),
             ),
             OpenApiParameter(
                 name='contributed_to_projects',
                 type=OpenApiTypes.BOOL,
                 location='query',
-                description='Whether to include projects created and contributed to by the member.',
+                description=_S('schema.param.include_projects'),
             ),
         ],
         responses={200: OrganizationMemberSerializer()},
@@ -245,20 +256,20 @@ class OrganizationMemberListAPI(generics.ListAPIView):
     decorator=extend_schema(
         tags=['Organizations'],
         summary='Soft delete an organization member',
-        description='Soft delete a member from the organization.',
+        description=_S('schema.action.delete_org_member'),
         parameters=[
             OpenApiParameter(
                 name='user_pk',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying the user to be deleted from the organization.',
+                description=_S('schema.param.user_id'),
             ),
         ],
         responses={
-            204: OpenApiResponse(description='Member deleted successfully.'),
-            405: OpenApiResponse(description='User cannot soft delete self.'),
-            404: OpenApiResponse(description='Member not found'),
-            403: OpenApiResponse(description='You can delete members only for your current active organization'),
+            204: OpenApiResponse(description=_S('schema.resp.member_deleted')),
+            405: OpenApiResponse(description=_S('schema.org.cannot_delete_self')),
+            404: OpenApiResponse(description=_S('schema.org.member_not_found')),
+            403: OpenApiResponse(description=_S('schema.org.cannot_delete_cross_org')),
         },
         extensions={
             'x-fern-sdk-group-name': ['organizations', 'members'],
@@ -277,10 +288,14 @@ class OrganizationMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroy
     serializer_class = OrganizationMemberSerializer
     http_method_names = ['delete', 'get']
 
+    #DRF（Django REST Framework）视图的动态权限控制
     @property
     def permission_classes(self):
+        # 如果请求方法是 DELETE（删除）
         if self.request.method == 'DELETE':
+            # 只允许【IAM认证 + 对象权限】
             return [IsAuthenticated, HasObjectPermission]
+        # 其他请求（GET/POST/PUT）走系统默认权限
         return api_settings.DEFAULT_PERMISSION_CLASSES
 
     def get_queryset(self):
@@ -303,15 +318,15 @@ class OrganizationMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroy
     def delete(self, request, pk=None, user_pk=None):
         org = self.parent_object
         if org != request.user.active_organization:
-            raise PermissionDenied('You can delete members only for your current active organization')
+            raise PermissionDenied(get_response_message('organization.cannot_delete_members_cross_org', language=_detect_lang(request)))
 
         user = get_object_or_404(User, pk=user_pk)
         member = get_object_or_404(OrganizationMember, user=user, organization=org)
         if member.deleted_at is not None:
-            raise NotFound('Member not found')
+            raise NotFound(get_response_message('organization.member_not_found', language=_detect_lang(request)))
 
         if member.user_id == request.user.id:
-            return Response({'detail': 'User cannot soft delete self'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            return Response({'detail': get_response_message('organization.cannot_soft_delete_self', language=_detect_lang(request))}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
         member.soft_delete()
         return Response(status=204)  # 204 No Content is a common HTTP status for successful delete requests
@@ -322,7 +337,7 @@ class OrganizationMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroy
     decorator=extend_schema(
         tags=['Organizations'],
         summary='Get organization settings',
-        description='Retrieve the settings for a specific organization by ID.',
+        description=_S('schema.action.get_org_settings'),
         extensions={
             'x-fern-sdk-group-name': 'organizations',
             'x-fern-sdk-method-name': 'get',
@@ -335,7 +350,7 @@ class OrganizationMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroy
     decorator=extend_schema(
         tags=['Organizations'],
         summary='Update organization settings',
-        description='Update the settings for a specific organization by ID.',
+        description=_S('schema.action.update_org_settings'),
         extensions={
             'x-fern-sdk-group-name': 'organizations',
             'x-fern-sdk-method-name': 'update',
@@ -369,7 +384,7 @@ class OrganizationAPI(generics.RetrieveUpdateAPIView):
     decorator=extend_schema(
         tags=['Invites'],
         summary='Get organization invite link',
-        description='Get a link to use to invite a new member to an organization in Label Studio Enterprise.',
+        description=_S('schema.action.get_org_invite'),
         responses={200: OrganizationInviteSerializer()},
         extensions={
             'x-fern-sdk-group-name': 'organizations',
@@ -398,7 +413,7 @@ class OrganizationInviteAPI(generics.RetrieveAPIView):
     decorator=extend_schema(
         tags=['Invites'],
         summary='Reset organization token',
-        description='Reset the token used in the invitation link to invite someone to an organization.',
+        description=_S('schema.action.reset_org_token'),
         responses={200: OrganizationInviteSerializer()},
         extensions={
             'x-fern-sdk-group-name': 'organizations',

@@ -11,6 +11,7 @@ import "./Timeline.scss";
 import type { TimelineContextValue, TimelineControlsStepHandler, TimelineProps } from "./Types";
 import { default as Views } from "./Views";
 
+// 没有实际引用，暂不国际化
 const TimelineComponent: FC<TimelineProps> = ({
   regions,
   zoom = 1,

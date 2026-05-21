@@ -2,14 +2,23 @@
 """
 import logging   # noqa: I001
 from typing import Optional
-
+#pydantic用来做数据结构校验
 from pydantic import BaseModel, ConfigDict
 
+#rules是Python 权限框架，专门管理谁能做什么
 import rules
 
 logger = logging.getLogger(__name__)
 
+##
+# 统一管理整个系统的所有权限 + 自动给所有权限绑定规则
+#1.定义系统所有能用的权限（比如创建项目、删除任务、邀请成员…）
+#2.把权限做成常量，避免到处乱写字符串
+#3.自动给所有权限设置规则：必须登录才能使用
+#4.给 API 接口做权限判断用的
+##
 
+#把系统所有权限写成固定字段，方便全局调用
 class AllPermissions(BaseModel):
     model_config = ConfigDict(protected_namespaces=('__.*__', '_.*'))
 
@@ -64,6 +73,7 @@ class AllPermissions(BaseModel):
 all_permissions = AllPermissions()
 
 
+#给 API 接口的每种请求方法绑定权限
 class ViewClassPermission(BaseModel):
     GET: Optional[str] = None
     PATCH: Optional[str] = None
@@ -71,7 +81,12 @@ class ViewClassPermission(BaseModel):
     DELETE: Optional[str] = None
     POST: Optional[str] = None
 
-
+##
+# 创建一个权限，并绑定规则
+#   name：权限名，如 projects.view
+#   pred：规则（比如必须登录）
+#   已存在就跳过，避免重复创建
+##
 def make_perm(name, pred, overwrite=False):
     if rules.perm_exists(name):
         if overwrite:
@@ -80,6 +95,8 @@ def make_perm(name, pred, overwrite=False):
             return
     rules.add_perm(name, pred)
 
-
+#遍历所有权限 → 给每个权限都设置一条规则：
+# 原先rules.is_authenticated是必须登录才能使用
+# 现调整为always_allow所有人都允许
 for _, permission_name in all_permissions:
     make_perm(permission_name, rules.is_authenticated)

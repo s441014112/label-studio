@@ -25,7 +25,12 @@ type LabelMaxWidth = {
 };
 
 const isDarkMode = getCurrentTheme() === "Dark";
-export type TimelineMark = { x: number; time: number; type: "mark" | "label"; includeMs: boolean };
+export type TimelineMark = {
+  x: number;
+  time: number;
+  type: "mark" | "label";
+  includeMs: boolean;
+};
 
 export class Timeline {
   private waveform: Waveform;
@@ -38,16 +43,26 @@ export class Timeline {
   private fontSize = 12;
   private gridWidth = 1;
   private fontFamily = "Arial";
-  private fontColor = isDarkMode ? rgba("rgba(200,200,200,0.8)") : rgba("#413C4A");
-  private selectionColor = isDarkMode ? rgba("rgba(200,200,200,0.08)") : rgba("rgba(65, 60, 74, 0.08)");
-  private gridColor = isDarkMode ? rgba("rgba(200,200,200,0.16)") : rgba("rgba(137,128,152,0.16)");
+  private fontColor = isDarkMode
+    ? rgba("rgba(200,200,200,0.8)")
+    : rgba("#413C4A");
+  private selectionColor = isDarkMode
+    ? rgba("rgba(200,200,200,0.08)")
+    : rgba("rgba(65, 60, 74, 0.08)");
+  private gridColor = isDarkMode
+    ? rgba("rgba(200,200,200,0.16)")
+    : rgba("rgba(137,128,152,0.16)");
   private backgroundColor = rgba("#fff");
   private _labeMaxWidth: LabelMaxWidth = {
     true: 0, // includeMs
     false: 0,
   };
 
-  constructor(options: TimelineOptions, waveform: Waveform, visualizer: Visualizer) {
+  constructor(
+    options: TimelineOptions,
+    waveform: Waveform,
+    visualizer: Visualizer,
+  ) {
     this.waveform = waveform;
     this.visualizer = visualizer;
     this.placement = options?.placement || defaults.timelinePlacement;
@@ -55,17 +70,29 @@ export class Timeline {
     this.fontSize = options?.fontSize ?? this.fontSize;
     this.fontFamily = options?.fontFamily ?? this.fontFamily;
     this.height =
-      (options?.height ?? defaults.timelinePlacement) ? (options?.height ?? defaults.timelineHeight) : this.height;
+      (options?.height ?? defaults.timelinePlacement)
+        ? (options?.height ?? defaults.timelineHeight)
+        : this.height;
     this.initHeight = this.height;
     this.gridWidth = options?.gridWidth ?? this.gridWidth;
-    this.fontColor = options?.fontColor ? rgba(options?.fontColor) : this.fontColor;
+    this.fontColor = options?.fontColor
+      ? rgba(options?.fontColor)
+      : this.fontColor;
     this.selectionColor = options?.selectedColor ?? this.selectionColor;
-    this.gridColor = options?.gridColor ? rgba(options?.gridColor) : this.gridColor;
-    this.backgroundColor = options?.backgroundColor ? rgba(options?.backgroundColor) : this.backgroundColor;
+    this.gridColor = options?.gridColor
+      ? rgba(options?.gridColor)
+      : this.gridColor;
+    this.backgroundColor = options?.backgroundColor
+      ? rgba(options?.backgroundColor)
+      : this.backgroundColor;
 
     this.visualizer.reserveSpace({ height: this.height });
 
-    this.layer = this.visualizer.createLayer({ name: "timeline", offscreen: true, zIndex: 103 });
+    this.layer = this.visualizer.createLayer({
+      name: "timeline",
+      offscreen: true,
+      zIndex: 103,
+    });
     this.visualizer.on("initialized", () => {
       this.visualizer.on("draw", () => this.render());
     });
@@ -167,7 +194,12 @@ export class Timeline {
     const layer = this.layer;
     const yOffset = placement === "top" ? 0 : offset;
     const xOffset = placement === "top" ? this.padding?.left || 0 : 0;
-    const markYOffset = placement === "top" ? (mark.type === "label" ? height * 0.75 : height * 0.875) : yOffset;
+    const markYOffset =
+      placement === "top"
+        ? mark.type === "label"
+          ? height * 0.75
+          : height * 0.875
+        : yOffset;
     const markHeight =
       placement === "top"
         ? mark.type === "label"
@@ -183,14 +215,18 @@ export class Timeline {
     if (mark.type === "label") {
       const ts = this.formatTime(mark.time * 1000, mark.includeMs);
       const markXOffset =
-        placement === "top" ? mark.x - this.getDownscaledTextWidth(layer, ts) / 2 : mark.x + (this.padding?.left || 6);
+        placement === "top"
+          ? mark.x - this.getDownscaledTextWidth(layer, ts) / 2
+          : mark.x + (this.padding?.left || 6);
 
       layer.fillStyle = this.fontColor.toString();
       layer.font = `${fontSize * pixelRatio}px ${this.fontFamily}`;
       layer.fillText(
         ts,
         markXOffset,
-        placement === "top" ? yOffset + (height * 0.75) / 2 + fontSize / 2 - this.gridWidth : yOffset + height - 8,
+        placement === "top"
+          ? yOffset + (height * 0.75) / 2 + fontSize / 2 - this.gridWidth
+          : yOffset + height - 8,
       );
     }
   }
@@ -222,7 +258,8 @@ export class Timeline {
 
     for (let i = segmentStart; i < segmentEnd; i += interval) {
       const time = toPrecision(i, precision);
-      const isLabelInterval = Math.round(time * factor) % Math.round(labelInterval * factor);
+      const isLabelInterval =
+        Math.round(time * factor) % Math.round(labelInterval * factor);
       const x = this.mapToPx(i - exactStart);
 
       let intervalType: TimelineMark["type"] = "mark";
@@ -279,7 +316,9 @@ export class Timeline {
 
     const exactInterval = toPrecision(lineSpace, Math.abs(significantDigits));
 
-    const significantDigitValue = Math.ceil(exactInterval / 10 ** significantDigits);
+    const significantDigitValue = Math.ceil(
+      exactInterval / 10 ** significantDigits,
+    );
 
     let interval = 10 ** significantDigits;
 
@@ -296,11 +335,16 @@ export class Timeline {
     const includeMs = viewableDuration < 60;
 
     const exactLabelInterval =
-      Math.ceil((this.getLabelMaxWidth(includeMs) + this.getLabelPadding() * 2) / this.mapToPx(interval)) * interval;
+      Math.ceil(
+        (this.getLabelMaxWidth(includeMs) + this.getLabelPadding() * 2) /
+          this.mapToPx(interval),
+      ) * interval;
 
     const significantLabelDigits = Math.floor(Math.log10(exactLabelInterval));
 
-    const significantLabelDigitValue = Math.ceil(exactLabelInterval / 10 ** significantLabelDigits);
+    const significantLabelDigitValue = Math.ceil(
+      exactLabelInterval / 10 ** significantLabelDigits,
+    );
 
     let labelInterval = toPrecision(10, significantLabelDigits);
 

@@ -1,0 +1,30 @@
+title: "意图分类"
+type: community
+group: 音频/语音处理
+image: /static/templates/intent-classification.png
+details: |
+  <h1>对音频中的用户意图进行分类</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>语音助手、呼叫中心、客服机器人、对话AI</dd>
+    <dt>相关模型</dt>
+    <dd>BERT、Wav2Vec、HuBERT</dd>
+    <dt>领域术语</dt>
+    <dd>意图识别、音频分类、语音NLP、对话系统</dd>
+  </dl>
+config: |
+  <View>
+    <Labels name="labels" toName="audio">
+      <Label value="Segment" />
+    </Labels>
+
+    <Audio name="audio" value="$audio"/>
+
+    <Choices name="intent" toName="audio" perRegion="true" required="true">
+      <Choice value="Question" />
+      <Choice value="Request" />
+      <Choice value="Satisfied" />
+      <Choice value="Interested" />
+      <Choice value="Unsatisfied" />
+    </Choices>
+  </View>

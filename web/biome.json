@@ -9,8 +9,7 @@
       "dist/**",
       "**/tsconfig*",
       "libs/editor/examples/**/*.json",
-      "libs/editor/src/examples/**/annotations/1.json",
-      "apps/labelstudio-e2e/**"
+      "libs/editor/src/examples/**/annotations/1.json"
     ],
     "maxSize": 3670016
   },

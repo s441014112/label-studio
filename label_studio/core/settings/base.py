@@ -61,6 +61,11 @@ LOGGING = {
             'handlers': ['console'],
             'level': os.environ.get('LOG_LEVEL', 'INFO'),
         },
+        'iam_auth': {
+            'handlers': ['console'],
+            'level': os.environ.get('LOG_LEVEL', 'DEBUG'),
+            'propagate': False,
+        },
         'ddtrace': {
             'handlers': ['console'],
             'level': 'WARNING',
@@ -208,76 +213,149 @@ if get_bool_env('GOOGLE_LOGGING_ENABLED', False):
     except GoogleAuthError:
         logger.exception('Google Cloud Logging handler could not be setup.')
 
+#项目里启用了哪些功能模块
 INSTALLED_APPS = [
+    # 后台管理页面
     'django.contrib.admin',
+    # 用户、权限、登录核心
     'django.contrib.auth',
+    # 数据表类型基础
     'django.contrib.contenttypes',
+    # 会话（保持登录状态）
     'django.contrib.sessions',
+    # 页面提示消息
     'django.contrib.messages',
+    # 静态文件（CSS/JS/图片）
     'django.contrib.staticfiles',
+    # 时间、数字格式化
     'django.contrib.humanize',
+    # API 文档生成
     'drf_spectacular',
+    # 跨域支持（前后端分离必备）
     'corsheaders',
+    # 开发工具
     'django_extensions',
+    # 异步任务队列
     'django_rq',
+    # 数据筛选
     'django_filters',
+    # 权限规则
     'rules',
+    # 简化模型字段
     'annoying',
+    # API 接口核心（DRF）
     'rest_framework',
+    # Token 登录
     'rest_framework.authtoken',
+    # JWT 令牌
     'rest_framework_simplejwt.token_blacklist',
+    # 测试数据生成
     'drf_generators',
+    # 状态机（工作流、任务状态）
     'fsm',  # MUST be before apps that register FSM transitions (projects, tasks)
+    # 核心工具、全局配置
     'core',
+    # 用户、登录、注册
     'users',
+    # 组织、团队管理
     'organizations',
+    # 数据导入
     'data_import',
+    # 数据导出
     'data_export',
+    # 项目管理
     'projects',
+    # 标注任务
     'tasks',
+    # 数据管理
     'data_manager',
+    # 云存储（S3/OSS）
     'io_storages',
+    # 机器学习联动
     'ml',
+    # 回调通知
     'webhooks',
+    # 标签管理
     'labels_manager',
+    # 机器学习模型
     'ml_models',
+    # 模型服务商
     'ml_model_providers',
+    # JWT 认证
     'jwt_auth',
+    # 会话策略
     'session_policy',
+    # 企业级 IAM 权限体系
+    'iam_auth',
 ]
 
+#中间件列表
+#系统的全局流水线关卡：请求进入系统后，一层层经过的「安检 / 处理流水线」，
+#所有请求必须按顺序经过这里，才能到达页面 / 接口。
 MIDDLEWARE = [
+    #跨域请求处理：允许前端（localhost:8080）调用后端接口（localhost:8000）
     'corsheaders.middleware.CorsMiddleware',
+    #安全基础加固：加安全头、防 XSS 等
     'django.middleware.security.SecurityMiddleware',
+    #会话支持（登录必备）：你登录后能保持登录状态，全靠它
     'django.contrib.sessions.middleware.SessionMiddleware',
+    #多语言切换：中文 / 英文界面切换靠它
     'django.middleware.locale.LocaleMiddleware',
+    #自定义：关闭 CSRF 校验
     'core.middleware.DisableCSRF',
+    #CSRF 安全保护：防止跨站攻击
     'django.middleware.csrf.CsrfViewMiddleware',
+    #支持 API Key 访问：给程序调用用的
     'core.middleware.XApiKeySupportMiddleware',
+    #IAM 外部身份认证系统接入（AuthenticationMiddleware 之前）
+    'iam_auth.middleware.IAMAuthenticationMiddleware',
+    #用户登录状态管理：
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    #页面提示消息：如 “注册成功”“登录失败”
     'django.contrib.messages.middleware.MessageMiddleware',
+    #自定义：自动补全路径 /：不跳转、直接补 /，更高效
     'core.middleware.CommonMiddlewareAppendSlashWithoutRedirect',  # instead of 'CommonMiddleware'
+    #识别设备：手机 / 电脑 / 浏览器
     'django_user_agents.middleware.UserAgentMiddleware',
+    #给会话设置唯一 ID，用于日志追踪
     'core.middleware.SetSessionUIDMiddleware',
+    #全局日志上下文：记录用户、请求 ID
     'core.middleware.ContextLogMiddleware',
+    #数据库锁定自动重试：SQLite 专用，防止报错 database is locked
     'core.middleware.DatabaseIsLockedRetryMiddleware',
+    #全局获取当前请求：任何地方都能拿到 request
     'core.current_request.ThreadLocalMiddleware',
+    #JWT 登录支持（Token 登录）：前端无 Cookie 也能登录
     'jwt_auth.middleware.JWTAuthenticationMiddleware',
 ]
 
+#REST框架
 REST_FRAMEWORK = {
+    ##全局开启接口过滤功能，可以让接口支持 ?id=1&name=xxx 这样的查询，不用每个接口单独写过滤
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    ##设置用户用什么方式登录接口，
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'jwt_auth.auth.TokenAuthenticationPhaseout',
-        'rest_framework.authentication.SessionAuthentication',
+        #IAM 外部身份认证
+        'iam_auth.auth.IAMAuthentication',
+        #自定义 JWT 登录（项目自己的登录）
+        #'jwt_auth.auth.TokenAuthenticationPhaseout',
+        #Django 自带的浏览器会话登录
+        #'rest_framework.authentication.SessionAuthentication',
     ),
+    #设置接口权限规则（必须满足才能访问）
     'DEFAULT_PERMISSION_CLASSES': [
+        #项目自定义的对象权限（比如只能看自己的数据）
         'core.api_permissions.HasObjectPermission',
+        #必须登录才能访问
         'rest_framework.permissions.IsAuthenticated',
     ],
+    #统一异常处理，接口报错时，不会返回 Django 默认的错误页面，而是返回统一格式的 JSON 错误，前端体验更统一、更好处理
     'EXCEPTION_HANDLER': 'core.utils.common.custom_exception_handler',
+    #所有接口 只返回 JSON 格式，不返回网页、不返回页面，纯后端 API 项目标准配置
     'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
+    #自动生成 API 文档，用 drf-spectacular 生成 Swagger 文档，不用手写文档，自动生成
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    #所有列表接口默认一页返回 100 条数据
     'PAGE_SIZE': 100,
 }
 SILENCED_SYSTEM_CHECKS += ['rest_framework.W001']
@@ -315,6 +393,14 @@ AUTHENTICATION_BACKENDS = [
 USE_USERNAME_FOR_LOGIN = False
 
 DISABLE_SIGNUP_WITHOUT_LINK = get_bool_env('DISABLE_SIGNUP_WITHOUT_LINK', False)
+
+# IAM 外部身份认证配置
+IAM_TOKEN_ANALYZE_URL = get_env('IAM_TOKEN_ANALYZE_URL', 'https://iam-test.digiwincloud.com.cn/api/iam/v2/identity/token/analyze')
+IAM_LOGIN_URL = get_env('IAM_LOGIN_URL', 'https://mop-test.digiwincloud.com.cn/login')
+IAM_REQUEST_TIMEOUT = int(get_env('IAM_REQUEST_TIMEOUT', '10'))
+IAM_AUTH_WHITELIST = get_env_list('IAM_AUTH_WHITELIST', ['/data/upload/'])
+IAM_AUTH_CACHE_TTL = int(get_env('IAM_AUTH_CACHE_TTL', '300'))
+
 
 # Password validation settings
 AUTH_PASSWORD_MIN_LENGTH = 8
@@ -402,7 +488,8 @@ SPECTACULAR_SETTINGS = {
         'displayOperationId': True,
     },
     'AUTHENTICATION_WHITELIST': [
-        'jwt_auth.auth.TokenAuthenticationPhaseout',
+        #'jwt_auth.auth.TokenAuthenticationPhaseout',
+        'iam_auth.auth.IAMAuthentication',
     ],
     'SERVERS': [
         {
@@ -438,11 +525,21 @@ GRAPHIQL = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = False
+LANGUAGE_CODE = 'zh-hans'
+TIME_ZONE = 'Asia/Shanghai'
+USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('zh-hans', '简体中文'),
+    ('zh-hant', '繁體中文'),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -899,7 +996,6 @@ if CI:
         'sql-analyser': 'postgresql',
     }
 
-LOGOUT_REDIRECT_URL = get_env('LOGOUT_REDIRECT_URL', None)
 
 # Enable legacy tokens (useful for running with a pre-existing token via `LABEL_STUDIO_USER_TOKEN`)
 LABEL_STUDIO_ENABLE_LEGACY_API_TOKEN = get_bool_env('LABEL_STUDIO_ENABLE_LEGACY_API_TOKEN', False)

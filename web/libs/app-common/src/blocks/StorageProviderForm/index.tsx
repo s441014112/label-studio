@@ -10,6 +10,9 @@ import { addProvider } from "./providers";
 import type { ProviderConfig } from "./types/provider";
 import { InlineError } from "apps/labelstudio/src/components/Error/InlineError";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 interface StorageProviderFormProps {
   onSubmit: () => void;
   target?: "import" | "export";
@@ -36,6 +39,8 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
     const [filesPreview, setFilesPreview] = useState<any[] | null>(null);
     const [connectionChecked, setConnectionChecked] = useState(false);
 
+    const { t } = useTranslation();
+
     const handleClose = () => {
       resetForm();
       setFilesPreview(null);
@@ -46,7 +51,7 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
     };
 
     // Initialize providers first
-    useEffect(() => {
+    useEffect(() => { 
       Object.entries(providers).forEach(([name, config]) => {
         addProvider(name, config);
       });
@@ -60,23 +65,23 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
     const steps = isEditMode
       ? [
           {
-            title: "Configure Connection",
+            title: t("common.blocks.configure_connection"),
             schema: getProviderSchema(type || "s3", isEditMode, effectiveTarget),
           },
           // Only include preview and review steps for import storages
           ...(effectiveTarget === "import"
-            ? [{ title: "Import Settings & Preview" }, { title: "Review & Confirm" }]
+            ? [{ title: t("common.blocks.import_setting_and_preview") }, { title: t("common.blocks.review_and_confirm") }]
             : []),
         ]
       : [
-          { title: "Select Provider", schema: step1Schema },
+          { title: t("common.blocks.select_provider"), schema: step1Schema },
           {
-            title: "Configure Connection",
+            title: t("common.blocks.configure_connection"),
             schema: getProviderSchema(type || "s3", isEditMode, effectiveTarget),
           },
           // Only include preview and review steps for import storages
           ...(effectiveTarget === "import"
-            ? [{ title: "Import Settings & Preview" }, { title: "Review & Confirm" }]
+            ? [{ title: t("common.blocks.import_setting_and_preview") }, { title: t("common.blocks.review_and_confirm") }]
             : []),
         ];
 
@@ -116,23 +121,23 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
       const newSteps = isEditMode
         ? [
             {
-              title: "Configure Connection",
+              title: t("common.blocks.configure_connection"),
               schema: getProviderSchema(formData.provider || type || "s3", isEditMode, effectiveTarget),
             },
             // Only include preview and review steps for import storages
             ...(effectiveTarget === "import"
-              ? [{ title: "Import Settings & Preview" }, { title: "Review & Confirm" }]
+              ? [{ title: t("common.blocks.import_setting_and_preview") }, { title: t("common.blocks.review_and_confirm") }]
               : []),
           ]
         : [
-            { title: "Select Provider", schema: step1Schema },
+            { title: t("common.blocks.select_provider"), schema: step1Schema },
             {
-              title: "Configure Connection",
+              title: t("common.blocks.configure_connection"),
               schema: getProviderSchema(formData.provider || type || "s3", isEditMode, effectiveTarget),
             },
             // Only include preview and review steps for import storages
             ...(effectiveTarget === "import"
-              ? [{ title: "Import Settings & Preview" }, { title: "Review & Confirm" }]
+              ? [{ title: t("common.blocks.import_setting_and_preview")}, { title: t("common.blocks.review_and_confirm") }]
               : []),
           ];
       setCurrentSteps(newSteps);
@@ -256,7 +261,7 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
 
     // Format file size helper
     const formatSize = (bytes: number) => {
-      if (bytes === 0) return "0 Bytes";
+      if (bytes === 0) return t("common.blocks.count_bytes", { count: 0 });
       const k = 1024;
       const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB"];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -265,7 +270,7 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
 
     return (
       <div className="flex flex-col h-full w-full">
-        <FormHeader title={title} onClose={handleClose} />
+        <FormHeader title={title} onClose={handleClose} t={t} />
 
         <Stepper steps={steps} currentStep={currentStep} onStepClick={handleStepClick} isEditMode={isEditMode} />
 
@@ -283,6 +288,7 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
                     setFormState={setFormState}
                     providers={providers}
                     target={target}
+                    t={t}
                   />
                 );
               case 1:
@@ -300,6 +306,7 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
                     provider={formData.provider || "s3"}
                     isEditMode={isEditMode}
                     target={effectiveTarget}
+                    t={t}
                   />
                 );
               case 2:
@@ -328,10 +335,11 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
                       setFilesPreview(null);
                       setConnectionChecked(false);
                     }}
+                    t={t}
                   />
                 );
               case 3:
-                return <ReviewStep formData={formData} filesPreview={filesPreview} formatSize={formatSize} />;
+                return <ReviewStep formData={formData} filesPreview={filesPreview} formatSize={formatSize} t={t} />;
               default:
                 return null;
             }
@@ -367,6 +375,7 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
           }}
           target={effectiveTarget}
           isProviderDisabled={providers[formData.provider]?.disabled || false}
+          t={t}
         />
       </div>
     );

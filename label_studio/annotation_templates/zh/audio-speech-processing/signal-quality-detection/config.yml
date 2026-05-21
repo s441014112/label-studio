@@ -1,0 +1,19 @@
+title: 信号质量
+type: community
+group: 音频/语音处理
+image: /static/templates/signal-quality-detection.png
+details: |
+  <h1>评估和标注信号质量</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>传感器校准、信号处理、设备监控、物联网、数据清洗</dd>
+    <dt>相关模型</dt>
+    <dd>信号处理、统计方法</dd>
+    <dt>领域术语</dt>
+    <dd>信号质量、SNR、噪声、信号处理</dd>
+  </dl>
+config: |
+  <View>
+    <Rating name="rating" toName="audio" maxRating="10" icon="star" size="medium" />
+    <Audio name="audio" value="$audio"/>
+  </View>

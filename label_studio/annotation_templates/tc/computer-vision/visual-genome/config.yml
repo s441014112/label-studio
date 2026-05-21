@@ -1,0 +1,70 @@
+title: "視覺基因組"
+type: community
+group: 電腦視覺
+image: /static/templates/visual-genome.png
+details: |
+  <h1>對圖片中的物體、屬性和關係進行標註</h1>
+  <dl>
+    <dt>產業應用</dt>
+    <dd>場景理解、關係檢測、視覺推理、知識圖譜建構</dd>
+    <dt>相關模型</dt>
+    <dd>Visual Genome、Scene Graph、VG</dd>
+    <dt>領域術語</dt>
+    <dd>場景圖、關係標註、屬性標註、視覺知識</dd>
+  </dl>
+config: |
+  <View>
+    <View style="display: flex; flex-wrap: wrap;">
+      <View className="label-column">
+        <Header value="Regions"/>
+        <RectangleLabels name="regions" toName="image" value="$regions"/>
+    </View>
+      <View className="label-column">
+        <Header value="Attributes"/>
+      <RectangleLabels name="attributes" toName="image" value="$attributes"/>
+      </View>
+      <View className="label-column">
+        <Header value="Relationships"/>
+      <RectangleLabels name="relationships" toName="image" value="$relationships"/>
+      </View>
+   
+    </View>
+    <Image name="image" value="$image"/>
+    <Style>
+    .label-column .lsf-labels {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    </Style>
+  </View>
+  <!-- { "data": {
+    "image": "https://htx-pub.s3.amazonaws.com/templates/visual-genome/panda.jpeg",
+    "regions": [{
+      "value": "panda bear holding something in it's paw"
+    }, {
+      "value": "trees behind the panda out of focus"
+    }, {
+        "value": "piece of bamboo in panda's paw"
+      }, {
+        "value": "bamboo next to panda"
+      }, {
+        "value": "the panda is cute"
+      }],
+    "attributes": [{
+      "value": "markings is black"
+    }, {
+      "value": "nose is black"
+    }, {
+      "value": "face is round"
+    }, {
+        "value": "wood is round"
+      }],
+    "relationships": [{
+      "value": "hole ON log"
+    }, {
+      "value": "tree BEHIND bear"
+    }, {
+        "value": "mouth OF panda"
+      }]
+  }}-->

@@ -4,17 +4,19 @@ import { Button } from "@humansignal/ui";
 import { cn } from "../../utils/bem";
 import "./HistoryActions.scss";
 
-export const EditingHistory = observer(({ entity }) => {
+export const EditingHistory = observer(({ entity, store }) => {
   const { history } = entity;
+
+  const t = store.t;
 
   return (
     <div className={cn("history-buttons").toClassName()}>
       <Button
         variant="neutral"
         look="string"
-        aria-label="Undo"
+        aria-label={ t("editor.components.topbar.undo") }
         className="!p-0"
-        tooltip="Undo"
+        tooltip={ t("editor.components.topbar.undo") }
         disabled={!history?.canUndo}
         onClick={() => entity.undo()}
       >
@@ -23,9 +25,9 @@ export const EditingHistory = observer(({ entity }) => {
       <Button
         variant="neutral"
         look="string"
-        aria-label="Redo"
+        aria-label={ t("editor.components.topbar.redo") }
         className="!p-0"
-        tooltip="Redo"
+        tooltip={ t("editor.components.topbar.redo") }
         disabled={!history?.canRedo}
         onClick={() => entity.redo()}
         leading={<IconRedo />}
@@ -33,8 +35,8 @@ export const EditingHistory = observer(({ entity }) => {
       <Button
         look="string"
         variant="negative"
-        aria-label="Reset"
-        tooltip="Reset"
+        aria-label={ t("editor.components.topbar.reset") }
+        tooltip={ t("editor.components.topbar.reset") }
         className="!p-0"
         disabled={!history?.canUndo}
         onClick={() => history?.reset()}

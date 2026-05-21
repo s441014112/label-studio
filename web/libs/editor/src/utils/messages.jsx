@@ -1,15 +1,16 @@
 import { htmlEscape } from "./html";
+import "../../../../apps/labelstudio/src/translations/i18n";
 
 const URL_CORS_DOCS = "https://labelstud.io/guide/storage.html#Troubleshoot-CORS-and-access-problems";
 const URL_TAGS_DOCS = "https://labelstud.io/tags";
 
 export default {
-  DONE: "Done!",
-  NO_COMP_LEFT: "No more annotations",
-  NO_NEXT_TASK: "No More Tasks Left in Queue",
-  NO_ACCESS: "You don't have access to this task",
+  DONE: "editor.utils.messages.done",
+  NO_COMP_LEFT: "editor.utils.messages.no_comp_left",
+  NO_NEXT_TASK: "editor.utils.messages.no_next_task",
+  NO_ACCESS: "editor.utils.messages.no_access",
 
-  CONFIRM_TO_DELETE_ALL_REGIONS: "Please confirm you want to delete all labeled regions",
+  CONFIRM_TO_DELETE_ALL_REGIONS: "editor.utils.messages.confirm_to_delete_all_regions",
 
   // Tree validation messages
   ERR_REQUIRED: ({ modelName, field }) => {

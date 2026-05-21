@@ -1,0 +1,29 @@
+title: "层级分类"
+type: community
+group: 自然语言处理
+order: 4
+image: /static/templates/taxonomy.png
+details: |
+  <h1>对文本进行层级分类标注</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>内容分类、产品目录、知识组织、信息架构、电商分类</dd>
+    <dt>相关模型</dt>
+    <dd>BERT、FastText、XGBoost</dd>
+    <dt>领域术语</dt>
+    <dd>分类体系、层级分类、taxonomy、树形分类</dd>
+  </dl>
+config: |
+  <View>
+    <Text name="text" value="$text"/>
+    <Taxonomy name="taxonomy" toName="text">
+      <Choice value="Archaea" />
+      <Choice value="Bacteria" />
+      <Choice value="Eukarya">
+        <Choice value="Human" />
+        <Choice value="Oppossum" />
+        <Choice value="Extraterrestial" />
+      </Choice>
+    </Taxonomy>
+  </View>
+

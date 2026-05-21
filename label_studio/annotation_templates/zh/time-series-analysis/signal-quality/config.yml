@@ -1,0 +1,53 @@
+title: 信号质量
+type: community
+group: 时间序列分析
+image: /static/templates/signal-quality.png
+details: |
+  <h1>评估和标注信号质量</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>工业设备、医疗设备监测、电信、音频信号处理、振动分析、环境监测、电力系统、汽车诊断、航空航天、制造质量控制、预测性维护、物联网传感器监测</dd>
+    <dt>相关模型</dt>
+    <dd>信噪比、数据质量评估、传感器验证、信号完整性</dd>
+    <dt>领域术语</dt>
+    <dd>CSV、Excel、XLS、Sheet、信号退化、噪声检测、数据可靠性、测量质量、传感器校准</dd>
+  </dl>
+config: |
+  <View>
+      <!-- No region selected section -->
+      <View visibleWhen="no-region-selected"
+            style="height:120px">
+
+          <!-- Control tag for region labels -->
+          <TimeSeriesLabels name="label" toName="ts">
+              <Label value="Region" background="#5b5"/>
+          </TimeSeriesLabels>
+      </View>
+
+      <!-- Region selected section with choices and rating -->
+      <View visibleWhen="region-selected" style="height:120px">
+
+          <!-- Per region Rating -->
+          <Rating name="rating" toName="ts"
+                  maxRating="10" icon="star"
+                  perRegion="true"/>
+          <!-- Per region Choices  -->
+          <Choices name="choices" toName="ts"
+                   showInline="true" required="true"
+                   perRegion="true">
+              <Choice value="Good"/>
+              <Choice value="Medium"/>
+              <Choice value="Poor"/>
+          </Choices>
+      </View>
+
+      <!-- Object tag for time series data source -->
+      <TimeSeries name="ts" valueType="url" value="$csv"
+                  sep="," timeColumn="time">
+          <Channel column="signal_1"
+                   strokeColor="#17b" legend="Signal 1"/>
+          <Channel column="signal_2"
+                   strokeColor="#f70" legend="Signal 2"/>
+      </TimeSeries>
+  </View>
+

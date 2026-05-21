@@ -4,12 +4,16 @@ import { Button, Dropdown } from "@humansignal/ui";
 import { ApiContext } from "../../../providers/ApiProvider";
 import { StorageSummary } from "./StorageSummary";
 import { IconEllipsisVertical } from "@humansignal/icons";
+import "../../../translations/i18n";
+import { useTranslation } from "react-i18next";
 
 export const StorageCard = ({ rootClass, target, storage, onEditStorage, onDeleteStorage, storageTypes }) => {
   const [syncing, setSyncing] = useState(false);
   const api = useContext(ApiContext);
   const [storageData, setStorageData] = useState({ ...storage });
   const [synced, setSynced] = useState(null);
+
+  const { t } = useTranslation();
 
   const startSync = useCallback(async () => {
     setSyncing(true);
@@ -39,18 +43,18 @@ export const StorageCard = ({ rootClass, target, storage, onEditStorage, onDelet
 
   return (
     <Card
-      header={storageData.title ?? `Untitled ${storageData.type}`}
+      header={storageData.title ?? `${t("pages.settings.storage_setting.untitled")}${storageData.type}`}
       extra={
         <Dropdown.Trigger
           align="right"
           content={
             <Menu size="compact" style={{ width: 110 }}>
-              <Menu.Item onClick={() => onEditStorage(storageData)}>Edit</Menu.Item>
-              <Menu.Item onClick={() => onDeleteStorage(storageData)}>Delete</Menu.Item>
+              <Menu.Item onClick={() => onEditStorage(storageData)}>{ t("pages.settings.storage_setting.edit") }</Menu.Item>
+              <Menu.Item onClick={() => onDeleteStorage(storageData)}>{ t("pages.settings.storage_setting.delete") }</Menu.Item>
             </Menu>
           }
         >
-          <Button look="string" className="-ml-3" aria-label="Storage options">
+          <Button look="string" className="-ml-3" aria-label={ t("pages.settings.storage_setting.storage_options") }>
             <IconEllipsisVertical />
           </Button>
         </Dropdown.Trigger>
@@ -71,11 +75,11 @@ export const StorageCard = ({ rootClass, target, storage, onEditStorage, onDelet
             disabled={notSyncedYet}
             aria-label="Sync Storage"
           >
-            Sync Storage
+            { t("pages.settings.storage_setting.sync_storage") }
           </Button>
           {notSyncedYet && (
             <div className={rootClass.elem("sync-count")}>
-              Syncing may take some time, please refresh the page to see the current status.
+              { t("pages.settings.storage_setting.sync_storage_tip") }
             </div>
           )}
         </div>

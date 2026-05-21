@@ -116,7 +116,8 @@ const _Tool3Point = types
   })
   .views((self) => ({
     get viewTooltip() {
-      return "3 Point Rectangle";
+      const t = self.t;
+      return t ? t('editor.tools.three_point_rect', { defaultValue: "3 Point Rectangle" }) : "3 Point Rectangle";
     },
     get iconComponent() {
       return self.dynamic ? NodeViews.Rect3PointRegionModel.altIcon : NodeViews.Rect3PointRegionModel.icon;

@@ -10,6 +10,8 @@ import { cn } from "../../../utils/bem";
 import { useRefresh } from "../../../utils/hooks";
 import { ImportPage } from "./Import";
 import { useImportPage } from "./useImportPage";
+import "../../../translations/i18n";
+import { useTranslation } from "react-i18next";
 
 export const Inner = () => {
   const history = useHistory();
@@ -22,6 +24,8 @@ export const Inner = () => {
   const api = useAPI();
 
   const { uploading, uploadDisabled, finishUpload, fileIds, pageProps, uploadSample } = useImportPage(project);
+
+  const { t } = useTranslation();
 
   const backToDM = useCallback(() => {
     const path = location.pathname.replace(ImportModal.path, "");
@@ -63,7 +67,7 @@ export const Inner = () => {
 
   return (
     <Modal
-      title="Import data"
+      title={ t("pages.create_project.import_data.title") }
       ref={modal}
       onHide={() => backToDM()}
       closeOnClickOutside={false}
@@ -72,7 +76,7 @@ export const Inner = () => {
       bare
     >
       <Modal.Header divided>
-        <div className={cn("modal").elem("title").toClassName()}>Import Data</div>
+        <div className={cn("modal").elem("title").toClassName()}>{ t("pages.create_project.import_data.title") }</div>
 
         <Space>
           <Button
@@ -81,18 +85,18 @@ export const Inner = () => {
             look="outlined"
             waiting={waiting}
             onClick={onCancel}
-            aria-label="Cancel import"
+            aria-label={ t("pages.create_project.cancel") }
           >
-            Cancel
+            { t("pages.create_project.cancel") }
           </Button>
           <Button
             size="small"
             onClick={onFinish}
             waiting={waiting || uploading}
             disabled={uploadDisabled}
-            aria-label="Finish import"
+            aria-label={ t("pages.create_project.import_data.import") }
           >
-            Import
+            { t("pages.create_project.import_data.import") }
           </Button>
         </Space>
       </Modal.Header>

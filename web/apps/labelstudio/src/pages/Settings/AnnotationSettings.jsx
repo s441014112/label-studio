@@ -8,6 +8,8 @@ import { cn } from "../../utils/bem";
 import { ModelVersionSelector } from "./AnnotationSettings/ModelVersionSelector";
 import { ProjectContext } from "../../providers/ProjectProvider";
 import { Divider } from "../../components/Divider/Divider";
+import "../../translations/i18n"
+import { useTranslation } from "react-i18next";
 
 export const AnnotationSettings = () => {
   const { project, fetchProject } = useContext(ProjectContext);
@@ -15,7 +17,9 @@ export const AnnotationSettings = () => {
   const formRef = useRef();
   const [collab, setCollab] = useState(null);
 
-  useUpdatePageTitle(createTitleFromSegments([project?.title, "Annotation Settings"]));
+  const { t } = useTranslation();
+
+  useUpdatePageTitle(createTitleFromSegments([project?.title, t("pages.settings.annotation_settings.title")]));
 
   useEffect(() => {
     pageContext.setProps({ formRef });
@@ -28,7 +32,7 @@ export const AnnotationSettings = () => {
   return (
     <div className={cn("annotation-settings").toClassName()}>
       <div className={cn("annotation-settings").elem("wrapper").toClassName()}>
-        <h1>Annotation Settings</h1>
+        <h1>{ t("pages.settings.annotation_settings.title") }</h1>
         <div className={cn("settings-wrapper").toClassName()}>
           <Form
             ref={formRef}
@@ -38,15 +42,15 @@ export const AnnotationSettings = () => {
             onSubmit={updateProject}
           >
             <Form.Row columnCount={1}>
-              <div className={cn("settings-wrapper").elem("header").toClassName()}>Labeling Instructions</div>
+              <div className={cn("settings-wrapper").elem("header").toClassName()}>{ t("pages.settings.annotation_settings.labeling_instructions") }</div>
               <div class="settings-description">
-                <p style={{ marginBottom: "0" }}>Write instructions to help users complete labeling tasks.</p>
+                <p style={{ marginBottom: "0" }}>{ t("pages.settings.annotation_settings.instruction_desc") }</p>
                 <p style={{ marginTop: "8px" }}>
-                  The instruction field supports HTML markup and it allows use of images, iframes (pdf).
+                  { t("pages.settings.annotation_settings.instruction_support") }
                 </p>
               </div>
               <div>
-                <Toggle label="Show before labeling" name="show_instruction" />
+                <Toggle label={ t("pages.settings.annotation_settings.show_before_labeling") } name="show_instruction" />
               </div>
               <TextArea name="expert_instruction" style={{ minHeight: 128, maxWidth: "520px" }} />
             </Form.Row>
@@ -55,11 +59,11 @@ export const AnnotationSettings = () => {
 
             <Form.Row columnCount={1}>
               <br />
-              <div className={cn("settings-wrapper").elem("header").toClassName()}>Prelabeling</div>
+              <div className={cn("settings-wrapper").elem("header").toClassName()}>{ t("pages.settings.annotation_settings.prelabeling") }</div>
               <div>
                 <Toggle
-                  label="Use predictions to prelabel tasks"
-                  description={<span>Enable and select which set of predictions to use for prelabeling.</span>}
+                  label={ t("pages.settings.annotation_settings.use_predictions") }
+                  description={<span>{ t("pages.settings.annotation_settings.enable_use_predictions") } </span>}
                   name="show_collab_predictions"
                   onChange={(e) => {
                     setCollab(e.target.checked);
@@ -72,10 +76,10 @@ export const AnnotationSettings = () => {
 
             <Form.Actions>
               <Form.Indicator>
-                <span case="success">Saved!</span>
+                <span case="success">{ t("pages.settings.annotation_settings.saved") }</span>
               </Form.Indicator>
-              <Button type="submit" look="primary" className="w-[150px]" aria-label="Save annotation settings">
-                Save
+              <Button type="submit" look="primary" className="w-[150px]" aria-label={ t("pages.settings.annotation_settings.save_settings") }>
+                { t("pages.settings.annotation_settings.save") }
               </Button>
             </Form.Actions>
           </Form>
@@ -85,5 +89,5 @@ export const AnnotationSettings = () => {
   );
 };
 
-AnnotationSettings.title = "Annotation";
+AnnotationSettings.title = "sideMenu.annotation";
 AnnotationSettings.path = "/annotation";

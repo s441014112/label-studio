@@ -1,11 +1,20 @@
 import { z } from "zod";
-import type { FieldDefinition, MessageDefinition, ProviderConfig } from "./common";
+import type {
+  FieldDefinition,
+  MessageDefinition,
+  ProviderConfig,
+} from "./common";
+
+import i18n from "apps/labelstudio/src/translations/i18n";
 
 // Re-export ProviderConfig for convenience
 export type { ProviderConfig };
 
 // Shared function to determine if a field is actually required
-export function isFieldRequired(field: FieldDefinition, isEditMode = false): boolean {
+export function isFieldRequired(
+  field: FieldDefinition,
+  isEditMode = false,
+): boolean {
   // Access key fields are never required in edit mode (they can be provided via env vars)
   if (field.accessKey && isEditMode) {
     return false;
@@ -39,7 +48,11 @@ export function isFieldRequired(field: FieldDefinition, isEditMode = false): boo
   if (field.schema instanceof z.ZodString) {
     const stringSchema = field.schema as z.ZodString;
     // Check if the schema has min(1) validation
-    if (stringSchema._def?.checks?.some((check: any) => check.kind === "min" && check.value === 1)) {
+    if (
+      stringSchema._def?.checks?.some(
+        (check: any) => check.kind === "min" && check.value === 1,
+      )
+    ) {
       return true;
     }
   }
@@ -49,7 +62,10 @@ export function isFieldRequired(field: FieldDefinition, isEditMode = false): boo
 }
 
 // Helper function to assemble the complete schema from field definitions
-export function assembleSchema(fields: FieldDefinition[], isEditMode = false): z.ZodObject<any> {
+export function assembleSchema(
+  fields: FieldDefinition[],
+  isEditMode = false,
+): z.ZodObject<any> {
   const schemaObject: Record<string, z.ZodTypeAny> = {};
 
   fields.forEach((field) => {
@@ -62,23 +78,35 @@ export function assembleSchema(fields: FieldDefinition[], isEditMode = false): z
     } else if (isRequired) {
       // For required fields, ensure they have proper validation
       if (fieldSchema instanceof z.ZodString) {
-        fieldSchema = fieldSchema.min(1, `${field.label} is required`);
+        fieldSchema = fieldSchema.min(
+          1,
+          `${i18n.t(field.label)}${i18n.t("common.blocks.is_required")}`,
+        );
       } else if (fieldSchema instanceof z.ZodNumber) {
         // For numbers, we might want to add additional validation if needed
         // For now, just ensure it's not optional
-        fieldSchema = fieldSchema.refine((val) => val !== undefined && val !== null, {
-          message: `${field.label} is required`,
-        });
+        fieldSchema = fieldSchema.refine(
+          (val) => val !== undefined && val !== null,
+          {
+            message: `${i18n.t(field.label)}${i18n.t("common.blocks.is_required")}`,
+          },
+        );
       } else if (fieldSchema instanceof z.ZodBoolean) {
         // For booleans, ensure they're not optional
-        fieldSchema = fieldSchema.refine((val) => val !== undefined && val !== null, {
-          message: `${field.label} is required`,
-        });
+        fieldSchema = fieldSchema.refine(
+          (val) => val !== undefined && val !== null,
+          {
+            message: `${i18n.t(field.label)}${i18n.t("common.blocks.is_required")}`,
+          },
+        );
       } else {
         // For other types, ensure they're not optional
-        fieldSchema = fieldSchema.refine((val) => val !== undefined && val !== null, {
-          message: `${field.label} is required`,
-        });
+        fieldSchema = fieldSchema.refine(
+          (val) => val !== undefined && val !== null,
+          {
+            message: `${i18n.t(field.label)}${i18n.t("common.blocks.is_required")}`,
+          },
+        );
       }
     } else {
       // For optional fields, make them nullable to handle null values from server
@@ -100,15 +128,23 @@ export function assembleSchema(fields: FieldDefinition[], isEditMode = false): z
 }
 
 // Helper function to extract default values from Zod schemas
-export function extractDefaultValues(fields: (FieldDefinition | MessageDefinition)[]): Record<string, any> {
+export function extractDefaultValues(
+  fields: (FieldDefinition | MessageDefinition)[],
+): Record<string, any> {
   const defaultValues: Record<string, any> = {};
 
   fields.forEach((field) => {
     if (field.type === "message") return;
 
     // Check if the field has a default value
-    if (Object.prototype.hasOwnProperty.call(field, "defaultValue") && field.defaultValue !== undefined) {
-      const customDefault = typeof field.defaultValue === "function" ? field.defaultValue() : field.defaultValue;
+    if (
+      Object.prototype.hasOwnProperty.call(field, "defaultValue") &&
+      field.defaultValue !== undefined
+    ) {
+      const customDefault =
+        typeof field.defaultValue === "function"
+          ? field.defaultValue()
+          : field.defaultValue;
       defaultValues[field.name] = customDefault;
       return;
     }
@@ -198,10 +234,9 @@ export function getFieldsForRow(
   rowFields: string[],
   target?: "import" | "export",
 ): (FieldDefinition | MessageDefinition)[] {
-  const filteredFields = rowFields.map((fieldName) => getFieldByName(fields, fieldName)).filter(Boolean) as (
-    | FieldDefinition
-    | MessageDefinition
-  )[];
+  const filteredFields = rowFields
+    .map((fieldName) => getFieldByName(fields, fieldName))
+    .filter(Boolean) as (FieldDefinition | MessageDefinition)[];
 
   // Filter fields based on target if specified
   if (target) {

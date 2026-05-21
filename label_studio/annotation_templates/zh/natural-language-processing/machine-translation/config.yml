@@ -1,0 +1,28 @@
+title: "机器翻译"
+type: community
+group: 自然语言处理
+image: /static/templates/machine-translation.png
+details: |
+  <h1>将文本从一种语言翻译到另一种语言</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>本地化、跨语言沟通、内容翻译、国际商务、多语言支持</dd>
+    <dt>相关模型</dt>
+    <dd>M2M-100、NLLB、mBART、GPT</dd>
+    <dt>领域术语</dt>
+    <dd>翻译、NMT、多语言、MT</dd>
+  </dl>
+config: |
+  <View>
+    <View style="display: grid; grid-template: auto/1fr 1fr; column-gap: 1em">
+      <Header value="Read the sentence in English" />
+      <Header value="Provide translation in Spanish" />
+
+    <Text name="english" value="$english" />
+
+    <TextArea name="spanish" toName="english" transcription="true"
+              showSubmitButton="true" maxSubmissions="1" editable="true"
+              required="true"/>
+    </View>
+  </View>
+

@@ -6,6 +6,7 @@ import random
 
 import ujson as json
 from core.permissions import AllPermissions
+from core.translations import TranslatableString as _S
 from core.utils.db import fast_first
 from data_manager.actions import DataManagerAction
 from data_manager.functions import DataManagerException
@@ -62,7 +63,7 @@ def propagate_annotations_form(user, project):
     field = {
         'type': 'number',
         'name': 'source_annotation_id',
-        'label': 'Enter source annotation ID'
+        'label': _S('dm.form.source_annotation_id')
         + (f' [first ID: {str(first_annotation.id)}]' if first_annotation else ''),
     }
     return [{'columnCount': 1, 'fields': [field]}]
@@ -141,16 +142,16 @@ def rename_labels_form(user, project):
                 {
                     'type': 'select',
                     'name': 'control_tag',
-                    'label': 'Choose a label control tag',
+                    'label': _S('dm.form.choose_label_control_tag'),
                     'options': control_tags,
                 },
                 {
                     'type': 'select',
                     'name': 'old_label_name',
-                    'label': 'Old label name',
+                    'label': _S('dm.form.old_label_name'),
                     'options': list(set(old_names)),
                 },
-                {'type': 'input', 'name': 'new_label_name', 'label': 'New label name'},
+                {'type': 'input', 'name': 'new_label_name', 'label': _S('dm.form.new_label_name')},
             ],
         }
     ]
@@ -277,14 +278,14 @@ def add_data_field_form(user, project):
         {
             'columnCount': 1,
             'fields': [
-                {'type': 'input', 'name': 'value_name', 'label': 'Name'},
+                {'type': 'input', 'name': 'value_name', 'label': _S('dm.form.name')},
                 {
                     'type': 'select',
                     'name': 'value_type',
-                    'label': 'Type',
+                    'label': _S('dm.form.type'),
                     'options': ['String', 'Number', 'Expression'],
                 },
-                {'type': 'input', 'name': 'value', 'label': 'Value'},
+                {'type': 'input', 'name': 'value', 'label': _S('dm.form.value')},
             ],
         }
     ]
@@ -294,13 +295,11 @@ actions: list[DataManagerAction] = [
     {
         'entry_point': add_data_field,
         'permission': all_permissions.projects_change,
-        'title': 'Add Or Modify Data Field',
+        'title': _S('dm.action.add_data_field.title'),
         'order': 1,
         'experimental': True,
         'dialog': {
-            'text': 'Confirm that you want to add a new field in tasks. '
-            'After this operation you must refresh the Data Manager page fully to see the new column! '
-            'You can use the following expressions: ' + add_data_field_examples,
+            'text': _S('dm.action.add_data_field.dialog_text') + ' ' + add_data_field_examples,
             'type': 'confirm',
             'form': add_data_field_form,
         },
@@ -308,15 +307,11 @@ actions: list[DataManagerAction] = [
     {
         'entry_point': propagate_annotations,
         'permission': all_permissions.tasks_change,
-        'title': 'Propagate Annotations',
+        'title': _S('dm.action.propagate_annotations.title'),
         'order': 1,
         'experimental': True,
         'dialog': {
-            'text': 'Confirm that you want to copy the source annotation to all selected tasks. '
-            'Note: this action can be applied only for similar source objects: '
-            'images with the same width and height, '
-            'texts with the same length, '
-            'audios with the same durations.',
+            'text': _S('dm.action.propagate_annotations.dialog_text'),
             'type': 'confirm',
             'form': propagate_annotations_form,
         },
@@ -324,12 +319,11 @@ actions: list[DataManagerAction] = [
     {
         'entry_point': rename_labels,
         'permission': all_permissions.tasks_change,
-        'title': 'Rename Labels',
+        'title': _S('dm.action.rename_labels.title'),
         'order': 1,
         'experimental': True,
         'dialog': {
-            'text': 'Confirm that you want to rename a label in all annotations. '
-            'Also you have to change label names in the labeling config manually.',
+            'text': _S('dm.action.rename_labels.dialog_text'),
             'type': 'confirm',
             'form': rename_labels_form,
         },

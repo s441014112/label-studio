@@ -119,6 +119,12 @@ class User(UserMixin, AbstractBaseUser, PermissionsMixin, UserLastActivityMixin)
     first_name = models.CharField(_('first name'), max_length=256, blank=True)
     last_name = models.CharField(_('last name'), max_length=256, blank=True)
     phone = models.CharField(_('phone'), max_length=256, blank=True)
+    user_id = models.CharField(
+        _('IAM 用户 id'), max_length=256, blank=True, default='', db_index=True, help_text='IAM 系统用户 id'
+    )
+    user_sid = models.BigIntegerField(
+        _('IAM 用户 sid'), null=True, blank=True, default=None, db_index=True, help_text='IAM 系统用户唯一标识'
+    )
     avatar = models.ImageField(upload_to=hash_upload, blank=True)
     custom_hotkeys = models.JSONField(
         _('custom hotkeys'),
@@ -239,9 +245,15 @@ class User(UserMixin, AbstractBaseUser, PermissionsMixin, UserLastActivityMixin)
             initials = self.first_name[0:1] + self.last_name[0:1]
         return initials
 
-
+#用户一创建，系统自动给他创建一个 API Token
+#监听 User 模型
+#用户被保存（创建 / 更新）
+#instance = 刚被创建 / 保存的那个用户
+#created = 是不是第一次创建（新用户）
 @receiver(post_save, sender=User)
 def init_user(sender, instance=None, created=False, **kwargs):
+    #只在【新用户第一次创建】时执行
     if created:
         # create token for user
+        #给这个新用户自动创建一个 API Token
         Token.objects.create(user=instance)

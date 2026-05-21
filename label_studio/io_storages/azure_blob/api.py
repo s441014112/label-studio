@@ -1,6 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
 from django.utils.decorators import method_decorator
+from core.translations import TranslatableString as _S
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from io_storages.api import (
@@ -31,13 +32,13 @@ from .openapi_schema import (
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Get all import storage',
-        description='Get list of all Azure import storage connections.',
+        description=_S('schema.action.list_azure_blob_import'),
         parameters=[
             OpenApiParameter(
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
                 required=True,
             ),
         ],
@@ -54,7 +55,7 @@ from .openapi_schema import (
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Create new storage',
-        description='Create new Azure import storage',
+        description=_S('schema.action.create_azure_blob_import'),
         request={
             'application/json': _azure_blob_import_storage_schema,
         },
@@ -75,7 +76,7 @@ class AzureBlobImportStorageListAPI(ImportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Get import storage',
-        description='Get a specific Azure import storage connection.',
+        description=_S('schema.action.get_azure_blob_import'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['import_storage', 'azure'],
@@ -89,7 +90,7 @@ class AzureBlobImportStorageListAPI(ImportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Update import storage',
-        description='Update a specific Azure import storage connection.',
+        description=_S('schema.action.update_azure_blob_import'),
         request={
             'application/json': _azure_blob_import_storage_schema,
         },
@@ -105,7 +106,7 @@ class AzureBlobImportStorageListAPI(ImportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Delete import storage',
-        description='Delete a specific Azure import storage connection.',
+        description=_S('schema.action.delete_azure_blob_import'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['import_storage', 'azure'],
@@ -124,13 +125,13 @@ class AzureBlobImportStorageDetailAPI(ImportStorageDetailAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Sync import storage',
-        description='Sync tasks from an Azure import storage connection.',
+        description=_S('schema.action.sync_azure_blob_import'),
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='Storage ID',
+                description=_S('schema.param.storage_id'),
             ),
         ],
         request=None,
@@ -150,7 +151,7 @@ class AzureBlobImportStorageSyncAPI(ImportStorageSyncAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Sync export storage',
-        description='Sync tasks from an Azure export storage connection.',
+        description=_S('schema.action.sync_azure_blob_export'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'azure'],
@@ -168,11 +169,11 @@ class AzureBlobExportStorageSyncAPI(ExportStorageSyncAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Validate import storage',
-        description='Validate a specific Azure import storage connection.',
+        description=_S('schema.action.validate_azure_blob_import'),
         request={
             'application/json': _azure_blob_import_storage_schema_with_id,
         },
-        responses={200: OpenApiResponse(description='Validation successful')},
+        responses={200: OpenApiResponse(description=_S('schema.resp.validation_successful'))},
         extensions={
             'x-fern-sdk-group-name': ['import_storage', 'azure'],
             'x-fern-sdk-method-name': 'validate',
@@ -189,11 +190,11 @@ class AzureBlobImportStorageValidateAPI(ImportStorageValidateAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Validate export storage',
-        description='Validate a specific Azure export storage connection.',
+        description=_S('schema.action.validate_azure_blob_export'),
         request={
             'application/json': _azure_blob_export_storage_schema_with_id,
         },
-        responses={200: OpenApiResponse(description='Validation successful')},
+        responses={200: OpenApiResponse(description=_S('schema.resp.validation_successful'))},
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'azure'],
             'x-fern-sdk-method-name': 'validate',
@@ -210,13 +211,13 @@ class AzureBlobExportStorageValidateAPI(ExportStorageValidateAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Get all export storage',
-        description='Get a list of all Azure export storage connections.',
+        description=_S('schema.action.list_azure_blob_export'),
         parameters=[
             OpenApiParameter(
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
                 required=True,
             ),
         ],
@@ -232,7 +233,7 @@ class AzureBlobExportStorageValidateAPI(ExportStorageValidateAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Create export storage',
-        description='Create a new Azure export storage connection to store annotations.',
+        description=_S('schema.action.create_azure_blob_export'),
         request={
             'application/json': _azure_blob_export_storage_schema,
         },
@@ -253,7 +254,7 @@ class AzureBlobExportStorageListAPI(ExportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Get export storage',
-        description='Get a specific Azure export storage connection.',
+        description=_S('schema.action.get_azure_blob_export'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'azure'],
@@ -267,7 +268,7 @@ class AzureBlobExportStorageListAPI(ExportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Update export storage',
-        description='Update a specific Azure export storage connection.',
+        description=_S('schema.action.update_azure_blob_export'),
         request={
             'application/json': _azure_blob_export_storage_schema,
         },
@@ -283,7 +284,7 @@ class AzureBlobExportStorageListAPI(ExportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Azure'],
         summary='Delete export storage',
-        description='Delete a specific Azure export storage connection.',
+        description=_S('schema.action.delete_azure_blob_export'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'azure'],

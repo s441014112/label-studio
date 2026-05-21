@@ -1,0 +1,23 @@
+title: "关键点"
+type: community
+group: 计算机视觉
+order: 10000
+image: /static/templates/keypoints.png
+details: |
+  <h1>在图像上标注关键点位置</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>姿态估计、手势识别、面部关键点、体育分析、动作捕捉、人体跟踪</dd>
+    <dt>相关模型</dt>
+    <dd>OpenPose、MediaPipe、HRNet、YOLOv8-pose</dd>
+    <dt>领域术语</dt>
+    <dd>关键点、骨骼点、landmark、姿态标注</dd>
+  </dl>
+config: |
+  <View>
+    <KeyPointLabels name="kp-1" toName="img-1">
+      <Label value="Face" background="red" />
+      <Label value="Nose" background="green" />
+    </KeyPointLabels>
+    <Image name="img-1" value="$img" />
+  </View>

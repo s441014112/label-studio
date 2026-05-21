@@ -3,6 +3,7 @@
 import logging
 
 from core.permissions import all_permissions
+from core.translations import TranslatableString as _S
 from data_manager.actions import DataManagerAction
 from data_manager.functions import filters_ordering_selected_items_exist
 from projects.functions.next_task import get_next_task
@@ -39,7 +40,7 @@ actions: list[DataManagerAction] = [
     {
         'entry_point': next_task,
         'permission': all_permissions.projects_view,
-        'title': 'Generate Next Task',
+        'title': _S('dm.action.generate_next_task.title'),
         'order': 0,
         'hidden': True,
     }

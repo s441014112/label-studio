@@ -90,7 +90,7 @@
   }
 
   &[data-required] &__text span::after {
-    content: "Required";
+    content: "*";
     font-size: 0.825rem;
     color: var(--color-neutral-content-subtler);
     margin-left: 0.325rem;

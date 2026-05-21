@@ -1,4 +1,4 @@
-import { isAlive, types } from "mobx-state-tree";
+import { isAlive, types, getEnv } from "mobx-state-tree";
 
 import BaseTool, { DEFAULT_DIMENSIONS } from "./Base";
 import ToolMixin from "../mixins/Tool";
@@ -38,7 +38,8 @@ const _Tool = types
       },
 
       get viewTooltip() {
-        return "Vector region";
+        const t = self.t;
+        return t ? t('editor.tools.vector_region', { defaultValue: 'Vector region' }) : 'Vector region';
       },
 
       get iconComponent() {

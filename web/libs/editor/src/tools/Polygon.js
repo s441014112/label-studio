@@ -39,7 +39,8 @@ const _Tool = types
       },
 
       get viewTooltip() {
-        return "Polygon region";
+        const t = self.t;
+        return t ? t('editor.tools.polygon_region', { defaultValue: "Polygon region" }) : "Polygon region";
       },
       get iconComponent() {
         return self.dynamic ? NodeViews.PolygonRegionModel.altIcon : NodeViews.PolygonRegionModel.icon;

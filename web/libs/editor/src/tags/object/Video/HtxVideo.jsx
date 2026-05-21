@@ -25,6 +25,8 @@ import { clamp, isDefined } from "../../../utils/utilities";
 import "./Video.scss";
 import { VideoRegions } from "./VideoRegions";
 import { ff } from "@humansignal/core";
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
 
 const isSyncedBuffering = ff.isActive(ff.FF_SYNCED_BUFFERING);
 
@@ -176,6 +178,8 @@ const HtxVideoView = ({ item, store }) => {
       exitFullscren();
     },
   });
+
+  const { t } = useTranslation();
 
   const setPosition = useCallback(
     (value) => {
@@ -650,10 +654,10 @@ const HtxVideoView = ({ item, store }) => {
                         inline={isFullScreen}
                         content={
                           <Menu size="auto" closeDropdownOnItemClick={false}>
-                            <Menu.Item onClick={zoomIn}>Zoom In</Menu.Item>
-                            <Menu.Item onClick={zoomOut}>Zoom Out</Menu.Item>
-                            <Menu.Item onClick={zoomToFit}>Zoom To Fit</Menu.Item>
-                            <Menu.Item onClick={zoomReset}>Zoom 100%</Menu.Item>
+                            <Menu.Item onClick={zoomIn}>{ t("editor.tools.zoom_in") }</Menu.Item>
+                            <Menu.Item onClick={zoomOut}>{ t("editor.tools.zoom_out") }</Menu.Item>
+                            <Menu.Item onClick={zoomToFit}>{ t("editor.tools.zoom_to_fit") }</Menu.Item>
+                            <Menu.Item onClick={zoomReset}>{ t("editor.tools.zoom_100") }</Menu.Item>
                           </Menu>
                         }
                       >

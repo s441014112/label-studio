@@ -3,6 +3,7 @@
 import logging
 
 from core.permissions import all_permissions
+from core.translations import TranslatableString as _S
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from drf_spectacular.utils import OpenApiResponse, extend_schema
@@ -45,7 +46,7 @@ _common_storage_list = _get_common_storage_list()
     decorator=extend_schema(
         tags=['Storage'],
         summary='List all import storages types',
-        description='Retrieve a list of the import storages types.',
+        description=_S('schema.action.list_import_types'),
         responses={
             200: OpenApiResponse(
                 response={
@@ -58,7 +59,7 @@ _common_storage_list = _get_common_storage_list()
                         },
                     },
                 },
-                description='List of import storage types',
+                description=_S('schema.resp.import_storage_types'),
             ),
         },
         extensions={
@@ -80,7 +81,7 @@ class AllImportStorageTypesAPI(APIView):
     decorator=extend_schema(
         tags=['Storage'],
         summary='List all export storages types',
-        description='Retrieve a list of the export storages types.',
+        description=_S('schema.action.list_export_types'),
         responses={
             200: OpenApiResponse(
                 response={
@@ -93,7 +94,7 @@ class AllImportStorageTypesAPI(APIView):
                         },
                     },
                 },
-                description='List of export storage types',
+                description=_S('schema.resp.export_storage_types'),
             ),
         },
         extensions={
@@ -115,7 +116,7 @@ class AllExportStorageTypesAPI(APIView):
     decorator=extend_schema(
         tags=['Storage'],
         summary='List all import storages from the project',
-        description='Retrieve a list of the import storages of all types with their IDs.',
+        description=_S('schema.action.list_all_imports'),
         responses={200: 'List of ImportStorageSerializer'},
         extensions={
             'x-fern-sdk-group-name': ['import_storage'],
@@ -152,7 +153,7 @@ class AllImportStorageListAPI(generics.ListAPIView):
     decorator=extend_schema(
         tags=['Storage'],
         summary='List all export storages from the project',
-        description='Retrieve a list of the export storages of all types with their IDs.',
+        description=_S('schema.action.list_all_exports'),
         responses={200: 'List of ExportStorageSerializer'},
         extensions={
             'x-fern-sdk-group-name': ['export_storage'],

@@ -5,6 +5,8 @@ import { Button } from "@humansignal/ui";
 import { Filters } from "../Filters";
 import "./FilterSidebar.scss";
 
+import i18n from "../../../../../../apps/labelstudio/src/translations/i18n";
+
 const sidebarInjector = inject(({ store }) => {
   const viewsStore = store.viewsStore;
 
@@ -23,12 +25,12 @@ export const FiltersSidebar = sidebarInjector(({ viewsStore, sidebarEnabled, sid
           <Button
             look="string"
             onClick={() => viewsStore.collapseFilters()}
-            tooltip="Unpin filters"
+            tooltip={ i18n.t("datamanager.components.filters.unpin_filters") }
             aria-label="Unpin filters"
           >
             <IconChevronLeft width={24} height={24} />
           </Button>
-          <div className={cn("filters-sidebar").elem("title").toClassName()}>Filters</div>
+          <div className={cn("filters-sidebar").elem("title").toClassName()}>{ i18n.t("datamanager.components.filters.filters") }</div>
         </div>
       </div>
       <Filters sidebar={true} />

@@ -102,6 +102,7 @@ urlpatterns = [
     path('feature-flags/', views.feature_flags, name='feature_flags'),
     path('heidi-tips/', views.heidi_tips, name='heidi_tips'),
     path('__lsa/', views.collect_metrics, name='collect_metrics'),
+    path('api/languages/', views.LanguageAPI.as_view(), name='api-languages'),
     re_path(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     re_path(r'^', include('jwt_auth.urls')),
     re_path(r'^', include('session_policy.urls')),

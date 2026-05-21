@@ -24,6 +24,9 @@ import { resizers } from "./utils";
 import "./PanelTabsBase.scss";
 import React from "react";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 const distance = (x1: number, x2: number, y1: number, y2: number) => {
   return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 };
@@ -88,13 +91,17 @@ export const PanelTabsBase: FC<BasePropsWithChildren> = ({
     onVisibilityChange,
     onSnap,
   });
+
+
+  const { t } = useTranslation();
+
   const [resizing, setResizing] = useState<string | undefined>();
   const keyRef = useRef(key);
   const collapsed = sidePanelCollapsed[alignment as Side] && !detached;
   const isParentOfCollapsedPanel = attachedKeys && attachedKeys[0] === key;
   const isChildOfGroup = attachedKeys && attachedKeys.includes(key) && attachedKeys[0] !== key;
   const collapsedHeader = !(collapsed && !isParentOfCollapsedPanel);
-  const tooltipText = visible && !collapsed ? "Collapse" : "Expand";
+  const tooltipText = visible && !collapsed ? t("editor.components.sidepanels.collapse") : t("editor.components.sidepanels.expand");
   const settings = props.currentEntity?.store?.settings || props.currentEntity?.settings;
   const [bottomCollapsed, setBottomCollapsed] = useState(() => {
     if (isBottomPanel && settings?.defaultCollapsedBottomPanel) return true;
@@ -105,6 +112,7 @@ export const PanelTabsBase: FC<BasePropsWithChildren> = ({
   const startY = useRef(0);
   const startHeight = useRef(0);
   const collapsibleBottomPanel = settings?.collapsibleBottomPanel ?? false;
+
 
   handlers.current = {
     onResize,
@@ -436,7 +444,7 @@ export const PanelTabsBase: FC<BasePropsWithChildren> = ({
                   <div
                     className={cn("tabs-panel").elem("toggle").mod({ detached, collapsed, alignment }).toClassName()}
                     onClick={handleGroupPanelToggle}
-                    data-tooltip={`${tooltipText} Group`}
+                    data-tooltip={`${tooltipText}${ t("editor.components.sidepanels.group") }`}
                   >
                     {Side.left === alignment ? <IconChevronLeft /> : <IconChevronRight />}
                   </div>

@@ -8,14 +8,18 @@ import { Tool } from "../components/Toolbar/Tool";
 import { FlyoutMenu } from "../components/Toolbar/FlyoutMenu";
 import { IconExpandTool, IconHandTool, IconZoomIn, IconZoomOut } from "@humansignal/icons";
 
+import i18n from "../../../../apps/labelstudio/src/translations/i18n";
+
+
 const ToolView = observer(({ item }) => {
+
   return (
     <Fragment>
       <Tool
         active={item.selected}
         icon={<IconHandTool />}
-        ariaLabel="pan"
-        label="Pan Image"
+        ariaLabel={ i18n.t("editor.tools.pan_image") }
+        label={ i18n.t("editor.tools.pan_image") }
         shortcut="tool:pan-image"
         onClick={() => {
           const sel = item.selected;
@@ -25,8 +29,8 @@ const ToolView = observer(({ item }) => {
       />
       <Tool
         icon={<IconZoomIn />}
-        ariaLabel="zoom-in"
-        label="Zoom In"
+        ariaLabel={ i18n.t("editor.tools.zoom_in") }
+        label={ i18n.t("editor.tools.zoom_in") }
         shortcut="tool:zoom-in"
         onClick={() => {
           item.handleZoom(1);
@@ -36,14 +40,14 @@ const ToolView = observer(({ item }) => {
         icon={<IconExpandTool />}
         items={[
           {
-            label: "Zoom to fit",
+            label: i18n.t("editor.tools.zoom_to_fit"),
             shortcut: "tool:zoom-to-fit",
             onClick: () => {
               item.sizeToFit();
             },
           },
           {
-            label: "Zoom to actual size",
+            label: i18n.t("editor.tools.zoom_to_actual_size"),
             shortcut: "tool:zoom-to-actual",
             onClick: () => {
               item.sizeToOriginal();
@@ -53,8 +57,8 @@ const ToolView = observer(({ item }) => {
       />
       <Tool
         icon={<IconZoomOut />}
-        ariaLabel="zoom-out"
-        label="Zoom Out"
+        ariaLabel={ i18n.t("editor.tools.zoom_out") }
+        label={ i18n.t("editor.tools.zoom_out") }
         shortcut="tool:zoom-out"
         onClick={() => {
           item.handleZoom(-1);
@@ -66,7 +70,6 @@ const ToolView = observer(({ item }) => {
 
 const _Tool = types
   .model("ZoomPanTool", {
-    // image: types.late(() => types.safeReference(Registry.getModelByTag("image")))
     group: "control",
   })
   .volatile(() => ({

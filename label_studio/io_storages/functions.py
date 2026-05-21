@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, Iterable, List, Union
 
+from core.translations import get_response_message
 from django.shortcuts import get_object_or_404
 from io_storages.base_models import ImportStorage
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -11,6 +12,15 @@ from .redis.api import RedisExportStorageListAPI, RedisImportStorageListAPI
 from .s3.api import S3ExportStorageListAPI, S3ImportStorageListAPI
 
 logger = logging.getLogger(__name__)
+
+
+def _detect_lang(request):
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
 
 
 def validate_storage_instance(request, serializer_class):
@@ -33,7 +43,7 @@ def validate_storage_instance(request, serializer_class):
         ValidationError: If serializer validation fails
     """
     if not serializer_class or not hasattr(serializer_class, 'Meta'):
-        raise ValidationError('Invalid or missing serializer class')
+        raise ValidationError(get_response_message('storage.invalid_serializer', language=_detect_lang(request)))
 
     storage_id = request.data.get('id')
     instance = None
@@ -59,7 +69,7 @@ def validate_storage_instance(request, serializer_class):
         instance.validate_connection()
     except Exception as exc:
         logger.error(f'Error validating storage connection: {exc}')
-        raise ValidationError('Error validating storage connection')
+        raise ValidationError(get_response_message('storage.validation_error', language=_detect_lang(request)))
 
     return instance
 

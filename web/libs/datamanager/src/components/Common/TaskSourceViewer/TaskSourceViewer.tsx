@@ -5,6 +5,9 @@ import { CodeView } from "./CodeView";
 import styles from "./TaskSourceViewer.module.scss";
 import { ViewToggle, type ViewMode } from "./ViewToggle";
 
+import i18n from "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 export type { ViewMode };
 
 /** Options passed to onTaskLoad callback */
@@ -30,7 +33,7 @@ export interface TaskSourceViewerProps {
 const TASK_SOURCE_FILTERS: FilterConfig[] = [
   {
     id: "annotations",
-    label: "Annotations",
+    label: i18n.t("datamanager.components.table.annotations"),
     filterFn: (nodeData) => {
       const path = nodeData.path;
       return path && path.includes("annotations");
@@ -38,7 +41,7 @@ const TASK_SOURCE_FILTERS: FilterConfig[] = [
   },
   {
     id: "predictions",
-    label: "Predictions",
+    label: i18n.t("datamanager.components.table.predictions"),
     filterFn: (nodeData) => {
       const path = nodeData.path;
       return path && path.includes("predictions");
@@ -46,7 +49,7 @@ const TASK_SOURCE_FILTERS: FilterConfig[] = [
   },
   {
     id: "data",
-    label: "Data",
+    label: i18n.t("datamanager.components.table.data"),
     filterFn: (nodeData) => {
       const path = nodeData.path;
       return path && path.includes("data");
@@ -80,6 +83,8 @@ export const TaskSourceViewer: FC<TaskSourceViewerProps> = ({
   const [resolveUrls, setResolveUrls] = useState<boolean>(() =>
     storageKey ? localStorage.getItem(`${storageKey}:resolveUrls`) === "true" : false,
   );
+
+  const { t } = useTranslation();
 
   const handleViewChange = useCallback(
     (newView: ViewMode) => {
@@ -130,7 +135,7 @@ export const TaskSourceViewer: FC<TaskSourceViewerProps> = ({
   // Provide toggle to external render location (e.g., modal header)
   useEffect(() => {
     if (renderToggle && isInteractiveViewerEnabled) {
-      renderToggle(<ViewToggle view={view} onViewChange={handleViewChange} />);
+      renderToggle(<ViewToggle view={view} onViewChange={handleViewChange} t={t} />);
     }
   }, [renderToggle, view, handleViewChange, isInteractiveViewerEnabled]);
 
@@ -152,7 +157,7 @@ export const TaskSourceViewer: FC<TaskSourceViewerProps> = ({
             storageKey={storageKey}
             toolbarExtra={
               <div style={{ marginLeft: "auto" }}>
-                <Toggle label="Resolve URIs" checked={resolveUrls} onChange={handleResolveUrlsChange} />
+                <Toggle label={t("datamanager.components.table.resolve_uris")} checked={resolveUrls} onChange={handleResolveUrlsChange} />
               </div>
             }
           />

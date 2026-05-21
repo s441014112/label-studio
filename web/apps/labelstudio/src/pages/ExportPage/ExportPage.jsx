@@ -18,6 +18,9 @@ import { cn } from "../../utils/bem";
 import { isDefined, copyText } from "../../utils/helpers";
 import "./ExportPage.scss";
 
+import { useTranslation } from 'react-i18next';
+import i18n from "../../translations/i18n";
+
 // Community Edition exports run synchronously in a single HTTP request.
 // Large exports can exceed typical proxy timeouts, so we warn early and link to alternatives.
 const LARGE_EXPORT_TASK_THRESHOLD = 1000;
@@ -26,10 +29,6 @@ const EXPORT_CONSOLE_DOCS_URL = "https://labelstud.io/guide/export.html#Export-u
 const EXPORT_SNAPSHOT_SDK_URL = "https://api.labelstud.io/api-reference/api-reference/projects/exports/create";
 const ENTERPRISE_URL = "https://docs.humansignal.com/guide/label_studio_compare";
 
-// const formats = {
-//   json: 'JSON',
-//   csv: 'CSV',
-// };
 
 const downloadFile = (blob, filename) => {
   const link = document.createElement("a");
@@ -56,6 +55,7 @@ export const ExportPage = () => {
   const [currentFormat, setCurrentFormat] = useState("JSON");
   const [projectTaskNumber, setProjectTaskNumber] = useState(null);
   const [exportIssue, setExportIssue] = useState(null);
+  const { t } = useTranslation();
 
   /** @type {import('react').RefObject<Form>} */
   const form = useRef();
@@ -161,11 +161,10 @@ export const ExportPage = () => {
 
         history.replace(`${path}${search !== "?" ? search : ""}`);
       }}
-      title="Export data"
+      title={ t("pages.exportPage.title") }
       style={{ width: 720 }}
       closeOnClickOutside={false}
       allowClose={!downloading}
-      // footer="Read more about supported export formats in the Documentation."
       visible
     >
       <div className={cn("export-page").toClassName()}>
@@ -185,18 +184,18 @@ export const ExportPage = () => {
         <div className={cn("export-page").elem("footer").toClassName()}>
           {downloadingMessage && (
             <div className={cn("export-page").elem("status-message").toClassName()}>
-              Files are being prepared. It might take long time.
+              { t("pages.exportPage.export_file_tips") }
             </div>
           )}
           <Space style={{ width: "100%" }} spread>
             <div className={cn("export-page").elem("recent").toClassName()}>
               <a className="no-go" href={EXPORT_TIMEOUT_DOCS_URL} target="_blank" rel="noreferrer">
-                Having a timeout or trouble exporting large projects?
+                { t("pages.exportPage.timeout_tips") }
               </a>
             </div>
             <div className={cn("export-page").elem("actions").toClassName()}>
-              <Button className="w-[135px]" onClick={proceedExport} waiting={downloading} aria-label="Export data">
-                Export
+              <Button className="w-[135px]" onClick={proceedExport} waiting={downloading} aria-label={ t("pages.exportPage.export") }>
+                { t("pages.exportPage.export") }
               </Button>
             </div>
           </Space>
@@ -210,7 +209,7 @@ const FormatInfo = ({ availableFormats, selected, onClick }) => {
   return (
     <div className={cn("formats").toClassName()}>
       <div className={cn("formats").elem("info").toClassName()}>
-        You can export dataset in one of the following formats:
+        { i18n.t("pages.exportPage.export_format_select") }
       </div>
       <div className={cn("formats").elem("list").toClassName()}>
         {availableFormats.map((format) => (
@@ -243,7 +242,7 @@ const FormatInfo = ({ availableFormats, selected, onClick }) => {
           </div>
         ))}
       </div>
-      <div className={cn("formats").elem("feedback").toClassName()}>
+      {/* <div className={cn("formats").elem("feedback").toClassName()}>
         Can't find an export format?
         <br />
         Please let us know in{" "}
@@ -259,7 +258,7 @@ const FormatInfo = ({ availableFormats, selected, onClick }) => {
         >
           Repository
         </a>
-      </div>
+      </div> */}
     </div>
   );
 };
@@ -273,18 +272,10 @@ const ExportLargeProjectWarning = ({ taskCount }) => {
   return (
     <div className={cn("export-page").elem("warning").toClassName()}>
       <div className={cn("export-page").elem("warning-title").toClassName()}>
-        Large project detected ({taskCount.toLocaleString()} tasks)
+        { i18n.t("pages.exportPage.large_project_export_warning", { count: taskCount.toLocaleString() } ) }
       </div>
       <div className={cn("export-page").elem("warning-body").toClassName()}>
-        To avoid potential timeouts during large dataset exports in the Community Edition, use the{" "}
-        <a className="no-go" href={EXPORT_TIMEOUT_DOCS_URL} target="_blank" rel="noreferrer">
-          CLI/SDK export options
-        </a>{" "}
-        or consider{" "}
-        <a className="no-go" href={ENTERPRISE_URL} target="_blank" rel="noreferrer">
-          Enterprise
-        </a>{" "}
-        for background exports at scale.
+        { i18n.t("pages.exportPage.large_project_export_tip" ) }
       </div>
     </div>
   );
@@ -293,6 +284,8 @@ const ExportLargeProjectWarning = ({ taskCount }) => {
 const ExportTimeoutGuidance = ({ projectId, exportType }) => {
   const cliCommand = `label-studio export ${projectId} ${exportType} --export-path=<output-path>`;
   const [copied, setCopied] = useState(false);
+
+  const { t } = useTranslation();
 
   const handleCopy = useCallback(() => {
     copyText(cliCommand);
@@ -304,24 +297,23 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
     <div className={cn("export-page").elem("timeout").toClassName()}>
       <div className={cn("export-page").elem("timeout-header").toClassName()}>
         <IconWarningCircleFilled className={cn("export-page").elem("timeout-icon").toClassName()} />
-        <div className={cn("export-page").elem("timeout-title").toClassName()}>Export timed out</div>
+        <div className={cn("export-page").elem("timeout-title").toClassName()}>{ t("pages.exportPage.export_timeout") }</div>
       </div>
       <div className={cn("export-page").elem("timeout-body").toClassName()}>
-        This export is processed synchronously in the Community Edition UI and can exceed typical reverse-proxy timeouts
-        (often around 90 seconds) for large datasets.
+        { t("pages.exportPage.sync_export_90s") }
       </div>
 
       <div className={cn("export-page").elem("timeout-actions").toClassName()}>
-        <div className={cn("export-page").elem("timeout-actions-title").toClassName()}>Recommended options:</div>
+        <div className={cn("export-page").elem("timeout-actions-title").toClassName()}>{ t("pages.exportPage.recommended_options") }:</div>
         <ul className={cn("export-page").elem("timeout-actions-list").toClassName()}>
           <li>
             <div className={cn("export-page").elem("timeout-action-item").toClassName()}>
               <IconTerminal className={cn("export-page").elem("timeout-action-icon").toClassName()} />
               <div className={cn("export-page").elem("timeout-action-content").toClassName()}>
                 <span>
-                  Export using the{" "}
+                  { t("pages.exportPage.export_using") }{" "}
                   <a className="no-go" href={EXPORT_CONSOLE_DOCS_URL} target="_blank" rel="noreferrer">
-                    console command
+                    { t("pages.exportPage.console_command") }
                     <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
                   </a>
                   :
@@ -335,11 +327,11 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
                     className={cn("export-page").elem("timeout-copy-button").toClassName()}
                     onClick={handleCopy}
                     aria-label="Copy command"
-                    title={copied ? "Copied!" : "Copy command"}
+                    title={copied ? t("pages.exportPage.copied") : t("pages.exportPage.copy_command")}
                   >
                     <IconCopyOutline className={cn("export-page").elem("timeout-copy-icon").toClassName()} />
                     {copied && (
-                      <span className={cn("export-page").elem("timeout-copy-text").toClassName()}>Copied</span>
+                      <span className={cn("export-page").elem("timeout-copy-text").toClassName()}>{ t("pages.exportPage.copied") }</span>
                     )}
                   </button>
                 </div>
@@ -350,16 +342,16 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
             <div className={cn("export-page").elem("timeout-action-item").toClassName()}>
               <IconCode className={cn("export-page").elem("timeout-action-icon").toClassName()} />
               <div className={cn("export-page").elem("timeout-action-content").toClassName()}>
-                Use{" "}
+                { t("pages.exportPage.use") }{" "}
                 <a className="no-go" href={EXPORT_SNAPSHOT_SDK_URL} target="_blank" rel="noreferrer">
-                  export snapshots via the SDK
+                  { t("pages.exportPage.export_snapshots") }
                   <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
                 </a>{" "}
-                to create and download a snapshot without relying on a single UI request.
+                { t("pages.exportPage.create_download_without_retry") }
               </div>
             </div>
           </li>
-          <li>
+          {/* <li>
             <div className={cn("export-page").elem("timeout-action-item").toClassName()}>
               <IconWarningCircleFilled className={cn("export-page").elem("timeout-action-icon").toClassName()} />
               <div className={cn("export-page").elem("timeout-action-content").toClassName()}>
@@ -371,14 +363,14 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
                 since it is designed for large-scale projects and asynchronous exports.
               </div>
             </div>
-          </li>
+          </li> */}
         </ul>
         <div className={cn("export-page").elem("timeout-footer").toClassName()}>
           <IconBook className={cn("export-page").elem("timeout-footer-icon").toClassName()} />
           <span>
-            More details in the documentation:{" "}
+            { t("pages.exportPage.more_details") }:{" "}
             <a className="no-go" href={EXPORT_TIMEOUT_DOCS_URL} target="_blank" rel="noreferrer">
-              Export timeout in Community Edition
+              { t("pages.exportPage.learn_more") }
               <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
             </a>
           </span>

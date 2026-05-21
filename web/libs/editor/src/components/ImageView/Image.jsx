@@ -5,6 +5,9 @@ import messages from "../../utils/messages";
 import { ErrorMessage } from "../ErrorMessage/ErrorMessage";
 import "./Image.scss";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 /**
  * Coordinates in relative mode belong to a data domain consisting of percentages in the range from 0 to 100
  */
@@ -59,7 +62,7 @@ export const Image = observer(
         {imageEntity.downloaded ? (
           <ImageRenderer
             // biome-ignore lint/a11y/noRedundantAlt: alt="image" is intentional for accessibility
-            alt="image"
+            alt=""
             ref={ref}
             src={imageEntity.currentSrc}
             onLoad={onLoad}
@@ -74,9 +77,12 @@ export const Image = observer(
 );
 
 const ImageProgress = observer(({ downloading, progress, error, src, usedValue }) => {
+
+  const { t } = useTranslation();
+
   return downloading ? (
     <div className={cn("image-progress").toClassName()}>
-      <div className={cn("image-progress").elem("message").toClassName()}>Downloading image</div>
+      <div className={cn("image-progress").elem("message").toClassName()}>{ t("editor.components.imageview.downloading_image") }</div>
       <progress
         className={cn("image-progress").elem("bar").toClassName()}
         value={progress}

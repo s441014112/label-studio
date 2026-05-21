@@ -11,6 +11,8 @@ import { Menu } from "../../Common/Menu/Menu";
 import { Modal } from "../../Common/Modal/ModalPopup";
 import "./ActionsButton.scss";
 
+import i18n from "../../../../../../apps/labelstudio/src/translations/i18n";
+
 const isFFLOPSE3 = isFF(FF_LOPS_E_3);
 const injector = inject(({ store }) => ({
   store,
@@ -233,7 +235,7 @@ export const ActionsButton = injector(
     const actionButtons = actions.map((action) => (
       <ActionButton key={action.id} action={action} parentRef={formRef} store={store} formRef={formRef} />
     ));
-    const recordTypeLabel = isFFLOPSE3 && store.SDK.type === "DE" ? "Record" : "Task";
+    const recordTypeLabel = isFFLOPSE3 && store.SDK.type === "DE" ? i18n.t("datamanager.components.datamanager.record") : i18n.t("datamanager.components.datamanager.task");
 
     return (
       <Dropdown.Trigger
@@ -241,7 +243,7 @@ export const ActionsButton = injector(
           <Menu size="compact">
             {isLoading || isFetching ? (
               <Menu.Item data-testid="loading-actions" disabled>
-                Loading actions...
+                { i18n.t("datamanager.components.datamanager.loading_actions") }
               </Menu.Item>
             ) : (
               actionButtons
@@ -261,7 +263,7 @@ export const ActionsButton = injector(
           aria-label="Tasks Actions"
           {...rest}
         >
-          {selectedCount > 0 ? `${selectedCount} ${recordTypeLabel}${selectedCount > 1 ? "s" : ""}` : "Actions"}
+          {selectedCount > 0 ? `${selectedCount} ${recordTypeLabel}` : i18n.t("datamanager.components.datamanager.actions") }
         </Button>
       </Dropdown.Trigger>
     );

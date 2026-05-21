@@ -1,6 +1,7 @@
 import logging
 
 from core.permissions import ViewClassPermission, all_permissions
+from core.translations import TranslatableString as _S
 from django.db.models import CharField, Count, Q
 from django.db.models.functions import Cast
 from django.utils.decorators import method_decorator
@@ -28,7 +29,7 @@ logger = logging.getLogger(__name__)
     decorator=extend_schema(
         tags=['Labels'],
         summary='Create labels',
-        description='Add labels to your project without updating the labeling configuration.',
+        description=_S('schema.action.add_labels'),
         extensions={
             'x-fern-sdk-group-name': 'labels',
             'x-fern-sdk-method-name': 'create',
@@ -41,7 +42,7 @@ logger = logging.getLogger(__name__)
     decorator=extend_schema(
         tags=['Labels'],
         summary='Remove labels',
-        description='Remove labels from your project without updating the labeling configuration.',
+        description=_S('schema.action.remove_labels'),
         extensions={
             'x-fern-sdk-group-name': 'labels',
             'x-fern-sdk-method-name': 'delete',
@@ -54,7 +55,7 @@ logger = logging.getLogger(__name__)
     decorator=extend_schema(
         tags=['Labels'],
         summary='Update labels',
-        description='Update labels used for your project without updating the labeling configuration.',
+        description=_S('schema.action.update_labels'),
         extensions={
             'x-fern-sdk-group-name': 'labels',
             'x-fern-sdk-method-name': 'update',
@@ -82,7 +83,7 @@ logger = logging.getLogger(__name__)
     decorator=extend_schema(
         tags=['Labels'],
         summary='List labels',
-        description='List all custom labels added to your project separately from the labeling configuration.',
+        description=_S('schema.action.list_labels'),
         extensions={
             'x-fern-sdk-group-name': 'labels',
             'x-fern-sdk-method-name': 'list',
@@ -111,7 +112,7 @@ class LabelAPI(viewsets.ModelViewSet):
         serializer.save(created_by=self.request.user, organization=self.request.user.active_organization)
 
     def get_queryset(self):
-        return Label.objects.filter(organization=self.request.user.active_organization).prefetch_related('links')
+        return Label.objects.filter(created_by=self.request.user).prefetch_related('links')
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -125,7 +126,7 @@ class LabelAPI(viewsets.ModelViewSet):
     decorator=extend_schema(
         tags=['Labels'],
         summary='Create label links',
-        description='Create label links to link new custom labels to your project labeling configuration.',
+        description=_S('schema.action.create_label_links'),
         extensions={
             'x-fern-sdk-group-name': ['projects', 'labels'],
             'x-fern-sdk-method-name': 'create',
@@ -170,7 +171,7 @@ class LabelAPI(viewsets.ModelViewSet):
     decorator=extend_schema(
         tags=['Labels'],
         summary='Get label link',
-        description='Get label links for a specific project configuration. ',
+        description=_S('schema.action.get_label_links_project'),
         extensions={
             'x-fern-sdk-group-name': ['projects', 'labels'],
             'x-fern-sdk-method-name': 'get',
@@ -183,7 +184,7 @@ class LabelAPI(viewsets.ModelViewSet):
     decorator=extend_schema(
         tags=['Labels'],
         summary='List label links',
-        description='List label links for a specific label and project.',
+        description=_S('schema.action.list_label_links'),
         extensions={
             'x-fern-sdk-group-name': ['projects', 'labels'],
             'x-fern-sdk-method-name': 'list',
@@ -209,7 +210,7 @@ class LabelLinkAPI(viewsets.ModelViewSet):
     )
 
     def get_queryset(self):
-        return LabelLink.objects.filter(label__organization=self.request.user.active_organization).annotate(
+        return LabelLink.objects.filter(label__created_by=self.request.user).annotate(
             annotations_count=Count(
                 'project__tasks__annotations',
                 filter=Q(

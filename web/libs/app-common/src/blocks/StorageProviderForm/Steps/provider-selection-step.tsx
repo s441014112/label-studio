@@ -15,6 +15,7 @@ interface ProviderSelectionStepProps {
   storageTypesLoading?: boolean;
   target?: "import" | "export";
   providers: Record<string, ProviderConfig>;
+  t: any;
 }
 
 export const ProviderSelectionStep = ({
@@ -22,6 +23,7 @@ export const ProviderSelectionStep = ({
   errors,
   handleSelectChange,
   providers,
+  t,
 }: ProviderSelectionStepProps) => {
   // Set default provider if none is selected and we have options
   useEffect(() => {
@@ -51,18 +53,19 @@ export const ProviderSelectionStep = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold">Choose your cloud storage provider</h2>
-        <p className="text-muted-foreground">Select the cloud storage service where your data is stored</p>
+        <h2 className="text-xl font-semibold">{ t("common.blocks.choose_cloud_storage") }</h2>
+        <p className="text-muted-foreground">{ t("common.blocks.select_storage_stored") }</p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label text="Storage Provider" required />
+          <Label text={t("common.blocks.storage_provider")} required />
           <ProviderGrid
             providers={providers}
             selectedProvider={formData.provider}
             onProviderSelect={(providerName) => handleSelectChange("provider", providerName)}
             error={errors.provider}
+            t={t}
           />
         </div>
 

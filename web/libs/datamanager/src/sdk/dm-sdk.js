@@ -219,7 +219,22 @@ export class DataManager {
 
     config.gateway = apiGateway ?? config.gateway;
     config.mockDisabled = apiMockDisabled;
-    config.commonHeaders = apiHeaders;
+
+    // 从当前页面的URL中，获取token、app_token、language参数, 并放到config.commonHeaders中
+    let localHeaders = {};
+    try {
+      localHeaders = {
+        ...apiHeaders,
+        token: localStorage.getItem("token") || "",
+        "Digi-middleware-auth-app": localStorage.getItem("digi-middleware-auth-app") || "",
+        "Accept-language": localStorage.getItem("language") || "en",
+      };
+    } catch (error) {
+      localHeaders = apiHeaders;
+      console.error("Error parsing URL parameters:", error);
+    }
+
+    config.commonHeaders = localHeaders;
 
     Object.assign(config.endpoints, apiEndpoints ?? {});
     const sharedParams = {};

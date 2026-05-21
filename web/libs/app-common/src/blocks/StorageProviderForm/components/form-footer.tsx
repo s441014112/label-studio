@@ -25,6 +25,7 @@ interface FormFooterProps {
   };
   target?: "import" | "export";
   isProviderDisabled?: boolean;
+  t: any;
 }
 
 export const FormFooter = ({
@@ -42,11 +43,12 @@ export const FormFooter = ({
   saveStorage,
   target,
   isProviderDisabled = false,
+  t,
 }: FormFooterProps) => {
   return (
     <div className="flex items-center justify-between p-wide border-t border-neutral-border bg-neutral-background">
       <Button look="outlined" onClick={onPrevious} disabled={currentStep === 0}>
-        Previous
+        { t("common.blocks.previous") }
       </Button>
 
       <div className="flex gap-tight items-center">
@@ -62,14 +64,14 @@ export const FormFooter = ({
               })}
               style={connectionChecked ? { textShadow: "none" } : {}}
             >
-              {connectionChecked ? "Connection Verified" : "Test Connection"}
+              {connectionChecked ? t("common.blocks.connection_verified") : t("common.blocks.test_connection") }
             </Button>
           </>
         )}
 
         {(isEditMode ? currentStep === 1 : currentStep === 2) && (
           <Button waiting={loadPreview.isLoading} onClick={loadPreview.mutate} disabled={filesPreview !== null}>
-            {filesPreview !== null ? "✓ Preview Loaded" : "Load Preview"}
+            {filesPreview !== null ? t("common.blocks.preview_loaded") : t("common.blocks.load_preview") }
           </Button>
         )}
 
@@ -82,18 +84,18 @@ export const FormFooter = ({
           look={currentStep === totalSteps - 1 && target !== "export" ? "outlined" : undefined}
           tooltip={
             currentStep === 1 && !connectionChecked
-              ? "Test connection before continuing"
+              ? t("common.blocks.test_connection_before_continue")
               : currentStep === 0 && isProviderDisabled
-                ? "This provider is not available in the current version"
+                ? t("common.blocks.provider_not_available")
                 : undefined
           }
         >
-          {currentStep < totalSteps - 1 ? "Next" : target === "export" ? "Save" : "Save & Sync"}
+          {currentStep < totalSteps - 1 ? t("common.blocks.next") : target === "export" ? t("common.blocks.save") : t("common.blocks.save_and_sync") }
         </Button>
 
         {currentStep === totalSteps - 1 && target !== "export" && onSave && (
           <Button onClick={onSave} waiting={saveStorage?.isLoading}>
-            Save
+            { t("common.blocks.save") }
           </Button>
         )}
       </div>

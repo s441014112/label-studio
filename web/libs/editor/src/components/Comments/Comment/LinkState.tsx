@@ -9,6 +9,9 @@ import { RegionLabel } from "../../SidePanels/OutlinerPanel/RegionLabel";
 
 import "./LinkState.scss";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 type LinkStateProps = {
   linking: boolean;
   region: MSTRegion;
@@ -19,18 +22,23 @@ type LinkStateProps = {
 
 export const LinkState: FC<LinkStateProps> = ({ linking, region, result, onUnlink, interactive }) => {
   const isVisible = linking || region;
+
   const mod = useMemo(() => {
     if (linking) return { action: true };
     if (region) return { display: true };
     return undefined;
   }, [linking, region]);
+
+  const { t } = useTranslation();
+
   if (!isVisible) return null;
+
   return (
     <div className={cn("link-state").mod(mod).toClassName()}>
       <div className={cn("link-state").elem("prefix").toClassName()}>
         <IconCommentLinkTo />
       </div>
-      {mod?.action && "Select an object to link it to this comment."}
+      {mod?.action && t("editor.components.comments.link_to_comment")}
       {mod?.display && <LinkedRegion region={region} result={result} onUnlink={onUnlink} interactive={interactive} />}
     </div>
   );

@@ -1,0 +1,13 @@
+title: "對比迴歸"
+type: community
+group: 排序與評分
+image: /static/templates/pairwise-regression.png
+details: <h1>在兩個選項之間進行評分比較</h1>
+config: |
+  <View>
+    <Header>Set how likely it is that these images represent the same thing:</Header>
+      <Rating name="rating" toName="image1,image2"/>
+      <Image name="image1" value="$image1" />
+      <Image name="image2" value="$image2" />
+  </View>
+

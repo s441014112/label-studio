@@ -13,12 +13,23 @@ from importlib import import_module
 from typing import Callable, Optional, TypedDict, Union
 
 from core.feature_flags import flag_set
+from core.translations import TranslatableString
 from core.utils.common import load_func
 from data_manager.functions import DataManagerException
 from django.conf import settings
 from rest_framework.exceptions import PermissionDenied
 
 logger = logging.getLogger(__name__)
+
+
+def _resolve_translatable(obj):
+    if isinstance(obj, TranslatableString):
+        return str(obj)
+    if isinstance(obj, dict):
+        return {k: _resolve_translatable(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_resolve_translatable(v) for v in obj]
+    return obj
 
 
 class DataManagerAction(TypedDict):
@@ -88,6 +99,7 @@ def get_all_actions(user, project):
         if callable(enterprise_badge_generator):
             action['enterprise_badge'] = enterprise_badge_generator(user, project)
 
+    actions = _resolve_translatable(actions)
     return actions
 
 
@@ -164,8 +176,8 @@ def get_action_form(action_id, project, user):
 
     form = action.get('dialog', {}).get('form')
     if callable(form):
-        return form(user, project)
-    return form or []
+        return _resolve_translatable(form(user, project))
+    return _resolve_translatable(form or [])
 
 
 register_actions_from_dir('data_manager.actions', os.path.dirname(__file__))

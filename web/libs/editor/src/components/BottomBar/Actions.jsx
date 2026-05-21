@@ -16,9 +16,11 @@ export const Actions = ({ store }) => {
   const isViewAll = annotationStore.viewingAll === true;
   const isBulkMode = isFF(FF_BULK_ANNOTATION) && !isStarterCloudPlan() && store.hasInterface("annotation:bulk");
 
+  const t = store.t;
+
   return (
     <div className={cn("bottombar").elem("section").toClassName()}>
-      {!isPrediction && !isViewAll && store.hasInterface("edit-history") && <EditingHistory entity={entity} />}
+      {!isPrediction && !isViewAll && store.hasInterface("edit-history") && <EditingHistory entity={entity} t={t} />}
 
       <div className={cn("action-buttons").toClassName()}>
         {store.description && store.hasInterface("instruction") && (
@@ -28,7 +30,7 @@ export const Actions = ({ store }) => {
             size="small"
             variant="neutral"
             look="string"
-            tooltip="Show instructions"
+            tooltip={ t("editor.components.bottomBar.show_instructions") }
             onClick={() => store.toggleDescription()}
             className="aspect-square"
             leading={<IconInfoOutline />}
@@ -42,14 +44,14 @@ export const Actions = ({ store }) => {
           look="string"
           variant="neutral"
           onClick={() => store.toggleSettings()}
-          tooltip="Settings"
+          tooltip={ t("editor.components.bottomBar.settings") }
           className="aspect-square"
           leading={<IconSettings />}
           data-testid="bottombar-settings-button"
         />
       </div>
 
-      {store.hasInterface("ground-truth") && !isBulkMode && <GroundTruth entity={entity} />}
+      {store.hasInterface("ground-truth") && !isBulkMode && <GroundTruth entity={entity} t={t} />}
 
       {!isViewAll && (
         <div className={cn("model-actions").toClassName()}>

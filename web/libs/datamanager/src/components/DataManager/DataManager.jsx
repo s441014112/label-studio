@@ -11,6 +11,8 @@ import { DataView } from "../MainView";
 import "./DataManager.scss";
 import { Toolbar } from "./Toolbar/Toolbar";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+
 const tabContentCN = cn("tabs-dm-content");
 
 const injector = inject(({ store }) => {
@@ -47,18 +49,18 @@ const ProjectSummary = summaryInjector((props) => {
     <Space size="large" style={{ paddingRight: "1em", color: "var(--color-neutral-content-subtle)" }}>
       {props.cloudSync && (
         <Space size="small" style={{ fontSize: 12, fontWeight: 400, opacity: 0.8 }}>
-          Storage sync
+          { i18n.t("datamanager.components.datamanager.storage_sync") }
           <Spinner size="small" />
         </Space>
       )}
       <span style={{ display: "flex", alignItems: "center", fontSize: 12 }}>
         <Space size="compact">
           <span>
-            Tasks: <span title="Filtered tasks">{props.totalFoundTasks}</span> /{" "}
-            <span title="Total tasks in the project">{props.totalTasks}</span>
+            { i18n.t("datamanager.components.datamanager.tasks") }: <span title={ i18n.t("datamanager.components.datamanager.filtered_tasks") }>{props.totalFoundTasks}</span> /{" "}
+            <span title={ i18n.t("datamanager.components.datamanager.total_tasks") }>{props.totalTasks}</span>
           </span>
-          <span>Submitted annotations: {props.totalAnnotations}</span>
-          <span>Predictions: {props.totalPredictions}</span>
+          <span>{ i18n.t("datamanager.components.datamanager.submitted_annotations") }: {props.totalAnnotations}</span>
+          <span>{ i18n.t("datamanager.components.datamanager.predictions") }: {props.totalPredictions}</span>
         </Space>
       </span>
     </Space>

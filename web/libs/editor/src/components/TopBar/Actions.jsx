@@ -21,13 +21,15 @@ export const Actions = ({ store }) => {
     annotationStore.toggleViewingAllAnnotations();
   }, [annotationStore]);
 
+  const t = store.t;
+
   return (
     <div className={cn("topbar").elem("section").toClassName()}>
       {store.hasInterface("annotations:view-all") && !isBulkMode && (
-        <Tooltip title="Compare all annotations">
+        <Tooltip title={ t("editor.components.topbar.compare_all_annotations") }>
           <Button
             icon={<IconViewAll />}
-            aria-label="Compare all annotations"
+            aria-label={ t("editor.components.topbar.compare_all_annotations") }
             onClick={() => onToggleVisibility()}
             variant={isViewAll ? "primary" : "neutral"}
             look={isViewAll ? "filled" : "string"}
@@ -42,10 +44,10 @@ export const Actions = ({ store }) => {
 
       {!isViewAll && !isBulkMode && store.hasInterface("ground-truth") && <GroundTruth entity={entity} />}
 
-      {!isPrediction && !isViewAll && store.hasInterface("edit-history") && <EditingHistory entity={entity} />}
+      {!isPrediction && !isViewAll && store.hasInterface("edit-history") && <EditingHistory entity={entity} store={store} />}
 
       {!isViewAll && !isBulkMode && store.hasInterface("annotations:delete") && (
-        <Tooltip title="Delete annotation">
+        <Tooltip title={ t("editor.components.topbar.delete_annotation") }>
           <Button
             icon={<IconTrash />}
             variant="negative"
@@ -54,10 +56,10 @@ export const Actions = ({ store }) => {
             aria-label="Delete"
             onClick={() => {
               confirm({
-                title: "Delete annotation",
-                body: "This action cannot be undone",
+                title: t("editor.components.topbar.delete_annotation"),
+                body: t("editor.components.topbar.delete_confirm"),
                 buttonLook: "destructive",
-                okText: "Proceed",
+                okText: t("editor.components.topbar.proceed"),
                 onOk: () => entity.list.deleteAnnotation(entity),
               });
             }}
@@ -71,13 +73,13 @@ export const Actions = ({ store }) => {
       )}
 
       {!isViewAll && !isBulkMode && store.hasInterface("annotations:add-new") && saved && (
-        <Tooltip title={`Create copy of current ${entity.type}`}>
+        <Tooltip title={ t("editor.components.topbar.copy_annotation") }>
           <Button
             icon={<IconCopy style={{ width: 36, height: 36 }} />}
             variant="neutral"
             look="string"
             type="text"
-            aria-label="Copy Annotation"
+            aria-label={ t("editor.components.topbar.copy_annotation") }
             onClick={(ev) => {
               ev.preventDefault();
 

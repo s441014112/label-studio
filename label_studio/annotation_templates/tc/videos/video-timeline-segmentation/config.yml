@@ -1,0 +1,34 @@
+title: "影片時間軸分割"
+type: community
+group: 影片
+image: /static/templates/video-timeline-segmentation.png
+details: |
+  <h1>在影片時間軸上標註片段</h1>
+  <dl>
+    <dt>產業應用</dt>
+    <dd>影片編輯、內容審核、體育分析、監控、事件檢測</dd>
+    <dt>相關模型</dt>
+    <dd>TimeSformer、VideoMAE、時序模型</dd>
+    <dt>領域術語</dt>
+    <dd>影片分段、時間軸、時序標註、事件檢測</dd>
+  </dl>
+config: |
+  <View>
+    <Header value="Video timeline segmentation via Audio sync trick"/>
+    <Video name="video" value="$video_url" sync="audio"/>
+    <Labels name="tricks" toName="audio" choice="multiple">
+      <Label value="Kickflip" background="#1BB500"/>
+      <Label value="360 Flip" background="#FFA91D"/>
+      <Label value="Trick" background="#358EF3"/>
+    </Labels>
+    <Audio name="audio" value="$video_url" sync="video" speed="false"/>
+  </View>
+
+  <!--
+    Audio tag uses the same $video file to be in sync, video is muted
+  -->
+
+  <!--{
+   "video_url": "/static/samples/opossum_snow.mp4"
+  }-->
+

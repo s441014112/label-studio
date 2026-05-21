@@ -1,6 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
 from django.utils.decorators import method_decorator
+from core.translations import TranslatableString as _S
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from io_storages.api import (
@@ -31,13 +32,13 @@ from .openapi_schema import (
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Get all import storage',
-        description='Get a list of all GCS import storage connections.',
+        description=_S('schema.action.list_get_a_list_of_all_gcs_import_storage_connections._import'),
         parameters=[
             OpenApiParameter(
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
                 required=True,
             ),
         ],
@@ -54,7 +55,7 @@ from .openapi_schema import (
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Create import storage',
-        description='Create a new GCS import storage connection.',
+        description=_S('schema.action.create_create_a_new_gcs_import_storage_connection._import'),
         request={
             'application/json': _gcs_import_storage_schema,
         },
@@ -75,7 +76,7 @@ class GCSImportStorageListAPI(ImportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Get import storage',
-        description='Get a specific GCS import storage connection.',
+        description=_S('schema.action.get_get_a_specific_gcs_import_storage_connection._import'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['import_storage', 'gcs'],
@@ -89,7 +90,7 @@ class GCSImportStorageListAPI(ImportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Update import storage',
-        description='Update a specific GCS import storage connection.',
+        description=_S('schema.action.update_update_a_specific_gcs_import_storage_connection._import'),
         request={
             'application/json': _gcs_import_storage_schema,
         },
@@ -105,7 +106,7 @@ class GCSImportStorageListAPI(ImportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Delete import storage',
-        description='Delete a specific GCS import storage connection.',
+        description=_S('schema.action.delete_delete_a_specific_gcs_import_storage_connection._import'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['import_storage', 'gcs'],
@@ -124,13 +125,13 @@ class GCSImportStorageDetailAPI(ImportStorageDetailAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Sync import storage',
-        description='Sync tasks from a GCS import storage connection.',
+        description=_S('schema.action.sync_sync_tasks_from_a_gcs_import_storage_connection._import'),
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='Storage ID',
+                description=_S('schema.param.storage_id'),
             ),
         ],
         request=None,
@@ -150,7 +151,7 @@ class GCSImportStorageSyncAPI(ImportStorageSyncAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Sync export storage',
-        description='Sync tasks from an GCS export storage connection.',
+        description=_S('schema.action.sync_sync_tasks_from_an_gcs_export_storage_connection._export'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'gcs'],
@@ -168,11 +169,11 @@ class GCSExportStorageSyncAPI(ExportStorageSyncAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Validate import storage',
-        description='Validate a specific GCS import storage connection.',
+        description=_S('schema.action.validate_validate_a_specific_gcs_import_storage_connection._import'),
         request={
             'application/json': _gcs_import_storage_schema_with_id,
         },
-        responses={200: OpenApiResponse(description='Validation successful')},
+        responses={200: OpenApiResponse(description=_S('schema.resp.validation_successful'))},
         extensions={
             'x-fern-sdk-group-name': ['import_storage', 'gcs'],
             'x-fern-sdk-method-name': 'validate',
@@ -189,11 +190,11 @@ class GCSImportStorageValidateAPI(ImportStorageValidateAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Validate export storage',
-        description='Validate a specific GCS export storage connection.',
+        description=_S('schema.action.validate_validate_a_specific_gcs_export_storage_connection._export'),
         request={
             'application/json': _gcs_export_storage_schema_with_id,
         },
-        responses={200: OpenApiResponse(description='Validation successful')},
+        responses={200: OpenApiResponse(description=_S('schema.resp.validation_successful'))},
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'gcs'],
             'x-fern-sdk-method-name': 'validate',
@@ -210,13 +211,13 @@ class GCSExportStorageValidateAPI(ExportStorageValidateAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Get all export storage',
-        description='Get a list of all GCS export storage connections.',
+        description=_S('schema.action.list_get_a_list_of_all_gcs_export_storage_connections._export'),
         parameters=[
             OpenApiParameter(
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
                 required=True,
             ),
         ],
@@ -232,7 +233,7 @@ class GCSExportStorageValidateAPI(ExportStorageValidateAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Create export storage',
-        description='Create a new GCS export storage connection to store annotations.',
+        description=_S('schema.action.create_create_a_new_gcs_export_storage_connection_to_store_annotations._export'),
         request={
             'application/json': _gcs_export_storage_schema,
         },
@@ -253,7 +254,7 @@ class GCSExportStorageListAPI(ExportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Get export storage',
-        description='Get a specific GCS export storage connection.',
+        description=_S('schema.action.get_get_a_specific_gcs_export_storage_connection._export'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'gcs'],
@@ -267,7 +268,7 @@ class GCSExportStorageListAPI(ExportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Update export storage',
-        description='Update a specific GCS export storage connection.',
+        description=_S('schema.action.update_update_a_specific_gcs_export_storage_connection._export'),
         request={
             'application/json': _gcs_export_storage_schema,
         },
@@ -283,7 +284,7 @@ class GCSExportStorageListAPI(ExportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: GCS'],
         summary='Delete export storage',
-        description='Delete a specific GCS export storage connection.',
+        description=_S('schema.action.delete_delete_a_specific_gcs_export_storage_connection._export'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'gcs'],

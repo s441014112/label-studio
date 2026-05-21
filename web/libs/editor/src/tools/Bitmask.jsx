@@ -9,6 +9,8 @@ import { Tool } from "../components/Toolbar/Tool";
 import { Range } from "../common/Range/Range";
 import { NodeViews } from "../components/Node/Node";
 
+import i18n from "../../../../apps/labelstudio/src/translations/i18n";
+
 const MIN_SIZE = 1;
 const MAX_SIZE = 50;
 
@@ -27,10 +29,11 @@ const IconDot = ({ size }) => {
 };
 
 const ToolView = observer(({ item }) => {
+
   return (
     <Tool
-      label="Bitmask"
-      ariaLabel="bitmask-tool"
+      label={ i18n.t("editor.tools.bitmask") }
+      ariaLabel={ i18n.t("editor.tools.bitmask") }
       active={item.selected}
       shortcut={item.shortcut}
       extraShortcuts={item.extraShortcuts}

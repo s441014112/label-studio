@@ -1,0 +1,44 @@
+title: "视频分类"
+type: community
+group: 视频
+image: /static/templates/video-classification.png
+details: |
+  <h1>对视频进行分类标注</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>内容审核、视频平台、媒体分析、安全监控、体育分析</dd>
+    <dt>相关模型</dt>
+    <dd>VideoMAE、TimeSformer、SlowFast、ViViT</dd>
+    <dt>领域术语</dt>
+    <dd>视频分类、动作识别、视频理解、媒体分析</dd>
+  </dl>
+config: |
+  <View>
+    <Video name="video" value="$video"/>
+    <Choices name="choice" toName="video" showInLine="true">
+      <Choice value="Blurry" />
+      <Choice value="Sharp" />
+    </Choices>
+  </View>
+
+  <!-- {
+  "data": {
+     "video": "/static/samples/opossum_snow.mp4"
+  },
+  "annotations": [{"result":
+      [
+          {
+              "value": {
+                  "choices": [
+                      "Blurry"
+                  ]
+              },
+              "id": "vB3U85jSU4",
+              "from_name": "choice",
+              "to_name": "video",
+              "type": "choices"
+          }
+      ]
+    }]
+  }
+  -->

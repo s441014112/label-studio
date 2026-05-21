@@ -1,25 +1,31 @@
 import { useMemo } from "react";
 import { Menu } from "../Menu/Menu";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 export const TabsMenu = ({ onClick, editable = true, closable = true, clonable = true, virtual = false }) => {
+  
+  const { t } = useTranslation();
+
   const items = useMemo(
     () => [
       {
         key: "edit",
-        title: "Rename",
+        title: t("datamanager.components.common.rename"),
         enabled: editable && !virtual,
         action: () => onClick("edit"),
       },
       {
         key: "duplicate",
-        title: "Duplicate",
+        title: t("datamanager.components.common.duplicate"),
         enabled: !virtual && clonable,
         action: () => onClick("duplicate"),
         willLeave: true,
       },
       {
         key: "save",
-        title: "Save",
+        title: t("datamanager.components.common.save"),
         enabled: virtual,
         action: () => onClick("save"),
         willLeave: true,
@@ -44,7 +50,7 @@ export const TabsMenu = ({ onClick, editable = true, closable = true, clonable =
         <>
           {showDivider && <Menu.Divider />}
           <Menu.Item onClick={() => onClick("close")} data-leave>
-            Close
+            { t("datamanager.components.common.close") }
           </Menu.Item>
         </>
       ) : null}

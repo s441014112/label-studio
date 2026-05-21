@@ -5,6 +5,8 @@ import { useProject } from "../../providers/ProjectProvider";
 import { FF_UNSAVED_CHANGES, isFF } from "../../utils/feature-flags";
 import { isEmptyString } from "../../utils/helpers";
 import { ConfigPage } from "../CreateProject/Config/Config";
+import "../../translations/i18n";
+import { useTranslation } from "react-i18next";
 
 export const LabelingSettings = () => {
   const { project, fetchProject, updateProject } = useProject();
@@ -12,8 +14,9 @@ export const LabelingSettings = () => {
   const [essentialDataChanged, setEssentialDataChanged] = useState(false);
   const hasChanges = isFF(FF_UNSAVED_CHANGES) && config !== project.label_config;
   const api = useAPI();
+  const { t } = useTranslation();
 
-  useUpdatePageTitle(createTitleFromSegments([project?.title, "Labeling Interface Settings"]));
+  useUpdatePageTitle(createTitleFromSegments([project?.title, t("pages.settings.title")]));
 
   const saveConfig = useCallback(
     isFF(FF_UNSAVED_CHANGES)
@@ -91,5 +94,5 @@ export const LabelingSettings = () => {
   );
 };
 
-LabelingSettings.title = "Labeling Interface";
+LabelingSettings.title = "sideMenu.labeling_interface";
 LabelingSettings.path = "/labeling";

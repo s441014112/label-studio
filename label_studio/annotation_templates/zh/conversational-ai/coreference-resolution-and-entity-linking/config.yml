@@ -1,0 +1,15 @@
+title: "指代消解与实体链接"
+type: community
+group: 对话AI
+image: /static/templates/coreference-resolution-and-entity-linking.png
+details: <h1>解决文本中的指代关系并链接到知识库实体</h1>
+config: |
+  <View>
+    <Labels name="label" toName="text">
+      <Label value="Noun" background="red"/>
+      <Label value="Pronoun" background="darkorange"/>
+    </Labels>
+
+    <Text name="text" value="$corefText"/>
+  </View>
+

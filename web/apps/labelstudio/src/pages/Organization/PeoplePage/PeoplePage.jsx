@@ -1,7 +1,7 @@
 import { Button } from "@humansignal/ui";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useUpdatePageTitle } from "@humansignal/core";
-import { HeidiTips } from "../../../components/HeidiTips/HeidiTips";
+// import { HeidiTips } from "../../../components/HeidiTips/HeidiTips";
 import { modal } from "../../../components/Modal/Modal";
 import { Space } from "../../../components/Space/Space";
 import { cn } from "../../../utils/bem";
@@ -89,7 +89,8 @@ export const PeoplePage = () => {
         {selectedUser ? (
           <SelectedUser user={selectedUser} onClose={() => selectUser(null)} />
         ) : (
-          isFF(FF_LSDV_E_297) && <HeidiTips collection="organizationPage" />
+          isFF(FF_LSDV_E_297) && <></>
+          // <HeidiTips collection="organizationPage" />
         )}
       </div>
       <InviteLink

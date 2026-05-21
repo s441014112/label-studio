@@ -28,6 +28,9 @@ export const TopBar = observer(({ store }) => {
   // Keep TopBar visible for Review Stream and Quick View
   if (isFF(FF_DEV_3873) && !store.hasInterface("annotations:view-all")) return null;
 
+  // 继承自appstore
+  const t = store.t;
+
   return store ? (
     <div
       className={cn("topbar")
@@ -43,11 +46,11 @@ export const TopBar = observer(({ store }) => {
             <Button
               className={cn("topbar").elem("button").toClassName()}
               type={isViewAll ? undefined : "text"}
-              aria-label="Create an annotation"
+              aria-label={ t("editor.components.topbar.new_annotation") }
               variant="neutral"
               size="small"
               look="outlined"
-              tooltip="Create a new annotation"
+              tooltip={ t("editor.components.topbar.new_annotation") }
               onClick={(event) => {
                 event.preventDefault();
                 const created = store.annotationStore.createAnnotation();

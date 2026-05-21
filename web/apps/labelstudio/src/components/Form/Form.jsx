@@ -19,6 +19,8 @@ import {
 } from "./FormContext";
 import * as Validators from "./Validation/Validators";
 import { ToastProvider, ToastViewport } from "@humansignal/ui";
+import "../../translations/i18n"
+import { useTranslation } from "react-i18next";
 
 const PASSWORD_PROTECTED_VALUE = "got ya, suspicious hacker!";
 
@@ -323,7 +325,7 @@ export default class Form extends React.Component {
     }
 
     validation.forEach((validator) => {
-      const result = validator(field.label, value);
+      const result = validator && validator(field.label, value);
 
       if (result) messages.push(result);
     });
@@ -502,6 +504,8 @@ Form.Builder = React.forwardRef(
       [onSubmit, fetchFormData],
     );
 
+    const { t } = useTranslation();
+
     useEffect(() => {
       updateFields();
     }, [updateFields]);
@@ -524,8 +528,8 @@ Form.Builder = React.forwardRef(
         {children}
         {props.autosubmit !== true && withActions === true && (
           <Form.Actions>
-            <Button type="submit" className="w-[120px]" aria-label="Submit form">
-              Save
+            <Button type="submit" className="w-[120px]" aria-label={ t("components.form.save") }>
+              { t("components.form.save") }
             </Button>
           </Form.Actions>
         )}
@@ -549,11 +553,13 @@ Form.Actions = ({ children, valid, extra, size }) => {
 Form.Indicator = () => {
   const state = React.useContext(FormStateContext);
 
+  const { t } = useTranslation();
+
   return (
     <div className={cn("form-indicator").toClassName()}>
       <Oneof value={state}>
         <span className={cn("form-indicator").elem("item").mod({ type: state }).toClassName()} case="success">
-          Saved!
+          { t("components.form.saved") }
         </span>
       </Oneof>
     </div>

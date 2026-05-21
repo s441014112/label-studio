@@ -1,6 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
 from django.utils.decorators import method_decorator
+from core.translations import TranslatableString as _S
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from io_storages.api import (
@@ -31,13 +32,13 @@ from .openapi_schema import (
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Get all import storage',
-        description='Get a list of all local file import storage connections.',
+        description=_S('schema.action.list_localfiles_import'),
         parameters=[
             OpenApiParameter(
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
                 required=True,
             ),
         ],
@@ -54,7 +55,7 @@ from .openapi_schema import (
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Create import storage',
-        description='Create a new local file import storage connection.',
+        description=_S('schema.action.create_localfiles_import'),
         request={
             'application/json': _local_files_import_storage_schema,
         },
@@ -75,7 +76,7 @@ class LocalFilesImportStorageListAPI(ImportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Get import storage',
-        description='Get a specific local file import storage connection.',
+        description=_S('schema.action.get_localfiles_import'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['import_storage', 'local'],
@@ -89,7 +90,7 @@ class LocalFilesImportStorageListAPI(ImportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Update import storage',
-        description='Update a specific local file import storage connection.',
+        description=_S('schema.action.update_localfiles_import'),
         request={
             'application/json': _local_files_import_storage_schema,
         },
@@ -105,7 +106,7 @@ class LocalFilesImportStorageListAPI(ImportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Delete import storage',
-        description='Delete a specific local file import storage connection.',
+        description=_S('schema.action.delete_localfiles_import'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['import_storage', 'local'],
@@ -124,13 +125,13 @@ class LocalFilesImportStorageDetailAPI(ImportStorageDetailAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Sync import storage',
-        description='Sync tasks from a local file import storage connection.',
+        description=_S('schema.action.sync_localfiles_import'),
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='Storage ID',
+                description=_S('schema.param.storage_id'),
             ),
         ],
         request=None,
@@ -150,7 +151,7 @@ class LocalFilesImportStorageSyncAPI(ImportStorageSyncAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Sync export storage',
-        description='Sync tasks from a local file export storage connection.',
+        description=_S('schema.action.sync_localfiles_export'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'local'],
@@ -168,11 +169,11 @@ class LocalFilesExportStorageSyncAPI(ExportStorageSyncAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Validate import storage',
-        description='Validate a specific local file import storage connection.',
+        description=_S('schema.action.validate_localfiles_import'),
         request={
             'application/json': _local_files_import_storage_schema_with_id,
         },
-        responses={200: OpenApiResponse(description='Validation successful')},
+        responses={200: OpenApiResponse(description=_S('schema.resp.validation_successful'))},
         extensions={
             'x-fern-sdk-group-name': ['import_storage', 'local'],
             'x-fern-sdk-method-name': 'validate',
@@ -189,11 +190,11 @@ class LocalFilesImportStorageValidateAPI(ImportStorageValidateAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Validate export storage',
-        description='Validate a specific local file export storage connection.',
+        description=_S('schema.action.validate_localfiles_export'),
         request={
             'application/json': _local_files_export_storage_schema_with_id,
         },
-        responses={200: OpenApiResponse(description='Validation successful')},
+        responses={200: OpenApiResponse(description=_S('schema.resp.validation_successful'))},
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'local'],
             'x-fern-sdk-method-name': 'validate',
@@ -210,13 +211,13 @@ class LocalFilesExportStorageValidateAPI(ExportStorageValidateAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Get all export storage',
-        description='Get a list of all local file export storage connections.',
+        description=_S('schema.action.list_localfiles_export'),
         parameters=[
             OpenApiParameter(
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
                 required=True,
             ),
         ],
@@ -232,7 +233,7 @@ class LocalFilesExportStorageValidateAPI(ExportStorageValidateAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Create export storage',
-        description='Create a new local file export storage connection to store annotations.',
+        description=_S('schema.action.create_localfiles_export'),
         request={
             'application/json': _local_files_export_storage_schema,
         },
@@ -253,7 +254,7 @@ class LocalFilesExportStorageListAPI(ExportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Get export storage',
-        description='Get a specific local file export storage connection.',
+        description=_S('schema.action.get_localfiles_export'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'local'],
@@ -267,7 +268,7 @@ class LocalFilesExportStorageListAPI(ExportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Update export storage',
-        description='Update a specific local file export storage connection.',
+        description=_S('schema.action.update_localfiles_export'),
         request={
             'application/json': _local_files_export_storage_schema,
         },
@@ -283,7 +284,7 @@ class LocalFilesExportStorageListAPI(ExportStorageListAPI):
     decorator=extend_schema(
         tags=['Storage: Local'],
         summary='Delete export storage',
-        description='Delete a specific local file export storage connection.',
+        description=_S('schema.action.delete_localfiles_export'),
         request=None,
         extensions={
             'x-fern-sdk-group-name': ['export_storage', 'local'],

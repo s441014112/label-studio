@@ -23,6 +23,7 @@ export const API_CONFIG = {
     createProject: "POST:/projects",
     deleteProject: "DELETE:/projects/:pk",
     projectResetCache: "POST:/projects/:pk/summary/reset",
+    apiLanguage:"POST:/languages",
 
     // Presigning
     presignUrlForTask: "/../tasks/:taskID/presign",

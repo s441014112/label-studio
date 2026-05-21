@@ -10,6 +10,9 @@ import { NodeIcon } from "../../Node/Node";
 import { LockButton } from "../Components/LockButton";
 import { RegionLabels } from "./RegionLabels";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next"; 
+
 interface RegionItemProps {
   region: any;
   withActions?: boolean;
@@ -47,6 +50,8 @@ export const RegionItem: FC<RegionItemProps> = observer(
       return chroma(bgColor).alpha(1);
     }, [region.background, region.style]);
 
+    const { t } = useTranslation();
+
     return (
       <div className={cn("detailed-region").mod({ compact }).toClassName()} data-testid="detailed-region">
         <div className={cn("detailed-region").elem("head").toClassName()} style={{ color: color.css() }}>
@@ -70,7 +75,7 @@ export const RegionItem: FC<RegionItemProps> = observer(
           <div className={cn("detailed-region").elem("warning").toClassName()}>
             <IconWarning />
             <div className={cn("detailed-region").elem("warning-text").toClassName()}>
-              Incomplete {region.type?.replace("region", "") ?? "region"}
+              { t("editor.components.sidepanels.incomplete", { type: region.type?.replace("region", "") ?? t("editor.components.sidepanels.region") })  }
             </div>
           </div>
         )}
@@ -137,6 +142,8 @@ const RegionAction: FC<any> = observer(({ region, annotation, editMode, onEditMo
     </WithHotkey>,
   );
 
+  const { t } = useTranslation();
+
   return (
     <div className={cn("region-actions").toClassName()}>
       <div className={cn("region-actions").elem("group").mod({ align: "left" }).toClassName()}>
@@ -153,15 +160,15 @@ const RegionAction: FC<any> = observer(({ region, annotation, editMode, onEditMo
           variant="neutral"
           look="string"
           aria-label="Unlock Region"
-          tooltip="Unlock Region"
+          tooltip={ t("editor.components.sidepanels.unlock_region") }
         />
         {region.hideable && (
           <RegionActionButton
-            aria-label={`${region.hidden ? "Show" : "Hide"} selected region`}
+            aria-label={ region.hidden ? t("editor.components.sidepanels.show_select_region") : t("editor.components.sidepanels.hide_select_region")}
             variant="neutral"
             look="string"
             onClick={region.toggleHidden}
-            tooltip={`${region.hidden ? "Show" : "Hide"} selected region`}
+            tooltip={ region.hidden ? t("editor.components.sidepanels.show_select_region") : t("editor.components.sidepanels.hide_select_region")}
           >
             {region.hidden ? <IconEyeClosed /> : <IconEyeOpened />}
           </RegionActionButton>
@@ -169,9 +176,9 @@ const RegionAction: FC<any> = observer(({ region, annotation, editMode, onEditMo
         <RegionActionButton
           variant="negative"
           look="string"
-          aria-label="Delete selected region"
+          aria-label={ t("editor.components.sidepanels.delete_selected_region") }
           disabled={region.isReadOnly()}
-          tooltip="Delete selected region"
+          tooltip={ t("editor.components.sidepanels.delete_selected_region") }
           onClick={() => annotation.deleteRegion(region)}
         >
           <IconTrash />

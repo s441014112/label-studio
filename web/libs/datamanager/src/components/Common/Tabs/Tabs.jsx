@@ -9,6 +9,9 @@ import Input from "../Input/Input";
 import "./Tabs.scss";
 import { TabsMenu } from "./TabsMenu";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 const TabsContext = createContext();
 export const tabsCN = cn("tabs-dm");
 
@@ -23,6 +26,8 @@ export const Tabs = ({
   addIcon,
 }) => {
   const [selectedTab, setSelectedTab] = useState(activeTab);
+
+  const { t } = useTranslation();
 
   const switchTab = useCallback((tab) => {
     setSelectedTab(tab);
@@ -61,14 +66,14 @@ export const Tabs = ({
             </Droppable>
           </DragDropContext>
           {allowedActions.add !== false && (
-            <Tooltip title="Open New Tab">
+            <Tooltip title={ t("datamanager.components.common.open_new_tab") }>
               <Button
                 className={tabsCN.elem("add").toString()}
                 size="smaller"
                 look="outline"
                 variant="neutral"
                 onClick={onAdd}
-                aria-label="Open New Tab"
+                aria-label={ t("datamanager.components.common.open_new_tab") }
                 data-leave
               >
                 <IconPlus width={12} height={12} aria-hidden="true" />
@@ -101,6 +106,8 @@ export const TabsItem = observer(
     const [savedTitle, setSavedTitle] = useState(title); // Track the last saved title
     const [renameMode, setRenameMode] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const { t } = useTranslation();
 
     const active = tab === selectedTab;
 
@@ -167,7 +174,7 @@ export const TabsItem = observer(
       [renameMode, switchTab, tab],
     );
 
-    const tabLabel = virtual ? `${currentTitle} (unsaved)` : currentTitle;
+    const tabLabel = virtual ? `${currentTitle} (${ t("datamanager.components.common.unsaved") })` : currentTitle;
 
     return (
       <div className={tabsCN.elem("item").mod({ active, virtual, menuOpen: isMenuOpen, edit: renameMode }).toString()}>

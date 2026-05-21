@@ -3,6 +3,7 @@
 import logging
 
 from core.permissions import ViewClassPermission, all_permissions
+from core.translations import get_response_message, TranslatableString as _S
 from django.utils.decorators import method_decorator
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
@@ -14,11 +15,21 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from users.functions import check_avatar
 from users.models import User
 from users.serializers import HotkeysSerializer, UserSerializer, UserSerializerUpdate, WhoAmIUserSerializer
 
 logger = logging.getLogger(__name__)
+
+
+def _detect_lang(request):
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
 
 _user_schema = {
     'type': 'object',
@@ -72,7 +83,7 @@ _user_schema = {
     Save details for a specific user, such as their name or contact information, in Label Studio.
     """,
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description='User ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description=_S('schema.param.user_id')),
         ],
         request=UserSerializer,
         extensions={
@@ -85,7 +96,7 @@ _user_schema = {
     decorator=extend_schema(
         tags=['Users'],
         summary='List users',
-        description='List the users that exist on the Label Studio server.',
+        description=_S('schema.action.list_users'),
         extensions={
             'x-fern-sdk-group-name': 'users',
             'x-fern-sdk-method-name': 'list',
@@ -98,7 +109,7 @@ _user_schema = {
     decorator=extend_schema(
         tags=['Users'],
         summary='Create new user',
-        description='Create a user in Label Studio.',
+        description=_S('schema.action.create_user'),
         request={
             'application/json': _user_schema,
         },
@@ -115,9 +126,9 @@ _user_schema = {
     decorator=extend_schema(
         tags=['Users'],
         summary='Get user info',
-        description='Get info about a specific Label Studio user, based on the user ID.',
+        description=_S('schema.action.get_user'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description='User ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description=_S('schema.param.user_id')),
         ],
         request=None,
         responses={200: UserSerializer},
@@ -137,7 +148,7 @@ _user_schema = {
         Update details for a specific user, such as their name or contact information, in Label Studio.
         """,
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description='User ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description=_S('schema.param.user_id')),
         ],
         request={
             'application/json': _user_schema,
@@ -155,9 +166,9 @@ _user_schema = {
     decorator=extend_schema(
         tags=['Users'],
         summary='Delete user',
-        description='Delete a specific Label Studio user.',
+        description=_S('schema.action.delete_user'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description='User ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description=_S('schema.param.user_id')),
         ],
         request=None,
         extensions={
@@ -228,7 +239,7 @@ class UserAPI(viewsets.ModelViewSet):
         read_only_fields = self.get_serializer_class().Meta.read_only_fields
         for field in read_only_fields:
             if field in request.data:
-                raise MethodNotAllowed('PATCH', detail=f'Cannot update read-only field: {field}')
+                raise MethodNotAllowed('PATCH', detail=get_response_message('user.cannot_update_readonly', language=_detect_lang(request), field=field))
 
         # newsletters
         if 'allow_newsletters' in request.data:
@@ -250,11 +261,11 @@ class UserAPI(viewsets.ModelViewSet):
     decorator=extend_schema(
         tags=['Users'],
         summary='Reset user token',
-        description='Reset the user token for the current user.',
+        description=_S('schema.action.reset_user_token'),
         request=None,
         responses={
             201: OpenApiResponse(
-                description='User token response',
+                description=_S('schema.resp.user_token'),
                 response={
                     'type': 'object',
                     'properties': {'token': {'type': 'string'}},
@@ -285,11 +296,11 @@ class UserResetTokenAPI(APIView):
     decorator=extend_schema(
         tags=['Users'],
         summary='Get user token',
-        description='Get a user token to authenticate to the API as the current user.',
+        description=_S('schema.action.get_user_token'),
         request=None,
         responses={
             200: OpenApiResponse(
-                description='User token response',
+                description=_S('schema.resp.user_token'),
                 response={
                     'type': 'object',
                     'properties': {'detail': {'type': 'string'}},
@@ -318,7 +329,7 @@ class UserGetTokenAPI(APIView):
     decorator=extend_schema(
         tags=['Users'],
         summary='Retrieve my user',
-        description='Retrieve details of the account that you are using to access the API.',
+        description=_S('schema.action.whoami'),
         request=None,
         responses={200: WhoAmIUserSerializer},
         extensions={
@@ -346,7 +357,7 @@ class UserWhoAmIAPI(generics.RetrieveAPIView):
     decorator=extend_schema(
         tags=['Users'],
         summary='Update user hotkeys',
-        description='Update the custom hotkeys configuration for the current user.',
+        description=_S('schema.action.update_hotkeys'),
         request=HotkeysSerializer,
         responses={200: HotkeysSerializer},
         extensions={
@@ -361,7 +372,7 @@ class UserWhoAmIAPI(generics.RetrieveAPIView):
     decorator=extend_schema(
         tags=['Users'],
         summary='Get user hotkeys',
-        description='Retrieve the custom hotkeys configuration for the current user.',
+        description=_S('schema.action.get_hotkeys'),
         request=None,
         responses={200: HotkeysSerializer},
         extensions={
@@ -371,14 +382,19 @@ class UserWhoAmIAPI(generics.RetrieveAPIView):
         },
     ),
 )
+
+#管理用户自定义快捷键的接口
 class UserHotkeysAPI(APIView):
     permission_classes = [IsAuthenticated]
+    #支持接收 JSON、表单等格式数据
     parser_classes = (JSONParser, FormParser, MultiPartParser)
 
+    #前端打开快捷键面板 → 调用这个接口 → 拿到你保存的快捷键
     def get(self, request, *args, **kwargs):
         """Retrieve the current user's hotkeys configuration"""
         try:
             user = request.user
+            # 取用户保存的快捷键
             custom_hotkeys = user.custom_hotkeys or {}
 
             serializer = HotkeysSerializer(data={'custom_hotkeys': custom_hotkeys})
@@ -393,6 +409,7 @@ class UserHotkeysAPI(APIView):
             logger.error(f'Error retrieving hotkeys for user {request.user.pk}: {str(e)}')
             return Response({'error': 'Failed to retrieve hotkeys configuration'}, status=500)
 
+    #你修改快捷键 → 前端调用这个接口 → 保存到你的用户信息里
     def patch(self, request, *args, **kwargs):
         """Update the current user's hotkeys configuration"""
         try:

@@ -2,10 +2,14 @@ import { useCallback, useState } from "react";
 import { Button } from "@humansignal/ui";
 import { useAPI } from "../../../providers/ApiProvider";
 import { Typography } from "@humansignal/ui";
+import "../../../translations/i18n";
+import { useTranslation } from "react-i18next";
 
 export const StartModelTraining = ({ backend }) => {
   const api = useAPI();
   const [response, setResponse] = useState(null);
+
+  const { t } = useTranslation();
 
   const onStartTraining = useCallback(
     async (backend) => {
@@ -23,12 +27,10 @@ export const StartModelTraining = ({ backend }) => {
   return (
     <div className="max-w-[680px]">
       <Typography size="small" className="text-neutral-content-subtler">
-        You're about to manually trigger your model's training process. This action will start the learning phase based
-        on how train method is implemented in the ML Backend. Proceed to begin this process.
+        { t("pages.settings.machine_learning_setting.training_process_tip") }
       </Typography>
       <Typography size="small" className="text-neutral-content-subtler mt-base mb-wide">
-        *Note: Currently, there is no built-in feedback loop within this interface for tracking the training progress.
-        You'll need to monitor the model's training steps directly through the model's own tools and environment.
+        { t("pages.settings.machine_learning_setting.training_process_note") }
       </Typography>
 
       {!response && (
@@ -37,14 +39,14 @@ export const StartModelTraining = ({ backend }) => {
             onStartTraining(backend);
           }}
         >
-          Start Training
+          { t("pages.settings.machine_learning_setting.start_training") }
         </Button>
       )}
 
       {!!response && (
         <>
-          <pre>Request Sent!</pre>
-          <pre>Response: {JSON.stringify(response, null, 2)}</pre>
+          <pre>{ t("pages.settings.machine_learning_setting.request_sent") }</pre>
+          <pre>{ t("pages.settings.machine_learning_setting.response") }: {JSON.stringify(response, null, 2)}</pre>
         </>
       )}
     </div>

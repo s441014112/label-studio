@@ -12,6 +12,8 @@ import { IconInfoOutline } from "@humansignal/icons";
 import type { MSTStore } from "../../stores/types";
 import { FF_FIT_1304_STRICT_OVERLAP, isFF } from "../../utils/feature-flags";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+
 type MixedInParams = {
   store: MSTStore;
   history: any;
@@ -58,7 +60,7 @@ export const AcceptButton = memo(
     return (
       <Button
         key="accept"
-        tooltip="Accept annotation: [ Ctrl+Enter ]"
+        tooltip={i18n.t("editor.components.bottomBar.accept_annotation_hotkey") }
         aria-label="accept-annotation"
         disabled={disabled}
         onClick={async () => {
@@ -68,7 +70,7 @@ export const AcceptButton = memo(
         }}
         data-testid="bottombar-accept-button"
       >
-        {hasChanges ? "Fix + Accept" : "Accept"}
+        {hasChanges ? i18n.t("editor.components.bottomBar.fix_and_accept") : i18n.t("editor.components.bottomBar.accept")}
       </Button>
     );
   }),
@@ -114,15 +116,15 @@ export const SkipButton = memo(
     const tooltip: string = overlapReached
       ? store.overlapReachedMessage
       : canSkip
-        ? "Cancel (skip) task [ Ctrl+Space ]"
-        : "This task cannot be skipped";
+        ? i18n.t("editor.components.bottomBar.cancel_task_hotkey")
+        : i18n.t("editor.components.bottomBar.cannot_skip");
 
     const showInfoIcon = skipDisabled && hasForceSkipPermission;
 
     return (
       <>
         {showInfoIcon && (
-          <Tooltip title="Annotators and Reviewers will not be able to skip this task">
+          <Tooltip title={ i18n.t("editor.components.bottomBar.not_able_skip") }>
             <IconInfoOutline width={20} height={20} className="text-neutral-content ml-auto cursor-pointer" />
           </Tooltip>
         )}
@@ -146,7 +148,7 @@ export const SkipButton = memo(
           }}
           data-testid="bottombar-skip-button"
         >
-          Skip
+          { i18n.t("editor.components.bottomBar.skip") }
         </Button>
       </>
     );
@@ -159,7 +161,7 @@ export const UnskipButton = memo(
       <Button
         key="cancel-skip"
         tooltip="Cancel skip: []"
-        aria-label="cancel-skip"
+        aria-label={ i18n.t("editor.components.bottomBar.cancel_skip") }
         look="outlined"
         disabled={disabled}
         onClick={async () => {
@@ -171,7 +173,7 @@ export const UnskipButton = memo(
         }}
         data-testid="bottombar-unskip-button"
       >
-        Cancel skip
+        { i18n.t("editor.components.bottomBar.cancel_skip") }
       </Button>
     );
   }),

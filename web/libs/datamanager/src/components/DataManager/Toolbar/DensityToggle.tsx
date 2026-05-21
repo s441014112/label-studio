@@ -5,6 +5,9 @@ import { RadioGroup } from "../../Common/RadioGroup/RadioGroup";
 import { IconRows3, IconRows4 } from "@humansignal/icons";
 import { Tooltip } from "@humansignal/ui";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 // Density constants - exported for use in other components
 export const DENSITY_STORAGE_KEY = "dm:table:density";
 export const DENSITY_COMFORTABLE = "comfortable" as const;
@@ -34,6 +37,8 @@ export const DensityToggle = densityInjector(
       return (localStorage.getItem(key) as Density) ?? DENSITY_COMFORTABLE;
     });
 
+    const { t } = useTranslation();
+
     useEffect(() => {
       localStorage.setItem(key, density);
       onChange?.(density);
@@ -56,20 +61,20 @@ export const DensityToggle = densityInjector(
         style={{ "--button-padding": "0 var(--spacing-tighter)" } as React.CSSProperties}
         data-testid="density-toggle"
       >
-        <Tooltip title="Comfortable density">
+        <Tooltip title={ t("datamanager.components.datamanager.comfortable_density") }>
           <div>
             <RadioGroup.Button
               value={DENSITY_COMFORTABLE}
-              aria-label="Comfortable density"
+              aria-label={t("datamanager.components.datamanager.comfortable_density")}
               data-testid="density-comfortable"
             >
               <IconRows3 />
             </RadioGroup.Button>
           </div>
         </Tooltip>
-        <Tooltip title="Compact density">
+        <Tooltip title={ t("datamanager.components.datamanager.compact_density") }>
           <div>
-            <RadioGroup.Button value={DENSITY_COMPACT} aria-label="Compact density" data-testid="density-compact">
+            <RadioGroup.Button value={DENSITY_COMPACT} aria-label={ t("datamanager.components.datamanager.compact_density") } data-testid="density-compact">
               <IconRows4 />
             </RadioGroup.Button>
           </div>

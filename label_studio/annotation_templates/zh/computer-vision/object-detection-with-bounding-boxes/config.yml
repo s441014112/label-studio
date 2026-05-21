@@ -1,0 +1,23 @@
+title: "使用边界框进行物体检测"
+type: community
+group: 计算机视觉
+order: 3
+image: /static/templates/object-detection-with-bounding-boxes.png
+details: |
+  <h1>在物体周围绘制边界框</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>自动驾驶、无人驾驶汽车、交通监控、航空、飞行跟踪、机场安全、监控、安防摄像头、零售分析、库存管理、仓库自动化、物流、车队管理、行人检测、障碍物检测、车牌检测、行李筛查、质量控制、缺陷检测、医学影像</dd>
+    <dt>相关模型</dt>
+    <dd>YOLO、R-CNN、SSD、Faster R-CNN、RetinaNet、FCOS</dd>
+    <dt>领域术语</dt>
+    <dd>bbox</dd>
+  </dl>
+config: |
+  <View>
+    <Image name="image" value="$image"/>
+    <RectangleLabels name="label" toName="image">
+      <Label value="Airplane" background="green"/>
+      <Label value="Car" background="blue"/>
+    </RectangleLabels>
+  </View>

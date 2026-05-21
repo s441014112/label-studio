@@ -10,6 +10,7 @@ from core.label_config import config_essential_data_has_changed
 from core.mixins import GetParentObjectMixin
 from core.permissions import ViewClassPermission, all_permissions
 from core.redis import start_job_async_or_sync
+from core.translations import get_response_message, TranslatableString as _S
 from core.utils.common import paginator, paginator_help, temporary_disconnect_all_signals
 from core.utils.exceptions import LabelStudioDatabaseException, ProjectExistException
 from core.utils.filterset_to_openapi_params import filterset_to_openapi_params
@@ -66,6 +67,16 @@ from webhooks.utils import api_webhook, api_webhook_for_delete, emit_webhooks_fo
 from label_studio.core.utils.common import load_func
 
 logger = logging.getLogger(__name__)
+
+
+def _detect_lang(request):
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
+
 
 ProjectImportPermission = load_func(settings.PROJECT_IMPORT_PERMISSION)
 
@@ -180,7 +191,7 @@ class ProjectListAPI(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         fields = serializer.validated_data.get('include')
         filter = serializer.validated_data.get('filter')
-        projects = Project.objects.filter(organization=self.request.user.active_organization).order_by(
+        projects = Project.objects.filter(created_by=self.request.user).order_by(
             F('pinned_at').desc(nulls_last=True), '-created_at'
         )
         if filter in ['pinned_only', 'exclude_pinned']:
@@ -202,7 +213,7 @@ class ProjectListAPI(generics.ListCreateAPIView):
 
     def perform_create(self, ser):
         try:
-            ser.save(organization=self.request.user.active_organization)
+            ser.save(created_by=self.request.user, organization=self.request.user.active_organization)
         except IntegrityError as e:
             if str(e) == 'UNIQUE constraint failed: project.title, project.created_by_id':
                 raise ProjectExistException(
@@ -227,7 +238,7 @@ class ProjectListAPI(generics.ListCreateAPIView):
             *serializer_to_openapi_params(GetFieldsSerializer),
             *filterset_to_openapi_params(ProjectFilterSet),
         ],
-        description='Returns a list of projects with their counts. For example, task_number which is the total task number in project',
+        description=_S('schema.action.list_projects'),
         extensions={
             'x-fern-sdk-group-name': 'projects',
             'x-fern-sdk-method-name': 'list_counts',
@@ -248,7 +259,7 @@ class ProjectCountsListAPI(generics.ListAPIView):
         serializer.is_valid(raise_exception=True)
         fields = serializer.validated_data.get('include')
         projects = Project.objects.with_counts(fields=fields).filter(
-            organization=self.request.user.active_organization
+            created_by=self.request.user
         )
 
         # Only annotate FSM state for UI/API consumption when both feature flags are enabled
@@ -265,10 +276,10 @@ class ProjectCountsListAPI(generics.ListAPIView):
     decorator=extend_schema(
         tags=['Projects'],
         summary='Get project by ID',
-        description='Retrieve information about a project by project ID.',
+        description=_S('schema.action.get_project'),
         responses={
             '200': OpenApiResponse(
-                description='Project information',
+                description=_S('schema.resp.project_info'),
                 response=ProjectSerializer,
                 examples=[
                     OpenApiExample(
@@ -340,7 +351,7 @@ class ProjectCountsListAPI(generics.ListAPIView):
     decorator=extend_schema(
         tags=['Projects'],
         summary='Delete project',
-        description='Delete a project by specified project ID.',
+        description=_S('schema.action.delete_project'),
         extensions={
             'x-fern-sdk-group-name': 'projects',
             'x-fern-sdk-method-name': 'delete',
@@ -353,7 +364,7 @@ class ProjectCountsListAPI(generics.ListAPIView):
     decorator=extend_schema(
         tags=['Projects'],
         summary='Update project',
-        description='Update the project settings for a specific project.',
+        description=_S('schema.action.update_project'),
         request=ProjectSerializer,
         extensions={
             'x-fern-sdk-group-name': 'projects',
@@ -382,7 +393,7 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
         serializer.is_valid(raise_exception=True)
         fields = serializer.validated_data.get('include')
         projects = Project.objects.with_counts(fields=fields).filter(
-            organization=self.request.user.active_organization
+            created_by=self.request.user
         )
 
         # Only annotate FSM state for UI/API consumption when both feature flags are enabled
@@ -454,7 +465,7 @@ class ProjectNextTaskAPI(generics.RetrieveAPIView):
         next_task, queue_info = get_next_task(request.user, prepared_tasks, project, dm_queue)
 
         if next_task is None:
-            raise NotFound(f'There are no tasks for {request.user}')
+            raise NotFound(get_response_message('task.no_tasks_for_user', language=_detect_lang(request), user=request.user))
 
         # serialize task
         context = {'request': request, 'project': project, 'resolve_uri': True, 'annotations': False}
@@ -483,10 +494,10 @@ class LabelStreamHistoryAPI(generics.RetrieveAPIView):
     decorator=extend_schema(
         tags=['Projects'],
         summary='Validate label config',
-        description='Validate an arbitrary labeling configuration.',
+        description=_S('schema.action.validate_label_config'),
         responses={
-            204: OpenApiResponse(description='Validation success'),
-            400: OpenApiResponse(description='Validation failed'),
+            204: OpenApiResponse(description=_S('schema.resp.validation_successful')),
+            400: OpenApiResponse(description=_S('schema.resp.validation_failed')),
         },
         request=ProjectLabelConfigSerializer,
         extensions={
@@ -521,13 +532,13 @@ class LabelConfigValidateAPI(generics.CreateAPIView):
         tags=['Projects'],
         operation_id='api_projects_validate_label_config',
         summary='Validate project label config',
-        description='Determine whether the label configuration for a specific project is valid.',
+        description=_S('schema.action.validate_project_config'),
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.param.project_id'),
             ),
         ],
         request=ProjectLabelConfigSerializer,
@@ -620,7 +631,7 @@ class ProjectSummaryResetAPI(GetParentObjectMixin, generics.CreateAPIView):
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project import.',
+                description=_S('schema.param.project_import_id'),
             ),
         ],
         extensions={
@@ -660,7 +671,7 @@ class ProjectImportAPI(generics.RetrieveAPIView):
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project reimport.',
+                description=_S('schema.param.project_reimport_id'),
             ),
         ],
         extensions={
@@ -682,13 +693,13 @@ class ProjectReimportAPI(generics.RetrieveAPIView):
     decorator=extend_schema(
         tags=['Projects'],
         summary='Delete all tasks',
-        description='Delete all tasks from a specific project.',
+        description=_S('schema.action.delete_all_tasks'),
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.param.project_id'),
             ),
         ],
         extensions={
@@ -716,7 +727,7 @@ class ProjectReimportAPI(generics.RetrieveAPIView):
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.param.project_id'),
             ),
         ]
         + paginator_help('tasks', 'Projects')['parameters'],
@@ -784,8 +795,27 @@ class ProjectTaskListAPI(GetParentObjectMixin, generics.ListCreateAPIView, gener
         return instance
 
 
-def read_templates_and_groups():
-    annotation_templates_dir = find_dir('annotation_templates')
+def _normalize_template_lang(language):
+    if not language:
+        return 'en'
+    language = language.lower().replace('_', '-')
+    if language in ('zh-hans', 'zh-cn', 'zh-sg', 'zh'):
+        return 'zh'
+    if language in ('zh-hant', 'zh-tw', 'zh-hk', 'zh-mo', 'tc'):
+        return 'tc'
+    if '-' in language:
+        return language.split('-')[0]
+    return language
+
+
+def read_templates_and_groups(language='en'):
+    language = _normalize_template_lang(language)
+    annotation_templates_dir = find_dir(os.path.join('annotation_templates', language))
+
+    if not annotation_templates_dir:
+        # 如果指定语言的目录不存在，回退到英文
+        annotation_templates_dir = find_dir(os.path.join('annotation_templates', 'en'))
+
     configs = []
     for config_file in pathlib.Path(annotation_templates_dir).glob('**/*.yml'):
         config = read_yaml(config_file)
@@ -817,7 +847,9 @@ class TemplateListAPI(generics.ListAPIView):
     templates_and_groups = read_templates_and_groups()
 
     def list(self, request, *args, **kwargs):
-        return Response(self.templates_and_groups)
+        language = request.query_params.get('language') or _detect_lang(request) or 'en'
+        result = read_templates_and_groups(language)
+        return Response(result)
 
 
 @extend_schema(exclude=True)
@@ -862,7 +894,7 @@ class ProjectModelVersions(generics.RetrieveAPIView):
     permission_required = all_permissions.projects_view
 
     def get_queryset(self):
-        return Project.objects.filter(organization=self.request.user.active_organization)
+        return Project.objects.filter(created_by=self.request.user)
 
     def get(self, request, *args, **kwargs):
         project = self.get_object()
@@ -902,10 +934,10 @@ class ProjectModelVersions(generics.RetrieveAPIView):
     decorator=extend_schema(
         tags=['Projects'],
         summary='List unique annotators for project',
-        description='Return unique users who have submitted annotations in the specified project.',
+        description=_S('schema.action.list_annotators'),
         responses={
             200: OpenApiResponse(
-                description='List of annotator users',
+                description=_S('schema.resp.annotator_list'),
                 response=UserSimpleSerializer(many=True),
             )
         },

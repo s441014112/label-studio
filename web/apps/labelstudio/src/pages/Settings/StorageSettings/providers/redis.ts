@@ -4,29 +4,29 @@ import { IconCloudProviderRedis } from "@humansignal/icons";
 
 export const redisProvider: ProviderConfig = {
   name: "redis",
-  title: "Redis Storage",
-  description: "Configure your Redis storage connection with all required Label Studio settings",
+  title: "pages.settings.providers.redis.redis_storage",
+  description: "pages.settings.providers.redis.desc",
   icon: IconCloudProviderRedis,
   fields: [
     {
       name: "db",
       type: "text",
-      label: "Database Number (db)",
+      label: "pages.settings.providers.redis.db",
       placeholder: "1",
       schema: z.string().default("1"),
     },
     {
       name: "password",
       type: "password",
-      label: "Password",
+      label: "pages.settings.providers.redis.password",
       autoComplete: "new-password",
-      placeholder: "Your redis password",
+      placeholder: "",
       schema: z.string().optional().default(""),
     },
     {
       name: "host",
       type: "text",
-      label: "Host",
+      label: "pages.settings.providers.redis.host",
       required: true,
       placeholder: "redis://example.com",
       schema: z.string().min(1, "Host is required"),
@@ -34,20 +34,23 @@ export const redisProvider: ProviderConfig = {
     {
       name: "port",
       type: "text",
-      label: "Port",
+      label: "pages.settings.providers.redis.port",
       placeholder: "6379",
       schema: z.string().default("6379"),
     },
     {
       name: "prefix",
       type: "text",
-      label: "Bucket prefix",
+      label: "pages.settings.providers.redis.prefix",
       placeholder: "path/to/files",
       schema: z.string().optional().default(""),
       target: "export",
     },
   ],
-  layout: [{ fields: ["host", "port", "db", "password"] }, { fields: ["prefix"] }],
+  layout: [
+    { fields: ["host", "port", "db", "password"] },
+    { fields: ["prefix"] },
+  ],
 };
 
 export default redisProvider;

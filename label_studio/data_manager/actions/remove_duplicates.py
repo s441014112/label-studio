@@ -7,6 +7,7 @@ from collections import defaultdict
 import ujson as json
 from core.label_config import replace_task_data_undefined_with_config_field
 from core.permissions import AllPermissions
+from core.translations import TranslatableString as _S
 from core.redis import start_job_async_or_sync
 from data_manager.actions import DataManagerAction
 from data_manager.actions.basic import delete_tasks
@@ -218,16 +219,11 @@ actions: list[DataManagerAction] = [
     {
         'entry_point': remove_duplicates,
         'permission': [all_permissions.projects_change, all_permissions.tasks_delete],
-        'title': 'Remove Duplicated Tasks',
+        'title': _S('dm.action.remove_duplicated_tasks.title'),
         'order': 95,
         'experimental': False,
         'dialog': {
-            'text': (
-                'Confirm that you want to remove duplicated tasks with the same data fields. '
-                'Duplicated tasks will be deleted and all annotations will be moved to the first task from duplicated tasks. '
-                'Also Source Storage Links will be restored if at least one duplicated task has a storage link. '
-                "Warning: Task assignments (enterprise only) won't be saved."
-            ),
+            'text': _S('dm.action.remove_duplicated_tasks.dialog_text'),
             'type': 'confirm',
         },
     },

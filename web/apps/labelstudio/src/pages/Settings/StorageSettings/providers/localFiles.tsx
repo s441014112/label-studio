@@ -3,6 +3,8 @@ import type { ProviderConfig } from "@humansignal/app-common/blocks/StorageProvi
 import { IconFolderOpen } from "@humansignal/icons";
 import { Alert, AlertDescription, AlertTitle } from "@humansignal/shad/components/ui/alert";
 
+import i18n from "../../../../translations/i18n";
+
 const localFilesDocumentRoot =
   typeof window === "undefined" ? undefined : window.APP_SETTINGS?.local_files_document_root;
 const localFilesServingEnabled =
@@ -15,32 +17,28 @@ const defaultPathExample = localFilesDocumentRoot
   : undefined;
 
 const pathSchema = defaultPathExample
-  ? z.string().min(1, "Path is required").default(defaultPathExample)
-  : z.string().min(1, "Path is required");
+  ? z.string().min(1, "pages.settings.providers.localFiles.path_schema").default(defaultPathExample)
+  : z.string().min(1, "pages.settings.providers.localFiles.path_schema");
 
 const LocalFilesServingWarning = () => {
   if (localFilesServingEnabled) return null;
   return (
     <>
       <Alert variant="destructive">
-        <AlertTitle>Local file serving is disabled</AlertTitle>
+        <AlertTitle>{ i18n.t("pages.settings.providers.localFiles.serving_is_disabled") }</AlertTitle>
         <AlertDescription>
-          Set the "LOCAL_FILES_SERVING_ENABLED" environment variable to "true" and restart Label Studio to enable Local
-          Files storage. See the documentation for details:{" "}
+          { i18n.t("pages.settings.providers.localFiles.alert_desc") }:{" "}
           <a href="https://labelstud.io/guide/storage.html#Local-storage" target="_blank" rel="noreferrer">
-            Local Storage documentation
+            { i18n.t("pages.settings.providers.localFiles.local_storage_docs") }:{" "}
           </a>
           {isCommunityEdition && (
             <Alert variant="info">
               <AlertDescription>
                 <p>
-                  Tip: Create a "mydata" or "label-studio-data" directory next to the command you use to run Label
-                  Studio and local file serving will be enabled automatically.
+                  { i18n.t("pages.settings.providers.localFiles.alert_info_row_one") }
                 </p>
                 <p>
-                  If you run the Docker image, the app starts in "/label-studio", so you can bind-mount your host folder
-                  to "/label-studio/mydata" or "/label-studio/label-studio-data" inside the container to enable local
-                  file serving without extra configuration.
+                  { i18n.t("pages.settings.providers.localFiles.alert_info_row_two") }
                 </p>
               </AlertDescription>
             </Alert>
@@ -53,8 +51,8 @@ const LocalFilesServingWarning = () => {
 
 export const localFilesProvider: ProviderConfig = {
   name: "localfiles",
-  title: "Local Files",
-  description: "Configure your local file storage connection with all required Label Studio settings",
+  title: "pages.settings.providers.localFiles.local_files",
+  description: "pages.settings.providers.localFiles.local_files_desc",
   icon: () => (
     <IconFolderOpen
       width={40}
@@ -74,12 +72,12 @@ export const localFilesProvider: ProviderConfig = {
     {
       name: "path",
       type: "text",
-      label: "Absolute local path",
+      label: "pages.settings.providers.localFiles.absolute_path",
       required: true,
       placeholder: defaultPathExample || "/data/my-folder/subdirectory",
       schema: pathSchema,
       defaultValue: defaultPathExample,
-      description: `This path must be an absolute path on the host machine where Label Studio is running and start with \n"${localFilesDocumentRoot}" (LOCAL_FILES_DOCUMENT_ROOT).`,
+      description: "pages.settings.providers.localFiles.absolute_path_desc",
     },
   ],
   layout: [{ fields: ["serving_warning"] }, { fields: ["path"] }],

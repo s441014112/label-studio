@@ -23,7 +23,7 @@ export default class DialogView extends React.Component {
       selectedStyle = `${selectedStyle} ${styles.block_selected}`;
       hint = (
         <div>
-          <Tag color="magenta">Selected Message</Tag>
+          <Tag color="magenta"></Tag>
         </div>
       );
 

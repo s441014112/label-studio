@@ -10,6 +10,7 @@ from core.decorators import override_report_only_csp
 from core.feature_flags import flag_set
 from core.permissions import ViewClassPermission, all_permissions
 from core.redis import start_job_async_or_sync
+from core.translations import get_response_message, TranslatableString as _S
 from core.utils.common import retry_database_locked, timeit
 from core.utils.exceptions import extract_message
 from core.utils.params import bool_from_request, list_of_strings_from_request
@@ -22,12 +23,13 @@ from django.utils.decorators import method_decorator
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from label_studio_sdk.label_interface import LabelInterface
+
 from projects.models import Project, ProjectImport, ProjectReimport
 from ranged_fileresponse import RangedFileResponse
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import APIView
@@ -52,44 +54,53 @@ from .uploader import create_file_uploads, load_tasks
 
 logger = logging.getLogger(__name__)
 
+
+def _detect_lang(request):
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
+
 ProjectImportPermission = load_func(settings.PROJECT_IMPORT_PERMISSION)
 
 task_create_response_scheme = {
     201: OpenApiResponse(
-        description='Tasks successfully imported or import queued. **For non-Community editions**, the response will be `{"import": <import_id>}` which you can use to poll the import status. **For Community edition**, the response contains task counts and is processed synchronously.',
+        description=_S('schema.import.201_desc'),
         response={
             'title': 'Task creation response',
-            'description': 'Response format varies by edition. Non-Community editions return `{"import": <import_id>}` for async processing. Community edition returns the detailed response below with task counts.',
+            'description': _S('schema.import.response_desc'),
             'type': 'object',
             'properties': {
                 'import': {
                     'title': 'import',
-                    'description': 'Import ID for async operations (non-Community editions only). Use this ID to poll `/api/projects/{project_id}/imports/{import_id}` for status.',
+                    'description': _S('schema.import.import_desc'),
                     'type': 'integer',
                 },
                 'task_count': {
                     'title': 'task_count',
-                    'description': 'Number of tasks added (Community edition sync import only)',
+                    'description': _S('schema.import.task_count_desc'),
                     'type': 'integer',
                 },
                 'annotation_count': {
                     'title': 'annotation_count',
-                    'description': 'Number of annotations added (Community edition sync import only)',
+                    'description': _S('schema.import.annotation_count_desc'),
                     'type': 'integer',
                 },
                 'predictions_count': {
                     'title': 'predictions_count',
-                    'description': 'Number of predictions added (Community edition sync import only)',
+                    'description': _S('schema.import.predictions_count_desc'),
                     'type': 'integer',
                 },
                 'duration': {
                     'title': 'duration',
-                    'description': 'Time in seconds to create (Community edition sync import only)',
+                    'description': _S('schema.import.duration_desc'),
                     'type': 'number',
                 },
                 'file_upload_ids': {
                     'title': 'file_upload_ids',
-                    'description': 'Database IDs of uploaded files (Community edition sync import only)',
+                    'description': _S('schema.import.file_upload_ids_desc'),
                     'type': 'array',
                     'items': {
                         'title': 'File Upload IDs',
@@ -98,24 +109,24 @@ task_create_response_scheme = {
                 },
                 'could_be_tasks_list': {
                     'title': 'could_be_tasks_list',
-                    'description': 'Whether uploaded files can contain lists of tasks, like CSV/TSV files (Community edition sync import only)',
+                    'description': _S('schema.import.could_be_tasks_list_desc'),
                     'type': 'boolean',
                 },
                 'found_formats': {
                     'title': 'found_formats',
-                    'description': 'The list of found file formats (Community edition sync import only)',
+                    'description': _S('schema.import.file_formats_desc'),
                     'type': 'array',
                     'items': {
-                        'title': 'File format',
+                        'title': _S('schema.import.file_format_title'),
                         'type': 'string',
                     },
                 },
                 'data_columns': {
                     'title': 'data_columns',
-                    'description': 'The list of found data columns (Community edition sync import only)',
+                    'description': _S('schema.import.data_columns_desc'),
                     'type': 'array',
                     'items': {
-                        'title': 'Data column name',
+                        'title': _S('schema.import.data_column_title'),
                         'type': 'string',
                     },
                 },
@@ -123,10 +134,10 @@ task_create_response_scheme = {
         },
     ),
     400: OpenApiResponse(
-        description='Bad Request',
+        description=_S('schema.import.400_desc'),
         response={
             'title': 'Incorrect task data',
-            'description': 'String with error description',
+            'description': _S('schema.common.error_detail_string'),
             'type': 'string',
         },
     ),
@@ -143,13 +154,13 @@ task_create_response_scheme = {
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.import.param_project'),
             ),
             OpenApiParameter(
                 name='commit_to_project',
                 type=OpenApiTypes.BOOL,
                 location='query',
-                description='Set to "true" to immediately commit tasks to the project.',
+                description=_S('schema.import.param_commit'),
                 default=True,
                 required=False,
             ),
@@ -157,7 +168,7 @@ task_create_response_scheme = {
                 name='return_task_ids',
                 type=OpenApiTypes.BOOL,
                 location='query',
-                description='Set to "true" to return task IDs in the response.',
+                description=_S('schema.import.param_return_ids'),
                 default=False,
                 required=False,
             ),
@@ -165,10 +176,7 @@ task_create_response_scheme = {
                 name='preannotated_from_fields',
                 many=True,
                 location='query',
-                description='List of fields to preannotate from the task data. For example, if you provide a list of'
-                ' `{"text": "text", "prediction": "label"}` items in the request, the system will create '
-                'a task with the `text` field and a prediction with the `label` field when '
-                '`preannoted_from_fields=["prediction"]`.',
+                description=_S('schema.import.param_preannotated'),
                 default=None,
                 required=False,
             ),
@@ -310,7 +318,7 @@ class ImportAPI(generics.CreateAPIView):
                             validation_errors.append(error_msg)
 
             if validation_errors:
-                error_message = f'Prediction validation failed ({len(validation_errors)} errors):\n'
+                error_message = get_response_message('prediction.validation_failed', language=_detect_lang(request), count=len(validation_errors)) + '\n'
                 for error in validation_errors:
                     error_message += f'- {error}\n'
 
@@ -391,7 +399,7 @@ class ImportAPI(generics.CreateAPIView):
             # empty url
             url = request.data.get('url')
             if not url:
-                raise ValidationError('"url" is not found in request data')
+                raise ValidationError(get_response_message('import.no_url', language=_detect_lang(request)))
             project_import.url = url
             project_import.save(update_fields=['url'])
         # take one task from request DATA
@@ -406,7 +414,7 @@ class ImportAPI(generics.CreateAPIView):
 
         # incorrect data source
         else:
-            raise ValidationError('load_tasks: No data found in DATA or in FILES')
+            raise ValidationError(get_response_message('import.no_data', language=_detect_lang(request)))
 
         start_job_async_or_sync(
             async_import_background,
@@ -441,19 +449,19 @@ class ImportAPI(generics.CreateAPIView):
     decorator=extend_schema(
         tags=['Import'],
         summary='Import predictions',
-        description='Import model predictions for tasks in the specified project.',
+        description=_S('schema.action.import_predictions'),
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.import.param_project'),
             ),
         ],
         request=PredictionSerializer(many=True),
         responses={
             201: OpenApiResponse(
-                description='Predictions successfully imported',
+                description=_S('schema.resp.predictions_imported'),
                 response={
                     'title': 'Predictions import response',
                     'description': 'Import result',
@@ -468,7 +476,7 @@ class ImportAPI(generics.CreateAPIView):
                 },
             ),
             400: OpenApiResponse(
-                description='Bad Request',
+                description=_S('schema.import.400_desc'),
             ),
         },
         extensions={
@@ -541,7 +549,7 @@ class ImportPredictionsAPI(generics.CreateAPIView):
 
                 if task_id not in existing_task_ids:
                     raise ValidationError(
-                        f'{item} contains invalid "task" field: task ID {task_id} ' f'not found in project {project}'
+                        get_response_message('prediction.invalid_task_field', language=_detect_lang(request), item=item, task_id=task_id, project=project)
                     )
 
                 batch_predictions.append(
@@ -590,14 +598,12 @@ class ImportPredictionsAPI(generics.CreateAPIView):
             if item.get('task') not in tasks_ids:
                 if flag_set('fflag_feat_utc_210_prediction_validation_15082025', user='auto'):
                     validation_errors.append(
-                        f'Prediction {i}: Invalid task ID {item.get("task")} - task not found in project'
+                        get_response_message('prediction.invalid_task_id', language=_detect_lang(request), i=i, task_id=item.get('task'))
                     )
                     continue
                 else:
-                    # Before change we raised only here
                     raise ValidationError(
-                        f'{item} contains invalid "task" field: corresponding task ID couldn\'t be retrieved '
-                        f'from project {project} tasks'
+                        get_response_message('prediction.invalid_task_field', language=_detect_lang(request), item=item, task_id='N/A', project=project)
                     )
 
             # Validate prediction using LabelInterface only
@@ -766,13 +772,13 @@ class ReImportAPI(ImportAPI):
                 name='all',
                 type=OpenApiTypes.BOOL,
                 location='query',
-                description='Set to "true" if you want to retrieve all file uploads',
+                description=_S('schema.param.retrieve_all'),
             ),
             OpenApiParameter(
                 name='ids',
                 many=True,
                 location='query',
-                description='Specify the list of file upload IDs to retrieve, e.g. ids=[1,2,3]',
+                description=_S('schema.param.file_upload_ids'),
             ),
         ],
         description="""
@@ -841,7 +847,7 @@ class FileUploadListAPI(generics.mixins.ListModelMixin, generics.mixins.DestroyM
     decorator=extend_schema(
         tags=['Import'],
         summary='Get file upload',
-        description='Retrieve details about a specific uploaded file.',
+        description=_S('schema.action.get_file_upload'),
         extensions={
             'x-fern-sdk-group-name': ['files'],
             'x-fern-sdk-method-name': 'get',
@@ -854,7 +860,7 @@ class FileUploadListAPI(generics.mixins.ListModelMixin, generics.mixins.DestroyM
     decorator=extend_schema(
         tags=['Import'],
         summary='Update file upload',
-        description='Update a specific uploaded file.',
+        description=_S('schema.action.update_file_upload'),
         request=FileUploadSerializer,
         extensions={
             'x-fern-sdk-group-name': ['files'],
@@ -868,7 +874,7 @@ class FileUploadListAPI(generics.mixins.ListModelMixin, generics.mixins.DestroyM
     decorator=extend_schema(
         tags=['Import'],
         summary='Delete file upload',
-        description='Delete a specific uploaded file.',
+        description=_S('schema.action.delete_file_upload'),
         extensions={
             'x-fern-sdk-group-name': ['files'],
             'x-fern-sdk-method-name': 'delete',
@@ -901,21 +907,21 @@ class FileUploadAPI(generics.RetrieveUpdateDestroyAPIView):
     decorator=extend_schema(
         tags=['Import'],
         summary='Download file',
-        description='Download a specific uploaded file.',
+        description=_S('schema.action.download_file_upload'),
         extensions={
             'x-fern-sdk-group-name': ['files'],
             'x-fern-sdk-method-name': 'download',
             'x-fern-audiences': ['public'],
         },
         responses={
-            200: OpenApiResponse(description='File downloaded successfully'),
+            200: OpenApiResponse(description=_S('schema.resp.file_downloaded')),
         },
     ),
 )
 class UploadedFileResponse(generics.RetrieveAPIView):
     """Serve uploaded files from local drive"""
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     @override_report_only_csp
     @csp(SANDBOX=[])

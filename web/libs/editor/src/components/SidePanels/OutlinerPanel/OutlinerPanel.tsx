@@ -10,6 +10,9 @@ import { IconLsLabeling } from "@humansignal/ui";
 import { EmptyState } from "../Components/EmptyState";
 import { getDocsUrl } from "../../../utils/docs";
 
+import i18n from "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 // Local type definitions based on ViewControls and RegionStore
 type GroupingOptions = "manual" | "label" | "type";
 type OrderingOptions = "score" | "date" | "mediaStartTime";
@@ -28,6 +31,9 @@ OutlinerFFClasses.push("ff_hide_all_regions");
 
 const OutlinerPanelComponent: FC<OutlinerPanelProps> = ({ regions, ...props }) => {
   const [group, setGroup] = useState<GroupingOptions>(regions.group);
+
+  const { t } = useTranslation();
+
   const onOrderingChange = useCallback(
     (value: OrderingOptions) => {
       regions.setSort(value);
@@ -50,7 +56,7 @@ const OutlinerPanelComponent: FC<OutlinerPanelProps> = ({ regions, ...props }) =
   regions.setGrouping(group);
 
   return (
-    <PanelBase {...props} name="outliner" mix={OutlinerFFClasses} title="Outliner">
+    <PanelBase {...props} name="outliner" mix={OutlinerFFClasses} title={ t("editor.components.sidepanels.outliner") }>
       <ViewControls
         ordering={regions.sort}
         regions={regions}
@@ -99,17 +105,17 @@ const OutlinerStandAlone: FC<OutlinerPanelProps> = ({ regions }) => {
 const OutlinerEmptyState = () => (
   <EmptyState
     icon={<IconLsLabeling width={24} height={24} />}
-    header="Labeled regions will appear here"
+    header={ i18n.t("editor.components.sidepanels.labeled_appear_here") }
     description={
       <>
         <span>
-          Start labeling and track your results
+          { i18n.t("editor.components.sidepanels.start_labeling_and_track_result") }
           <br />
-          using this panel
+          { i18n.t("editor.components.sidepanels.using_this_panel") }
         </span>
       </>
     }
-    learnMore={{ href: getDocsUrl("guide/labeling"), text: "Learn more", testId: "regions-panel-learn-more" }}
+    learnMore={{ href: getDocsUrl("guide/labeling"), text: i18n.t("editor.components.sidepanels.learn_more"), testId: "regions-panel-learn-more" }}
   />
 );
 
@@ -122,14 +128,16 @@ const OutlinerTreeComponent: FC<OutlinerTreeComponentProps> = observer(({ region
     return regions?.regions?.length - regions?.filter?.length;
   }, [regions?.regions?.length, regions?.filter?.length]);
 
+  const { t } = useTranslation();
+
   return (
     <>
       {allRegionsHidden ? (
         <div className={cn("filters-info").toClassName()}>
           <IconInfo width={21} height={20} />
-          <div className={cn("filters-info").elem("filters-title").toClassName()}>All regions hidden</div>
+          <div className={cn("filters-info").elem("filters-title").toClassName()}>{ t("editor.components.sidepanels.all_resions_hidden") }</div>
           <div className={cn("filters-info").elem("filters-description").toClassName()}>
-            Adjust or remove the filters to view
+            { t("editor.components.sidepanels.adjust_or_remove_filters") }
           </div>
         </div>
       ) : regions?.regions?.length > 0 ? (
@@ -141,10 +149,10 @@ const OutlinerTreeComponent: FC<OutlinerTreeComponentProps> = observer(({ region
                 <div className={cn("filters-info").toClassName()}>
                   <IconInfo width={21} height={20} />
                   <div className={cn("filters-info").elem("filters-title").toClassName()}>
-                    There {hiddenRegions === 1 ? "is" : "are"} {hiddenRegions} hidden region{hiddenRegions > 1 && "s"}
+                    { hiddenRegions === 1 ? t("editor.components.sidepanels.there_is_region", { count: hiddenRegions }) : t("editor.components.sidepanels.there_are_regions", { count: hiddenRegions }) }
                   </div>
                   <div className={cn("filters-info").elem("filters-description").toClassName()}>
-                    Adjust or remove filters to view
+                    { t("editor.components.sidepanels.adjust_or_remove_filters") }
                   </div>
                 </div>
               )

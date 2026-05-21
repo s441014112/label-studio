@@ -3,6 +3,8 @@ import { Button, ButtonGroup, EnterpriseBadge } from "@humansignal/ui";
 import { inject } from "mobx-react";
 import { FieldsButton } from "../../Common/FieldsButton";
 import { Space } from "../../Common/Space/Space";
+import i18n from "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
 
 const injector = inject(({ store }) => {
   const view = store?.currentView;
@@ -20,7 +22,7 @@ export const OrderButton = injector(({ size, ordering, view, ...rest }) => {
         <FieldsButton
           size={size}
           style={{ minWidth: 67, textAlign: "left", marginRight: -1 }}
-          title={ordering ? ordering.column?.title : "Order by"}
+          title={ordering ? ordering.column?.title : i18n.t("datamanager.components.datamanager.order_by") }
           onClick={(col) => view.setOrdering(col.id)}
           onReset={() => view.setOrdering(null)}
           resetTitle="Default"

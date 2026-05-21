@@ -1,0 +1,12 @@
+title: "回覆產生"
+type: community
+group: 對話AI
+image: /static/templates/response-generation.png
+details: <h1>收集聊天機器人訓練資料：產生下一個對話回覆</h1>
+config: |
+  <View>
+    <Paragraphs name="chat" value="$dialogue" layout="dialogue" />
+    <Header value="Provide response" />
+    <TextArea name="response" toName="chat" rows="4" editable="true" maxSubmissions="1" />
+  </View>
+

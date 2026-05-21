@@ -2,6 +2,7 @@
 
 import logging
 
+from core.translations import get_response_message
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -22,11 +23,11 @@ class SkillNames(models.TextChoices):
 
 def validate_string_list(value):
     if not value:
-        raise ValidationError('list should not be empty')
+        raise ValidationError(get_response_message('ml.model.list_not_empty'))
     if not isinstance(value, list):
-        raise ValidationError('Value must be a list')
+        raise ValidationError(get_response_message('ml.model.must_be_list'))
     if not all(isinstance(item, str) for item in value):
-        raise ValidationError('All items in the list must be strings')
+        raise ValidationError(get_response_message('ml.model.items_must_be_strings'))
 
 
 class ModelInterface(models.Model):

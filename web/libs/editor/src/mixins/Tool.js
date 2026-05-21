@@ -11,6 +11,13 @@ const ToolMixin = types
     disabled: false,
   })
   .views((self) => ({
+
+    /** 获取翻译函数 */
+    get t() {
+      const env = getEnv(self);
+      return env?.t ?? ((key, options) => options?.defaultValue ?? key);
+    },
+
     get obj() {
       if (ff.isActive(FF_DEV_3391)) {
         // It's a temporal solution (see root description)

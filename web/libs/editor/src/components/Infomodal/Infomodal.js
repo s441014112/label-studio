@@ -1,5 +1,7 @@
 import { Modal } from "antd";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+
 const wrapper = (_type, value, title) => {
   const custom = {
     type: "",
@@ -9,19 +11,19 @@ const wrapper = (_type, value, title) => {
   switch (_type) {
     case "error":
       custom.type = Modal.error;
-      custom.title = "Error";
+      custom.title = i18n.t("editor.components.infomodal.error");
       break;
     case "warning":
       custom.type = Modal.warning;
-      custom.title = "Warning";
+      custom.title = i18n.t("editor.components.infomodal.warning");
       break;
     case "success":
       custom.type = Modal.success;
-      custom.title = "Success";
+      custom.title = i18n.t("editor.components.infomodal.success");
       break;
     default:
       custom.type = Modal.info;
-      custom.title = "Info";
+      custom.title = i18n.t("editor.components.infomodal.info");
   }
 
   return custom.type({

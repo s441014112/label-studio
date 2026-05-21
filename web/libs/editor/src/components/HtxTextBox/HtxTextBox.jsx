@@ -4,6 +4,9 @@ import { Button, Tooltip, Typography } from "@humansignal/ui";
 import throttle from "lodash/throttle";
 import { cn } from "../../utils/bem";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { withTranslation } from "react-i18next";
+
 // used for correct auto-height calculation
 const BORDER_WIDTH = 1;
 
@@ -109,6 +112,7 @@ export class HtxTextBox extends React.Component {
       isEditable: __,
       isDeleteable: ___,
       ignoreShortcuts: ____,
+      t,
     } = this.props;
     const { height, value } = this.state;
 
@@ -152,7 +156,7 @@ export class HtxTextBox extends React.Component {
       <div className={cn("textarea").elem("region").toClassName()} data-testid="htx-textbox-edit">
         {rows > 1 ? <textarea {...inputProps} /> : <input {...inputProps} />}
         {!onlyEdit && (
-          <Tooltip title="Save: [shift+enter]">
+          <Tooltip title={ t("editor.components.htxTextBox.save") }>
             <Button
               type="text"
               variant="primary"
@@ -181,7 +185,7 @@ export class HtxTextBox extends React.Component {
       // don't pass non-DOM props to Paragraph
       ignoreShortcuts: _,
       onlyEdit: __,
-
+      t,
       ...props
     } = this.props;
 
@@ -206,7 +210,7 @@ export class HtxTextBox extends React.Component {
               variant="neutral"
               look="outlined"
               size="small"
-              tooltip="Edit"
+              tooltip={ t("editor.components.htxTextBox.edit") }
               tooltipTheme="Dark"
               leading={<IconPencil />}
               aria-label="Edit Region"
@@ -220,7 +224,7 @@ export class HtxTextBox extends React.Component {
               variant="negative"
               look="outlined"
               size="small"
-              tooltip="Delete"
+              tooltip={ t("editor.components.htxTextBox.delete") }
               tooltipTheme="Dark"
               leading={<IconTrashAlt />}
               aria-label="Delete Region"
@@ -237,3 +241,5 @@ export class HtxTextBox extends React.Component {
     return (this.state.editing || this.props.onlyEdit) && this.props.isEditable ? this.renderEdit() : this.renderView();
   }
 }
+
+export default withTranslation()(HtxTextBox);

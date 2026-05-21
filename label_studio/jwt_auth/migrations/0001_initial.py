@@ -4,11 +4,19 @@ import annoying.fields
 import django.db.models.deletion
 from django.db import migrations, models
 
+#迁移
+#创建一张叫 JWTSettings 的表，用来存储每个组织的 JWT 登录配置
+#在数据库里建一张表，存「每个组织要不要开 JWT 登录、令牌有效期多久」
+#JWT 就是你接口用的 Token 登录
+#这张表控制是否开启令牌验证
 
+
+
+#Django 迁移类，负责改数据库
 class Migration(migrations.Migration):
-
+    #这是第一次创建这张表
     initial = True
-
+    #必须先执行组织（organizations）的迁移，因为这张表依赖组织表
     dependencies = [
         ('organizations', '0006_alter_organizationmember_deleted_at'),
     ]

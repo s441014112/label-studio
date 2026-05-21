@@ -1,0 +1,24 @@
+title: "表格数据"
+type: community
+group: 结构化数据解析
+image: /static/templates/tabular-data.png
+details: |
+  <h1>对表格数据进行标注和分类</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>数据分析、数据库标注、电子表格处理、数据清洗、商业智能</dd>
+    <dt>相关模型</dt>
+    <dd>XGBoost、表格transformer、TabNet</dd>
+    <dt>领域术语</dt>
+    <dd>表格、结构化数据、表格标注、数据列</dd>
+  </dl>
+config: |
+  <View>
+      <Header value="Table with {key: value} pairs"/>
+      <Table name="table" value="$item"/>
+      <Choices name="choice" toName="table">
+          <Choice value="Correct"/>
+          <Choice value="Incorrect"/>
+      </Choices>
+  </View>
+

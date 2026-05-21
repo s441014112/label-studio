@@ -6,6 +6,9 @@ import { useAtomValue } from "jotai";
 import { queryClientAtom } from "jotai-tanstack-query";
 import { type ChangeEvent, useState } from "react";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from 'react-i18next';
+
 export const TokenSettingsModal = ({
   showTTL,
   onSaved,
@@ -38,26 +41,29 @@ function TokenSettingsModalView({
 }) {
   const [enableTTL, setEnableTTL] = useState(settings.api_tokens_enabled);
   const queryClient = useAtomValue(queryClientAtom);
+
+  const { t } = useTranslation();
   const reloadSettings = () => {
     queryClient.invalidateQueries({ queryKey: [TOKEN_SETTINGS_KEY] });
     onSaved?.();
   };
+
   return (
     <Form action="accessTokenUpdateSettings" onSubmit={reloadSettings}>
       <Form.Row columnCount={1}>
         <Toggle
-          label="Personal Access Tokens"
+          label={ t("common.blocks.personal_access_token") }
           name="api_tokens_enabled"
-          description="Enable increased token authentication security"
+          description={ t("common.blocks.enable_token_security") }
           checked={settings.api_tokens_enabled ?? true}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setEnableTTL(e.target.checked)}
         />
       </Form.Row>
       <Form.Row columnCount={1}>
         <Toggle
-          label="Legacy Tokens"
+          label={ t("common.blocks.legacy_tokens") }
           name="legacy_api_tokens_enabled"
-          description="Enable legacy access tokens, these do not expire"
+          description={ t("common.blocks.enable_access_tokens") }
           checked={settings.legacy_api_tokens_enabled ?? false}
         />
       </Form.Row>
@@ -65,11 +71,11 @@ function TokenSettingsModalView({
         <Form.Row columnCount={1}>
           <Input
             name="api_token_ttl_days"
-            label="Time-to-Live (optional, Personal Access Token only)"
-            description="The number of days, after creation, that the token will be valid for. After this time period a user will need to create a new access token"
+            label={ t("common.blocks.time_to_live") }
+            description={ t("common.blocks.token_will_valid") }
             labelProps={{
               description:
-                "The number of days, after creation, that the token will be valid for. After this time period a user will need to create a new access token",
+                t("common.blocks.token_will_valid"),
             }}
             disabled={!enableTTL}
             type="number"
@@ -81,7 +87,7 @@ function TokenSettingsModalView({
       )}
       <Form.Actions>
         <Button variant="primary" look="filled" type="submit">
-          Save Changes
+          { t("common.blocks.save_changes") }
         </Button>
       </Form.Actions>
     </Form>

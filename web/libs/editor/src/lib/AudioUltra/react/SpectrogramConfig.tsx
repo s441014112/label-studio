@@ -7,6 +7,10 @@ import type { ColorScheme } from "../Visual/ColorMapper";
 import type { SpectrogramScale } from "../Analysis/FFTProcessor";
 import { SPECTROGRAM_DEFAULTS } from "../Visual/constants";
 import type { MutableRefObject } from "react";
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
+// 这边的单词担心是专业名词，暂时不做国际化
 
 interface SpectrogramConfigProps {
   waveform: MutableRefObject<Waveform | undefined>;
@@ -96,9 +100,11 @@ export const SpectrogramConfig: React.FC<SpectrogramConfigProps> = ({ waveform }
     [waveform, changeSetting],
   );
 
+  const { t } = useTranslation();
+
   return (
     <div className="spectrogram-config">
-      <h3>Spectrogram Settings</h3>
+      <h3>{ t("editor.libs.react.spectrogram_settings") }</h3>
       <div className="control-group">
         <label>
           Scale

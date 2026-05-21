@@ -5,6 +5,9 @@ import { RegionEditor } from "./RegionEditor";
 import "./RegionDetails.scss";
 import { JsonViewer, Typography } from "@humansignal/ui";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next"; 
+
 const TextResult: FC<{ mainValue: string[] }> = observer(({ mainValue }) => {
   return (
     <div className="flex flex-col items-start gap-tighter">
@@ -51,6 +54,9 @@ const ReactCodeResult: FC<{ mainValue: unknown }> = observer(({ mainValue }) => 
 
 export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
   const { type, mainValue } = result;
+
+  const { t } = useTranslation();
+
   /**
    * @todo before fix this var was always false, so fix is left commented out
    * intention was to don't show per-region textarea text twice —
@@ -62,7 +68,7 @@ export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
     if (type === "rating") {
       return (
         <div className={cn("region-meta").elem("result").toClassName()}>
-          <Typography size="small">Rating: </Typography>
+          <Typography size="small">{ t("editor.components.sidepanels.rating") }: </Typography>
           <div className={cn("region-meta").elem("value").toClassName()}>
             <RatingResult mainValue={mainValue} />
           </div>
@@ -72,7 +78,7 @@ export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
     if (type === "textarea") {
       return (
         <div className={cn("region-meta").elem("result").toClassName()}>
-          <Typography size="small">Text: </Typography>
+          <Typography size="small">{ t("editor.components.sidepanels.text") }: </Typography>
           <div className={cn("region-meta").elem("value").toClassName()}>
             <TextResult mainValue={mainValue} />
           </div>
@@ -82,7 +88,7 @@ export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
     if (type === "choices") {
       return (
         <div className={cn("region-meta").elem("result").toClassName()}>
-          <Typography size="small">Choices: </Typography>
+          <Typography size="small">{ t("editor.components.sidepanels.choices") }: </Typography>
           <div className={cn("region-meta").elem("value").toClassName()}>
             <ChoicesResult mainValue={mainValue} />
           </div>
@@ -92,7 +98,7 @@ export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
     if (type === "taxonomy") {
       return (
         <div className={cn("region-meta").elem("result").toClassName()}>
-          <Typography size="small">Taxonomy: </Typography>
+          <Typography size="small">{ t("editor.components.sidepanels.taxonomy") }: </Typography>
           <div className={cn("region-meta").elem("value").toClassName()}>
             <ChoicesResult mainValue={mainValue.map((v: string[]) => v.join("/"))} />
           </div>

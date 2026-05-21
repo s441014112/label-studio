@@ -1,14 +1,25 @@
 import logging
 
+from core.translations import get_response_message
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
+
 from users.product_tours.models import UserProductTour
 
 from .serializers import UserProductTourSerializer
 
 logger = logging.getLogger(__name__)
+
+
+def _detect_lang(request):
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
 
 
 @extend_schema(exclude=True)
@@ -19,8 +30,7 @@ class ProductTourAPI(generics.RetrieveUpdateAPIView):
     def get_tour_name(self):
         name = self.request.query_params.get('name')
         if not name:
-            raise ValidationError('Name is required')
-        # normalize name for subsequent checks
+            raise ValidationError(get_response_message('common.invalid_request', language=_detect_lang(self.request), detail='Name is required'))
         return name.replace('-', '_').lower()
 
     def get_serializer_context(self):

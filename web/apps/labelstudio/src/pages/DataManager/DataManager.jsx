@@ -17,6 +17,9 @@ import { APIConfig } from "./api-config";
 
 import "./DataManager.scss";
 
+import { useTranslation } from 'react-i18next';
+import i18n from "../../translations/i18n";
+
 const loadDependencies = () => [import("@humansignal/datamanager"), import("@humansignal/editor")];
 
 const initializeDataManager = async (root, props, params) => {
@@ -71,6 +74,8 @@ export const DataManagerPage = ({ ...props }) => {
   const dataManagerRef = useRef();
   const projectId = project?.id;
 
+  const { t } = useTranslation();
+
   const init = useCallback(async () => {
     if (!window.LabelStudio) return;
     if (!window.DataManager) return;
@@ -100,9 +105,7 @@ export const DataManagerPage = ({ ...props }) => {
       const isMissingProjectError = error?.startsWith("Project ID:");
 
       if (isMissingTaskError || isMissingProjectError) {
-        const message = `The ${
-          isMissingTaskError ? "task" : "project"
-        } you are trying to access does not exist or is no longer available.`;
+        const message = isMissingTaskError ? t("pages.dataManager.task_not_exist") : t("pages.dataManager.project_not_exist") ;
 
         toast.show({
           message,
@@ -214,10 +217,10 @@ export const DataManagerPage = ({ ...props }) => {
 
   return crashed ? (
     <div className={cn("crash").toClassName()}>
-      <div className={cn("crash").elem("info").toClassName()}>Project was deleted or not yet created</div>
+      <div className={cn("crash").elem("info").toClassName()}>{ t("pages.dataManager.project_deleted") }</div>
 
-      <Button to="/projects" aria-label="Back to projects">
-        Back to projects
+      <Button to="/projects" aria-label={ t("pages.dataManager.back_to_projects") }>
+        { t("pages.dataManager.back_to_projects") }
       </Button>
     </div>
   ) : (
@@ -243,7 +246,7 @@ DataManagerPage.context = ({ dmRef }) => {
   const [mode, setMode] = useState(dmRef?.mode ?? "explorer");
 
   const links = {
-    "/settings": "Settings",
+    "/settings": i18n.t("sideMenu.settings"),
   };
 
   const updateCrumbs = (currentMode) => {
@@ -265,7 +268,7 @@ DataManagerPage.context = ({ dmRef }) => {
 
     if (isLabelStream && show_instruction && expert_instruction) {
       modal({
-        title: "Labeling Instructions",
+        title: i18n.t("pages.settings.annotation_settings.labeling_instructions"),
         body: <div dangerouslySetInnerHTML={{ __html: expert_instruction }} />,
         style: { width: 680 },
       });
@@ -296,7 +299,7 @@ DataManagerPage.context = ({ dmRef }) => {
           look="outlined"
           onClick={() => {
             modal({
-              title: "Instructions",
+              title: i18n.t("pages.dataManager.instructions"),
               body: () => (
                 <div
                   dangerouslySetInnerHTML={{
@@ -307,7 +310,7 @@ DataManagerPage.context = ({ dmRef }) => {
             });
           }}
         >
-          Instructions
+          { i18n.t("pages.dataManager.instructions") }
         </Button>
       )}
 

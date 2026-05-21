@@ -10,6 +10,8 @@ import { Tool } from "../components/Toolbar/Tool";
 import { Range } from "../common/Range/Range";
 import { BrushCursorMixin } from "./Brush";
 
+import i18n from "../../../../apps/labelstudio/src/translations/i18n";
+
 const MIN_SIZE = 1;
 const MAX_SIZE = 50;
 
@@ -28,10 +30,11 @@ const IconDot = ({ size }) => {
 };
 
 const ToolView = observer(({ item }) => {
+
   return (
     <Tool
-      label="Eraser"
-      ariaLabel="eraser"
+      label={ i18n.t("editor.tools.eraser") }
+      ariaLabel={ i18n.t("editor.tools.eraser") }
       shortcut="tool:eraser"
       active={item.selected}
       extraShortcuts={item.extraShortcuts}
@@ -83,6 +86,7 @@ const _Tool = types
       ];
     },
     get extraShortcuts() {
+      // label 好像被丢掉了，暂时不做国际化
       return {
         "tool:decrease-tool": [
           "Decrease size",

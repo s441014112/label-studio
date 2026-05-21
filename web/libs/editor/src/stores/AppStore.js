@@ -30,8 +30,10 @@ import { imageCache } from "@humansignal/core";
 import { isActive, FF_FIT_720_LAZY_LOAD_ANNOTATIONS } from "@humansignal/core/lib/utils/feature-flags";
 import { CommentStore } from "./Comment/CommentStore";
 import { CustomButton } from "./CustomButton";
+import i18n from "../../../../apps/labelstudio/src/translations/i18n";
 
-const hotkeys = Hotkey("AppStore", "Global Hotkeys");
+
+const hotkeys = Hotkey("AppStore", i18n.t("editor.tools.global_hotkeys"));
 
 export default types
   .model("AppStore", {
@@ -259,6 +261,15 @@ export default types
     get autoAcceptSuggestions() {
       return self.forceAutoAcceptSuggestions || self._autoAcceptSuggestions;
     },
+    /** i18n 翻译函数 */
+    get t() {
+      const env = getEnv(self);
+      if (!env.i18n) {
+        console.warn("[i18n] i18n instance not found in environment");
+        return (key) => key; // 降级处理
+      }
+      return env.i18n.t.bind(env.i18n);
+    },
   }))
   .actions((self) => {
     let appControls;
@@ -415,7 +426,7 @@ export default types
       hotkeys.addNamed("region:delete-all", () => {
         const { selected } = self.annotationStore;
 
-        if (window.confirm(getEnv(self).messages.CONFIRM_TO_DELETE_ALL_REGIONS)) {
+        if (window.confirm(self.t(getEnv(self).messages.CONFIRM_TO_DELETE_ALL_REGIONS))) {
           selected.deleteAllRegions();
         }
       });
@@ -1035,6 +1046,10 @@ export default types
         return { ...oldUsersMap[user.id], ...user };
       });
       self.setUsers(uniqBy([...newUsers, ...oldUsers], "id"));
+    }
+
+    function translate(key, options = {}) {
+      return self.t(key, options);
     }
 
     return {

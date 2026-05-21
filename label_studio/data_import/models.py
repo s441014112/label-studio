@@ -14,6 +14,7 @@ except:  # noqa: E722
     import json
 
 from core.utils.exceptions import extract_message
+from core.translations import get_response_message
 from django.conf import settings
 from django.db import models
 from django.utils.functional import cached_property
@@ -163,7 +164,7 @@ class FileUpload(models.Model):
             if not task.get('data'):
                 task = {'data': task}
             if not isinstance(task['data'], dict):
-                raise ValidationError('Task item should be dict')
+                raise ValidationError(get_response_message('import.task_must_be_dict'))
             tasks_formatted.append(task)
         return tasks_formatted
 
@@ -207,15 +208,14 @@ class FileUpload(models.Model):
                     batch.append(formatted_task)
 
                 else:
-                    # Unknown/invalid JSON structure
-                    raise ValidationError('Unsupported or invalid JSON structure')
+                    raise ValidationError(get_response_message('import.unsupported_json'))
 
                 # Yield remaining tasks if any
                 if batch:
                     yield batch
 
         except Exception as exc:
-            raise ValidationError(f'Failed to parse JSON file {self.file_name}: {extract_message(exc)}')
+            raise ValidationError(get_response_message('import.failed_parse_json', file_name=self.file_name, error=extract_message(exc)))
 
     def _format_task_for_json_streaming(self, task):
         """Format task data for JSON streaming consistency with read_tasks_list_from_json"""
@@ -228,7 +228,7 @@ class FileUpload(models.Model):
             task = {'data': task}
 
         if not isinstance(task['data'], dict):
-            raise ValidationError('Task item should be dict')
+            raise ValidationError(get_response_message('import.task_must_be_dict'))
         return task
 
     def read_task_from_hypertext_body(self):
@@ -265,8 +265,7 @@ class FileUpload(models.Model):
             # otherwise - only one object tag should be presented in label config
             elif not self.project.one_object_in_label_config:
                 raise ValidationError(
-                    'Your label config has more than one data key and direct file upload supports only '
-                    'one data key. To import data with multiple data keys, use a JSON or CSV file.'
+                    get_response_message('import.too_many_data_keys')
                 )
 
             # file as a single asset
@@ -276,7 +275,7 @@ class FileUpload(models.Model):
                 tasks = self.read_task_from_uploaded_file()
 
         except Exception as exc:
-            raise ValidationError('Failed to parse input file ' + self.file_name + ': ' + extract_message(exc))
+            raise ValidationError(get_response_message('import.failed_parse_file', file_name=self.file_name, error=extract_message(exc)))
         return tasks
 
     def read_tasks_streaming(self, file_as_tasks_list=True, batch_size=100):
@@ -314,7 +313,7 @@ class FileUpload(models.Model):
                     yield batch
 
         except Exception as exc:
-            raise ValidationError('Failed to parse input file ' + self.file_name + ': ' + extract_message(exc))
+            raise ValidationError(get_response_message('import.failed_parse_file', file_name=self.file_name, error=extract_message(exc)))
 
     @classmethod
     def load_tasks_from_uploaded_files(

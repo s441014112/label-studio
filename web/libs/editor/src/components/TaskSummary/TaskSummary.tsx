@@ -8,6 +8,7 @@ import { getLabelColors, sortControls } from "./utils";
 type TaskSummaryProps = {
   annotations: MSTAnnotation[];
   store: MSTStore["annotationStore"];
+  rootstore: any; // app-store
 };
 
 interface Annotation {
@@ -15,11 +16,13 @@ interface Annotation {
   type: "annotation" | "prediction";
 }
 
-const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryProps) => {
+const TaskSummary = ({ annotations: all, store: annotationStore, rootstore }: TaskSummaryProps) => {
   const task = annotationStore.store.task;
   // skip unsubmitted drafts
   const annotations = all.filter((a) => a.pk);
   const allTags = [...annotationStore.names];
+
+  const t = rootstore.t;
 
   const onSelect = (entity: Annotation) => {
     if (entity.type === "annotation") {
@@ -86,29 +89,29 @@ const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryPr
     ...(typeof task?.agreement === "number"
       ? [
           {
-            title: "Agreement",
+            title: t("editor.components.taskSummary.agreement"),
             // 2 decimals but without trailing zeros
             value: `${Math.round(task.agreement * 100) / 100}%`,
-            info: "Overall agreement over all submitted annotations",
+            info: t("editor.components.taskSummary.overall_agreement"),
           },
         ]
       : []),
     {
-      title: "Annotations",
+      title: t("editor.components.taskSummary.annotations"),
       value: annotations.filter((a) => a.type === "annotation").length,
-      info: "Number of submitted annotations. Table shows only submitted results, not current drafts.",
+      info: t("editor.components.taskSummary.submitted_annotations"),
     },
     {
-      title: "Predictions",
+      title: t("editor.components.taskSummary.predictions"),
       value: annotations.filter((a) => a.type === "prediction").length,
-      info: "Number of predictions. They are not included in the agreement calculation.",
+      info: t("editor.components.taskSummary.predictions_numbers"),
     },
   ];
 
   return (
     <div>
       <div className="mb-base">
-        <h2 className="mt-base text-headline-small font-semibold text-neutral-content">Task Summary</h2>
+        <h2 className="mt-base text-headline-small font-semibold text-neutral-content">{ t("editor.components.taskSummary.task_summary") }</h2>
         <NumbersSummary values={values} />
       </div>
       <div className="mb-relaxed">
@@ -121,7 +124,7 @@ const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryPr
         />
       </div>
       <div className="mb-relaxed">
-        <h2 className="mb-base text-headline-small font-semibold text-neutral-content">Task Data</h2>
+        <h2 className="mb-base text-headline-small font-semibold text-neutral-content">{ t("editor.components.taskSummary.task_data") }</h2>
         <DataSummary data_types={dataTypes} />
       </div>
     </div>

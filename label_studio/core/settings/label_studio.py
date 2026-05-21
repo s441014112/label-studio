@@ -10,8 +10,8 @@ SECRET_KEY = generate_secret_key_if_missing(BASE_DATA_DIR)
 
 DJANGO_DB = get_env('DJANGO_DB', DJANGO_DB_SQLITE)
 DATABASES = {'default': DATABASES_ALL[DJANGO_DB]}
-
-MIDDLEWARE.append('organizations.middleware.DummyGetSessionMiddleware')
+#未登录用户被赋予组织创建者身份
+#MIDDLEWARE.append('organizations.middleware.DummyGetSessionMiddleware')
 MIDDLEWARE.append('core.middleware.UpdateLastActivityMiddleware')
 if INACTIVITY_SESSION_TIMEOUT_ENABLED:
     MIDDLEWARE.append('core.middleware.InactivitySessionTimeoutMiddleWare')

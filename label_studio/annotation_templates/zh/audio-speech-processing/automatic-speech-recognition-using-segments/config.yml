@@ -1,0 +1,29 @@
+title: "使用分段进行自动语音识别"
+type: community
+group: 音频/语音处理
+image: /static/templates/automatic-speech-recognition-using-segments.png
+details: |
+  <h1>使用预标注分段转录音频</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>会议转录、多说话人环境、访谈、法庭记录、对话分析</dd>
+    <dt>相关模型</dt>
+    <dd>Whisper、Wav2Vec、pyannote、speaker diarization</dd>
+    <dt>领域术语</dt>
+    <dd>分段ASR、说话人分割、音频分段、多说话人</dd>
+  </dl>
+config: |
+  <View>
+    <Labels name="labels" toName="audio">
+      <Label value="Speech" />
+      <Label value="Noise" />
+    </Labels>
+
+    <Audio name="audio" value="$audio"/>
+
+    <TextArea name="transcription" toName="audio"
+              rows="2" editable="true"
+              perRegion="true" required="true" />
+  </View>
+
+

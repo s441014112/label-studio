@@ -15,16 +15,22 @@ import { Checkbox, Toggle } from "@humansignal/ui";
 import { FF_DEV_3873, isFF } from "../../utils/feature-flags";
 import { ff } from "@humansignal/core";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 const HotkeysDescription = () => {
+
+  const { t } = useTranslation();
+
   const columns = [
-    { title: "Shortcut", dataIndex: "combo", key: "combo" },
-    { title: "Description", dataIndex: "descr", key: "descr" },
+    { title: t("editor.components.settings.shortcut"), dataIndex: "combo", key: "combo" },
+    { title: t("editor.components.settings.description"), dataIndex: "descr", key: "descr" },
   ];
 
   const keyNamespaces = Hotkey.namespaces();
 
-  const getData = (descr) =>
-    Object.keys(descr)
+  const getData = (descr) => {
+    const data = Object.keys(descr)
       .filter((k) => descr[k])
       .map((k) => ({
         key: k,
@@ -42,8 +48,11 @@ const HotkeysDescription = () => {
             </div>
           );
         }),
-        descr: descr[k],
+        descr: t(descr[k]),
       }));
+
+    return data;
+  }
 
   return (
     <div className={cn("keys").toClassName()}>
@@ -95,20 +104,20 @@ const GeneralSettings = observer(({ store }) => {
               <>
                 <div className={cn("settings__label").toClassName()}>
                   <div className={cn("settings__label").elem("title").toClassName()}>
-                    {EditorSettings[obj].newUI.title}
+                    { i18n.t(EditorSettings[obj].newUI.title) }
                     {EditorSettings[obj].newUI.tags?.split(",").map((tag) => (
-                      <SettingsTag key={tag}>{tag}</SettingsTag>
+                      <SettingsTag key={tag}>{ i18n.t(tag) }</SettingsTag>
                     ))}
                   </div>
                   <div className={cn("settings__label").elem("description").toClassName()}>
-                    {EditorSettings[obj].newUI.description}
+                    { i18n.t(EditorSettings[obj].newUI.description) }
                   </div>
                 </div>
                 <Toggle
                   key={index}
                   checked={store.settings[obj]}
                   onChange={store.settings[EditorSettings[obj].onChangeEvent]}
-                  description={EditorSettings[obj].description}
+                  description={ i18n.t(EditorSettings[obj].description) }
                 />
               </>
             ) : (
@@ -118,7 +127,7 @@ const GeneralSettings = observer(({ store }) => {
                   checked={store.settings[obj]}
                   onChange={store.settings[EditorSettings[obj].onChangeEvent]}
                 >
-                  {EditorSettings[obj].description}
+                  {i18n.t(EditorSettings[obj].description)}
                 </Checkbox>
                 <br />
               </>
@@ -131,6 +140,9 @@ const GeneralSettings = observer(({ store }) => {
 });
 
 const LayoutSettings = observer(({ store }) => {
+
+  const t = store?.t;
+
   return (
     <div className={cn("settings").mod(newUI).toClassName()}>
       <div className={cn("settings").elem("field").toClassName()}>
@@ -141,13 +153,13 @@ const LayoutSettings = observer(({ store }) => {
             setTimeout(triggerResizeEvent);
           }}
         >
-          Move sidepanel to the bottom
+          { t("editor.components.settings.move_panel_to_bottom") }
         </Checkbox>
       </div>
 
       <div className={cn("settings").elem("field").toClassName()}>
         <Checkbox checked={store.settings.displayLabelsByDefault} onChange={store.settings.toggleSidepanelModel}>
-          Display Labels by default in Results panel
+          { t("editor.components.settings.display_labels_by_default") }
         </Checkbox>
       </div>
 
@@ -159,7 +171,7 @@ const LayoutSettings = observer(({ store }) => {
             store.settings.toggleAnnotationsPanel();
           }}
         >
-          Show Annotations panel
+          { t("editor.components.settings.show_annotation_panel") }
         </Checkbox>
       </div>
 
@@ -171,7 +183,7 @@ const LayoutSettings = observer(({ store }) => {
             store.settings.togglePredictionsPanel();
           }}
         >
-          Show Predictions panel
+          { t("editor.components.settings.show_predictions_panel") }
         </Checkbox>
       </div>
 
@@ -192,8 +204,8 @@ const LayoutSettings = observer(({ store }) => {
 });
 
 const Settings = {
-  General: { name: "General", component: GeneralSettings },
-  Hotkeys: { name: "Hotkeys", component: HotkeysDescription },
+  General: { name: i18n.t("editor.components.settings.general"), component: GeneralSettings },
+  Hotkeys: { name: i18n.t("editor.components.settings.hotkeys"), component: HotkeysDescription },
 };
 
 if (!isFF(FF_DEV_3873)) {
@@ -205,12 +217,12 @@ const DEFAULT_ACTIVE = Object.keys(Settings)[0];
 const DEFAULT_MODAL_SETTINGS = isFF(FF_DEV_3873)
   ? {
       name: "settings-modal",
-      title: "Labeling Interface Settings",
+      title: i18n.t("editor.components.settings.labeling_interface_settings"),
       closeIcon: <IconClose />,
     }
   : {
       name: "settings-modal-old",
-      title: "Settings",
+      title: i18n.t("editor.components.settings.settings"),
       bodyStyle: { paddingTop: "0" },
     };
 

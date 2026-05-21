@@ -6,6 +6,7 @@ import os
 import time
 
 from core.permissions import ViewClassPermission, all_permissions
+from core.translations import get_response_message
 from core.utils.io import read_yaml
 from django.conf import settings
 from drf_spectacular.utils import extend_schema
@@ -17,6 +18,15 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
 logger = logging.getLogger(__name__)
+
+
+def _detect_lang(request):
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
 
 
 class ImportStorageListAPI(generics.ListCreateAPIView):
@@ -31,7 +41,7 @@ class ImportStorageListAPI(generics.ListCreateAPIView):
     def get_queryset(self):
         project_pk = self.request.query_params.get('project')
         if not project_pk:
-            raise ValidationError('query parameter "project" is required')
+            raise ValidationError(get_response_message('storage.project_required', language=_detect_lang(self.request)))
 
         project = generics.get_object_or_404(Project, pk=project_pk)
         self.check_object_permissions(self.request, project)
@@ -72,7 +82,7 @@ class ExportStorageListAPI(generics.ListCreateAPIView):
     def get_queryset(self):
         project_pk = self.request.query_params.get('project')
         if not project_pk:
-            raise ValidationError('query parameter "project" is required')
+            raise ValidationError(get_response_message('storage.project_required', language=_detect_lang(self.request)))
 
         project = generics.get_object_or_404(Project, pk=project_pk)
         self.check_object_permissions(self.request, project)
@@ -213,7 +223,7 @@ class ImportStorageListFilesAPI(generics.CreateAPIView):
             return Response({'files': files})
         except Exception as exc:
             logger.exception('Error listing storage files: %s', exc)
-            raise ValidationError('Failed to list storage files')
+            raise ValidationError(get_response_message('storage.list_failed', language=_detect_lang(self.request)))
 
 
 @extend_schema(exclude=True)
@@ -227,7 +237,7 @@ class StorageFormLayoutAPI(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         form_layout_file = os.path.join(os.path.dirname(inspect.getfile(self.__class__)), 'form_layout.yml')
         if not os.path.exists(form_layout_file):
-            raise NotFound(f'"form_layout.yml" is not found for {self.__class__.__name__}')
+            raise NotFound(get_response_message('storage.form_layout_not_found', language=_detect_lang(self.request), name=self.__class__.__name__))
 
         form_layout = read_yaml(form_layout_file)
         form_layout = self.post_process_form(form_layout)

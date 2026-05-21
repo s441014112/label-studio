@@ -7,6 +7,9 @@ import { Button } from "@humansignal/ui";
 import { Space } from "../Space/Space";
 import "./Error.scss";
 
+import "../../translations/i18n";
+import { useTranslation } from "react-i18next";
+
 const SLACK_INVITE_URL = "https://slack.labelstud.io/?source=product-error-msg";
 
 export const ErrorWrapper = ({
@@ -32,6 +35,8 @@ export const ErrorWrapper = ({
     copyText(preparedStackTrace);
     setTimeout(() => setCopied(false), 1200);
   }, [preparedStackTrace]);
+
+  const { t } = useTranslation();
 
   return (
     <div className={cn("error-message").toClassName()}>
@@ -83,8 +88,7 @@ export const ErrorWrapper = ({
       {!minimal && (version || errorId) && (
         <div className={cn("error-message").elem("version").toClassName()}>
           <Space>
-            {version && `Version: ${version}`}
-            {errorId && `Error ID: ${errorId}`}
+            {errorId && `${t("components.error.error_id")}: ${errorId}`}
           </Space>
         </div>
       )}
@@ -98,7 +102,7 @@ export const ErrorWrapper = ({
               icon={<IconSlack />}
               href={SLACK_INVITE_URL}
             >
-              Ask on Slack
+              { t("components.error.ask_on_slack") }
             </Button>
 
             <Space size="small">
@@ -109,17 +113,17 @@ export const ErrorWrapper = ({
                   className="w-[100px]"
                   aria-label="Copy error stacktrace"
                 >
-                  {copied ? "Copied" : "Copy Stacktrace"}
+                  {copied ? t("components.error.copied") : t("components.error.copy_stacktrace") }
                 </Button>
               )}
               {onGoBack && (
-                <Button onClick={onGoBack} aria-label="Go back">
-                  Go Back
+                <Button onClick={onGoBack} aria-label={ t("components.error.goback") }>
+                  { t("components.error.goback") }
                 </Button>
               )}
               {onReload && (
-                <Button onClick={onReload} aria-label="Reload page">
-                  Reload
+                <Button onClick={onReload} aria-label={ t("components.error.reload_page") }>
+                  { t("components.error.reload") }
                 </Button>
               )}
             </Space>

@@ -7,6 +7,8 @@ import { Button } from "@humansignal/ui";
 import { Dropdown } from "@humansignal/ui";
 import { Icon } from "./Icon/Icon";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+
 const buttonInjector = inject(({ store }) => {
   const { viewsStore, currentView } = store;
 
@@ -33,7 +35,7 @@ export const FiltersButton = buttonInjector(
           aria-label="Filters"
           {...rest}
         >
-          Filters{" "}
+          { i18n.t("datamanager.components.filters.filters") }{" "}
           {hasFilters && (
             <Badge size="small" style={{ marginLeft: 5 }}>
               {activeFiltersNumber}

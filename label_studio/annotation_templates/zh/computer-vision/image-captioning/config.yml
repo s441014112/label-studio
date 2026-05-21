@@ -1,0 +1,22 @@
+title: "图像描述"
+type: community
+group: 计算机视觉
+image: /static/templates/image-captioning.png
+details: |
+  <h1>为图像添加描述性文字</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>辅助功能、alt文本生成、社交媒体、内容管理、视觉问答、图像搜索</dd>
+    <dt>相关模型</dt>
+    <dd>BLIP、CLIP、OFA、Vision Transformer、CNN+RNN</dd>
+    <dt>领域术语</dt>
+    <dd>图像描述、图像标注、视觉语言、alt文本</dd>
+  </dl>
+config: |
+  <View>
+    <Image name="image" value="$captioning"/>
+    <Header value="Describe the image:"/>
+    <TextArea name="caption" toName="image" placeholder="Enter description here..."
+              rows="5" maxSubmissions="1"/>
+  </View>
+

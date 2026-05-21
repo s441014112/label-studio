@@ -4,6 +4,8 @@ import { Typography } from "@humansignal/ui";
 import { cn } from "../../utils/bem";
 import "./ViewAllToggle.scss";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+
 interface ViewAllToggleProps {
   isActive: boolean;
   onClick: () => void;
@@ -25,7 +27,7 @@ export const ViewAllToggle = observer(({ isActive, onClick }: ViewAllToggleProps
         </div>
         <div className={cn("view-all-toggle").elem("content").toClassName()}>
           <Typography variant="label" size="small" className={cn("view-all-toggle").elem("label").toClassName()}>
-            Compare All
+            { i18n.t("editor.components.annotation.compare_all") }
           </Typography>
         </div>
       </div>

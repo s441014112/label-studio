@@ -17,6 +17,8 @@ import { annotationToServer, taskToLSFormat } from "./lsf-utils";
 import { when } from "mobx";
 import { imageCache } from "@humansignal/core";
 
+import i18n from "../../../../apps/labelstudio/src/translations/i18n";
+
 const DEFAULT_INTERFACES = [
   "basic",
   "controls",
@@ -294,7 +296,7 @@ export class LSFWrapper {
 
       if (noData) {
         Modal.modal({
-          title: "Can't find task",
+          title: i18n.t("datamanager.sdk.cannot_find_task"),
           body,
         });
         return false;
@@ -344,12 +346,13 @@ export class LSFWrapper {
 
     if (isFF(FF_DEV_2887) && this.lsf?.commentStore?.hasUnsaved) {
       Modal.confirm({
-        title: "You have unsaved changes",
-        body: "There are comments which are not persisted. Please submit the annotation. Continuing will discard these comments.",
+        title: i18n.t("datamanager.sdk.unsave_changes"),
+        body: i18n.t("datamanager.sdk.unsave_tips"),
         onOk() {
           nextAction();
         },
-        okText: "Discard and continue",
+        cancelText: i18n.t("datamanager.sdk.cancel"),
+        okText: i18n.t("datamanager.sdk.discard_and_continue"),
       });
       return;
     }
@@ -431,7 +434,7 @@ export class LSFWrapper {
       this.overlapReached = overlapReached;
       this.overlapReachedMessage =
         this.task.overlap_reached_message ||
-        "Annotation overlap has been reached for this task. Your draft is preserved but cannot be submitted.";
+        i18n.t("datamanager.sdk.preserved_not_submit");
 
       // Set overlap state on LSF store - this will disable buttons with tooltips
       this.lsf.setFlags({
@@ -476,7 +479,7 @@ export class LSFWrapper {
             size="small"
             look="outlined"
           >
-            Next Task
+            { i18n.t("datamanager.sdk.next_task") }
           </Button>
         </div>
       ),
@@ -713,7 +716,7 @@ export class LSFWrapper {
           this.overlapReached = true;
           this.overlapReachedMessage =
             result?.response?.detail ||
-            "Annotation overlap has been reached for this task. Your draft is preserved but cannot be submitted.";
+            i18n.t("datamanager.sdk.preserved_not_submit");
           // Set overlap state on LSF store - this will disable buttons with tooltips
           this.lsf.setFlags({
             overlapReached: true,
@@ -729,17 +732,7 @@ export class LSFWrapper {
       this.datamanager.invoke("toast", {
         message: (
           <span>
-            {errorAction}, please try again or{" "}
-            <a
-              href={supportUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "inherit", textDecoration: "underline" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              contact our team
-            </a>{" "}
-            if it doesn't help.
+            {errorAction}, { i18n.t("datamanager.sdk.try_again") }
           </span>
         ),
         type: "error",
@@ -773,7 +766,7 @@ export class LSFWrapper {
     );
     const status = result?.$meta?.status;
 
-    this.showOperationToast(status, "Annotation saved successfully", "Annotation is not saved", result);
+    this.showOperationToast(status, i18n.t("datamanager.sdk.annotation_saved_success"), i18n.t("datamanager.sdk.annotation_not_saved"), result);
 
     if (exitStream) return this.exitStream();
   };
@@ -804,7 +797,7 @@ export class LSFWrapper {
     });
     const status = result?.$meta?.status;
 
-    this.showOperationToast(status, "Annotation updated successfully", "Annotation is not updated", result);
+    this.showOperationToast(status, i18n.t("datamanager.sdk.annotation_saved_success"), i18n.t("datamanager.sdk.annotation_not_updated"), result);
 
     this.datamanager.invoke("updateAnnotation", ls, annotation, result);
 
@@ -867,7 +860,7 @@ export class LSFWrapper {
   };
 
   draftToast = (status, result = null) => {
-    this.showOperationToast(status, "Draft saved successfully", "Draft is not saved", result);
+    this.showOperationToast(status, i18n.t("datamanager.sdk.draft_saved_success"), i18n.t("datamanager.sdk.draft_not_saved"), result);
   };
 
   needsDraftSave = (annotation) => {
@@ -952,8 +945,8 @@ export class LSFWrapper {
     const canSkip = !skipDisabled || hasForceSkipPermission;
     if (!canSkip) {
       console.warn("Task cannot be skipped: allow_skip is false and user lacks manager role");
-      this.showOperationToast(400, null, "This task cannot be skipped", {
-        error: "Task cannot be skipped",
+      this.showOperationToast(400, null, i18n.t("datamanager.sdk.task_not_skip"), {
+        error: i18n.t("datamanager.sdk.task_not_skip"),
       });
       return;
     }
@@ -980,7 +973,7 @@ export class LSFWrapper {
     );
     const status = result?.$meta?.status;
 
-    this.showOperationToast(status, "Task skipped successfully", "Task is not skipped", result);
+    this.showOperationToast(status, i18n.t("datamanager.sdk.task_skip_success"), i18n.t("datamanager.sdk.task_skip_failed"), result);
   };
 
   onUnskipTask = async () => {

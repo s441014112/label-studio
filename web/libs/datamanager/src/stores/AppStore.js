@@ -11,6 +11,8 @@ import { CustomJSON } from "./types";
 import { User } from "./Users";
 import { ActivityObserver } from "../utils/ActivityObserver";
 
+import i18n from "../../../../apps/labelstudio/src/translations/i18n";
+
 /**
  * @type {ActivityObserver | null}
  */
@@ -319,12 +321,13 @@ export const AppStore = types
 
       if (isFF(FF_DEV_2887) && self.LSF?.lsf?.annotationStore?.selected?.commentStore?.hasUnsaved) {
         Modal.confirm({
-          title: "You have unsaved changes",
-          body: "There are comments which are not persisted. Please submit the annotation. Continuing will discard these comments.",
+          title: i18n.t("datamanager.sdk.unsave_changes"), 
+          body: i18n.t("datamanager.sdk.unsave_tips"),
           onOk() {
             nextAction();
           },
-          okText: "Discard and continue",
+          cancelText: i18n.t("datamanager.sdk.cancel"),
+          okText: i18n.t("datamanager.sdk.discard_and_continue"),
         });
         return;
       }
@@ -364,12 +367,13 @@ export const AppStore = types
 
       if (isFF(FF_DEV_2887) && self.LSF?.lsf?.annotationStore?.selected?.commentStore?.hasUnsaved) {
         Modal.confirm({
-          title: "You have unsaved changes",
-          body: "There are comments which are not persisted. Please submit the annotation. Continuing will discard these comments.",
+          title: i18n.t("datamanager.sdk.unsave_changes"), 
+          body: i18n.t("datamanager.sdk.unsave_tips"),
           onOk() {
             nextAction();
           },
-          okText: "Discard and continue",
+          cancelText: i18n.t("datamanager.sdk.cancel"),
+          okText: i18n.t("datamanager.sdk.discard_and_continue"),
         });
         return;
       }
@@ -380,12 +384,13 @@ export const AppStore = types
     confirmLabelingConfigured() {
       if (!self.labelingIsConfigured) {
         Modal.confirm({
-          title: "You're almost there!",
-          body: "Before you can annotate the data, set up labeling configuration",
+          title: i18n.t("datamanager.sdk.almost_here"),
+          body: i18n.t("datamanager.sdk.almost_here_tips"),
           onOk() {
             self.SDK.invoke("settingsClicked");
           },
-          okText: "Go to setup",
+          cancelText: i18n.t("datamanager.sdk.cancel"),
+          okText: i18n.t("datamanager.sdk.go_to_setup"),
         });
         return false;
       }

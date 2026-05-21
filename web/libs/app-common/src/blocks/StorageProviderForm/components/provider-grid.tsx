@@ -6,9 +6,10 @@ interface ProviderGridProps {
   selectedProvider?: string;
   onProviderSelect: (providerName: string) => void;
   error?: string;
+  t: any;
 }
 
-export const ProviderGrid = ({ providers, selectedProvider, onProviderSelect, error }: ProviderGridProps) => {
+export const ProviderGrid = ({ providers, selectedProvider, onProviderSelect, error, t }: ProviderGridProps) => {
   return (
     <div className="flex flex-col gap-tight">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-base">
@@ -37,7 +38,7 @@ export const ProviderGrid = ({ providers, selectedProvider, onProviderSelect, er
             >
               {Icon && <Icon className="w-8 h-8" />}
               <div className="flex-1 min-w-0 text-center">
-                <h3 className="text-body-medium truncate whitespace-pre">{provider.title}</h3>
+                <h3 className="text-body-medium truncate whitespace-pre">{t(provider.title)}</h3>
                 {provider.badge && (
                   <div className="mt-1 flex justify-center whitespace-pre absolute -bottom-tight left-1/2 -translate-x-[40px]">
                     {provider.badge}

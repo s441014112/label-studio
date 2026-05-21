@@ -324,9 +324,11 @@ class GridClassComponent extends Component {
 
   render() {
     const i = this.state.item;
-    const { annotations } = this.props;
+    const { annotations, rootstore } = this.props;
     const selected = isFF(FF_DEV_3391) ? null : this.props.store.selected;
     const isRenderingNext = i < annotations.length && annotations[i] === selected;
+
+    const t = rootstore.t;
 
     return (
       <div className={styles.container}>
@@ -335,7 +337,7 @@ class GridClassComponent extends Component {
             .filter((c) => !c.hidden)
             .map((c) => (
               <div id={`c-${c.id}`} key={`anno-${c.id}`} style={{ position: "relative" }}>
-                <Tooltip title="Open Annotation Tab">
+                <Tooltip title={ t("editor.components.app.open_annotation_tab") }>
                   <div>
                     <EntityTab
                       entity={c}

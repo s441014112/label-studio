@@ -1,3 +1,4 @@
+from core.translations import get_response_message
 from django.conf import settings
 from django.db import transaction
 from projects.models import Project
@@ -8,10 +9,20 @@ from rest_framework.exceptions import ValidationError
 from .models import Label, LabelLink
 
 
+def _detect_lang(serializer_self):
+    request = serializer_self.context.get('request') if hasattr(serializer_self, 'context') else None
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
+
+
 class LabelListSerializer(serializers.ListSerializer):
     def validate(self, items):
         if len(set(item['project'] for item in items)) > 1:
-            raise ValidationError('Creating labels for different projects in one request not allowed')
+            raise ValidationError(get_response_message('label.cross_project_not_allowed', language=_detect_lang(self)))
         return items
 
     def create(self, validated_data):

@@ -1,10 +1,20 @@
 import logging
 
+from core.translations import get_response_message
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
 logger = logging.getLogger(__name__)
+
+
+def _detect_lang(request):
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
 
 
 class TokenAuthenticationPhaseout(TokenAuthentication):
@@ -33,7 +43,7 @@ class TokenAuthenticationPhaseout(TokenAuthentication):
             # raise 401 if legacy API token auth disabled (i.e. this token is no longer valid)
             if org and (not org.jwt.legacy_api_tokens_enabled):
                 raise AuthenticationFailed(
-                    'Authentication token no longer valid: legacy token authentication has been disabled for this organization'
+                    get_response_message('auth.legacy_token_disabled', language=_detect_lang(request))
                 )
 
             logger.info(

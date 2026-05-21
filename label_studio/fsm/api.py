@@ -1,6 +1,7 @@
 import logging
 
 from core.permissions import all_permissions
+from core.translations import TranslatableString as _S
 from core.utils.exceptions import extract_message
 from core.utils.filterset_to_openapi_params import filterset_to_openapi_params
 from django.shortcuts import get_object_or_404
@@ -77,7 +78,7 @@ class FSMEntityHistoryFilterSet(FilterSet):
     decorator=extend_schema(
         tags=['FSM'],
         summary='Get entity state history',
-        description='Get the state history of an entity',
+        description=_S('schema.action.get_state_history'),
         parameters=filterset_to_openapi_params(FSMEntityHistoryFilterSet),
         extensions={
             'x-fern-sdk-group-name': 'fsm',
@@ -123,7 +124,7 @@ class FSMEntityHistoryAPI(FSMAPIMixin, generics.ListAPIView):
     decorator=extend_schema(
         tags=['FSM'],
         summary='Execute manual FSM transition',
-        description='Execute a registered manual transition for an entity.',
+        description=_S('schema.action.execute_transition'),
         request=FSMTransitionExecuteRequestSerializer,
         responses={200: FSMTransitionExecuteResponseSerializer},
         extensions={

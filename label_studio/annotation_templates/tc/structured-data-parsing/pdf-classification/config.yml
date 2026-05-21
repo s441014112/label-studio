@@ -1,0 +1,24 @@
+title: "PDF 分類"
+type: community
+group: 結構化資料解析
+image: /static/templates/pdf-classification.png
+details: <h1>對PDF文件頁面進行分類</h1>
+config: |
+  <View>
+    <Header value="Rate this article"/>
+    <Rating name="rating" toName="pdf" maxRating="10" icon="star" size="medium" />
+
+    <Choices name="choices" choice="single-radio" toName="pdf" showInline="true">
+      <Choice value="Important article"/>
+      <Choice value="Yellow press"/>
+    </Choices>
+    <Pdf name="pdf" value="$pdf"/>
+  </View>
+
+
+  <!-- {
+    "data": {
+      "pdf": "/static/samples/sample.pdf"
+    }
+  } -->
+

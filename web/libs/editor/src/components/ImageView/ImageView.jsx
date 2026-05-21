@@ -24,6 +24,9 @@ import { FF_DEV_1442, FF_DEV_3077, FF_LSDV_4583_6, FF_LSDV_4930, FF_ZOOM_OPTIM, 
 import { Pagination } from "../../common/Pagination/Pagination";
 import { Image } from "./Image";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 Konva.showWarnings = false;
 
 const hotkeys = Hotkey("Image");
@@ -959,13 +962,14 @@ export default observer(
     }, 16);
 
     componentDidMount() {
-      const { item } = this.props;
+      const { item, store } = this.props;
+      const t = store.t;
 
       window.addEventListener("resize", this.onResize);
       this.attachObserver(item.containerRef);
       this.updateReadyStatus();
 
-      hotkeys.addDescription("shift", "Pan image");
+      hotkeys.addDescription("shift", t("editor.components.imageview.pan_image"));
     }
 
     attachObserver = (node) => {
@@ -1061,7 +1065,7 @@ export default observer(
           {paginationEnabled ? (
             <div
               className={styles.pagination}
-              title={isViewingAll ? "Pagination is not supported in View All Annotations" : undefined}
+              title={undefined}
             >
               <Pagination
                 size="small"

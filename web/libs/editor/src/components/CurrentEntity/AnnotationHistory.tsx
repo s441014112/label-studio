@@ -22,6 +22,9 @@ import { humanDateDiff, userDisplayName } from "../../utils/utilities";
 import { EmptyState } from "../SidePanels/Components/EmptyState";
 import "./AnnotationHistory.scss";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 type HistoryItemType =
   | "prediction"
   | "imported"
@@ -65,6 +68,7 @@ const DraftState: FC<{
   useEffect(() => {
     setChanges(true);
   }, [annotation.history.history.length]);
+
   useEffect(() => {
     setChanges(false);
   }, [annotation.draftSaved]);
@@ -129,12 +133,14 @@ const AnnotationHistoryComponent: FC<any> = ({
   const hasHistory = history && history.length > 0;
   const shouldShowEmptyState = showEmptyState && !hasChanges && !hasDraft && !hasHistory;
 
+  const { t } = useTranslation();
+
   // Default empty state component
   const defaultEmptyState = (
     <EmptyState
       icon={<IconHistoryRewind width={24} height={24} />}
-      header="View annotation activity"
-      description={<>See a log of user actions for this annotation</>}
+      header={ t("editor.components.currentEntity.view_annotation_activity") }
+      description={<>{ t("editor.components.currentEntity.view_annotation_activity_desc") }</>}
     />
   );
 
@@ -311,6 +317,8 @@ const HistoryComment: FC<{
   const [collapsible, setCollapsible] = useState(false);
   const commentRef = useRef();
 
+  const { t } = useTranslation();
+
   useLayoutEffect(() => {
     if (commentRef.current) {
       const { clientHeight } = commentRef.current;
@@ -339,7 +347,7 @@ const HistoryComment: FC<{
             setCollapsed((v) => !v);
           }}
         >
-          {collapsed ? "Show more" : "Show less"}
+          {collapsed ? t("editor.components.currentEntity.show_more") : t("editor.components.currentEntity.show_less")}
         </div>
       )}
     </div>

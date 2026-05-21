@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 
 import ujson as json
 from core.label_config import replace_task_data_undefined_with_config_field
+from core.translations import get_response_message
 from core.utils.exceptions import extract_message
 from rest_framework.exceptions import ValidationError
 
@@ -55,7 +56,7 @@ class TaskValidator:
     def check_data(project, data):
         """Validate data from task['data']"""
         if data is None:
-            raise ValidationError('Task is empty (None)')
+            raise ValidationError(get_response_message('task.empty_none'))
 
         replace_task_data_undefined_with_config_field(data, project)
 
@@ -71,10 +72,10 @@ class TaskValidator:
                 try:
                     data_item = reduce(getitem, keys, data)
                 except KeyError:
-                    raise ValidationError('"{data_key}" key is expected in task data'.format(data_key=data_key))
+                    raise ValidationError(get_response_message('task.key_expected', data_key=data_key))
             else:
                 if data_key not in data:
-                    raise ValidationError('"{data_key}" key is expected in task data'.format(data_key=data_key))
+                    raise ValidationError(get_response_message('task.key_expected', data_key=data_key))
                 data_item = data[data_key]
 
             if is_array:
@@ -129,7 +130,7 @@ class TaskValidator:
                 class_def = ' or '.join([c.__name__ for c in class_def])
             else:
                 class_def = class_def.__name__
-            raise ValidationError('Task[{key}] must be {class_def}'.format(key=key, class_def=class_def))
+            raise ValidationError(get_response_message('task.must_be_type', key=key, class_def=class_def))
 
     def validate(self, task):
         """Validate whole task with task['data'] and task['annotations']. task['predictions']"""
@@ -146,17 +147,17 @@ class TaskValidator:
                 try:
                     data = json.loads(self.instance.data)
                 except ValueError as e:
-                    raise ValidationError("Can't parse task data: " + extract_message(e))
+                    raise ValidationError(get_response_message('task.cant_parse', error=extract_message(e)))
             else:
                 raise ValidationError(
-                    'Field "data" must be string or dict, but not "' + type(self.instance.data) + '"'
+                    get_response_message('task.data_field_must_be_str_or_dict', type=type(self.instance.data))
                 )
             self.check_data_and_root(self.instance.project, data)
             return task
 
         # check task is dict
         if not isinstance(task, dict):
-            raise ValidationError('Task root must be dict with "data", "meta", "annotations", "predictions" fields')
+            raise ValidationError(get_response_message('task.root_must_be_dict'))
 
         # task[data] | task[annotations] | task[predictions] | task[meta]
         if self.check_allowed(task):
@@ -174,11 +175,11 @@ class TaskValidator:
 
                 ok = 'result' in annotation
                 if not ok:
-                    raise ValidationError('Annotation must have "result" fields')
+                    raise ValidationError(get_response_message('annotation.must_have_result'))
 
                 # check result is list
                 if not isinstance(annotation.get('result', []), list):
-                    raise ValidationError('"result" field in annotation must be list')
+                    raise ValidationError(get_response_message('annotation.result_must_be_list'))
 
             # task[predictions]
             self.raise_if_wrong_class(task, 'predictions', list)
@@ -189,7 +190,7 @@ class TaskValidator:
 
                 ok = 'result' in prediction
                 if not ok:
-                    raise ValidationError('Prediction must have "result" fields')
+                    raise ValidationError(get_response_message('prediction.must_have_result'))
 
             # task[meta]
             self.raise_if_wrong_class(task, 'meta', (dict, list))

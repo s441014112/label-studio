@@ -4,6 +4,7 @@
 import logging
 
 from core.permissions import AllPermissions
+from core.translations import TranslatableString as _S
 from core.redis import start_job_async_or_sync
 from data_manager.actions import DataManagerAction
 from label_studio_sdk.label_interface import LabelInterface
@@ -121,24 +122,24 @@ def cache_labels_form(user, project):
                 {
                     'type': 'select',
                     'name': 'control_tag',
-                    'label': 'Choose a control tag',
+                    'label': _S('dm.form.control_tag'),
                     'options': control_tags,
                 },
                 {
                     'type': 'input',
                     'name': 'custom_control_tag',
-                    'label': "Custom control tag if it's not in label config",
+                    'label': _S('dm.form.custom_control_tag'),
                 },
                 {
                     'type': 'select',
                     'name': 'with_counters',
-                    'label': 'With counters',
+                    'label': _S('dm.form.with_counters'),
                     'options': ['Yes', 'No'],
                 },
                 {
                     'type': 'select',
                     'name': 'source',
-                    'label': 'Source',
+                    'label': _S('dm.form.source'),
                     'options': ['Annotations', 'Predictions'],
                 },
             ],
@@ -150,13 +151,11 @@ actions: list[DataManagerAction] = [
     {
         'entry_point': cache_labels,
         'permission': all_permissions.projects_change,
-        'title': 'Cache Labels',
+        'title': _S('dm.action.cache_labels.title'),
         'order': 1,
         'experimental': True,
         'dialog': {
-            'text': 'Confirm that you want to add a new task.data field with cached labels from annotations. '
-            'This field will help you to quickly filter or order tasks by labels. '
-            'After this operation you must refresh the Data Manager page fully to see the new column!',
+            'text': _S('dm.action.cache_labels.dialog_text'),
             'type': 'confirm',
             'form': cache_labels_form,
         },

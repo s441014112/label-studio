@@ -5,12 +5,14 @@ import { cn } from "../../../utils/bem";
 import "./Config.scss";
 import { IconInfo } from "@humansignal/icons";
 import { Button, EnterpriseBadge } from "@humansignal/ui";
+import i18n from "../../../translations/i18n";
+import { useTranslation } from "react-i18next";
 
 const listClass = cn("templates-list");
 
 const Arrow = () => (
   <svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <title>Arrow Icon</title>
+    <title>{ i18n.t("pages.create_project.config.arrow_icon") }</title>
     <path opacity="0.9" d="M2 10L6 6L2 2" stroke="currentColor" strokeWidth="2" strokeLinecap="square" />
   </svg>
 );
@@ -18,7 +20,6 @@ const Arrow = () => (
 const TemplatesInGroup = ({ templates, group, onSelectRecipe, isEdition }) => {
   const picked = templates
     .filter((recipe) => recipe.group === group)
-    // templates without `order` go to the end of the list
     .sort((a, b) => (a.order ?? Number.POSITIVE_INFINITY) - (b.order ?? Number.POSITIVE_INFINITY));
 
   const isCommunityEdition = isEdition === "Community";
@@ -53,6 +54,8 @@ export const TemplatesList = ({ selectedGroup, selectedRecipe, onCustomTemplate,
   const [templates, setTemplates] = React.useState();
   const api = useAPI();
   const isEdition = window?.APP_SETTINGS?.version_edition;
+
+  const { t } = useTranslation();
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -94,9 +97,9 @@ export const TemplatesList = ({ selectedGroup, selectedRecipe, onCustomTemplate,
           size="small"
           onClick={onCustomTemplate}
           className="w-full"
-          aria-label="Create custom template"
+          aria-label={ t("pages.create_project.config.custom_template") }
         >
-          Custom template
+          { t("pages.create_project.config.custom_template") }
         </Button>
       </aside>
       <main>
@@ -111,9 +114,9 @@ export const TemplatesList = ({ selectedGroup, selectedRecipe, onCustomTemplate,
       <footer className="flex items-center justify-center gap-1">
         <IconInfo className={listClass.elem("info-icon")} width="20" height="20" />
         <span>
-          See the documentation to{" "}
+          { t("pages.create_project.config.footer_mst_part1") }{" "}
           <a href="https://labelstud.io/guide" target="_blank" rel="noreferrer">
-            contribute a template
+            { t("pages.create_project.config.footer_mst_part2") }
           </a>
           .
         </span>

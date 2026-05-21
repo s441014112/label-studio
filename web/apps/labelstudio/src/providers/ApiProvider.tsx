@@ -13,6 +13,8 @@ import { absoluteURL, isDefined } from "../utils/helpers";
 import { FF_IMPROVE_GLOBAL_ERROR_MESSAGES, isFF } from "../utils/feature-flags";
 import { ToastType, useToast } from "@humansignal/ui";
 import { captureException } from "../config/Sentry";
+import "../translations/i18n";
+import { useTranslation } from "react-i18next";
 
 export const IMPROVE_GLOBAL_ERROR_MESSAGES = isFF(FF_IMPROVE_GLOBAL_ERROR_MESSAGES);
 // Duration for toast errors
@@ -41,17 +43,17 @@ let apiLocked = false;
 /**
  * Displays an error modal with the error details.
  */
-const displayErrorModal = (errorDetails: FormattedError) => {
+const displayErrorModal = (errorDetails: FormattedError, t: any) => {
   const { isShutdown, title, message, stacktrace, ...formattedError } = errorDetails;
 
   modal({
-    unique: "network-error",
+    unique: t("errors.network_error"),
     allowClose: !isShutdown,
     body: isShutdown ? (
       <ErrorWrapper
         possum={false}
-        title={"Connection refused"}
-        message={"Server not responding. Is it still running?"}
+        title={t("errors.connect_refused")}
+        message={t("errors.server_not_response")}
       />
     ) : (
       <ErrorWrapper
@@ -72,6 +74,8 @@ const displayErrorModal = (errorDetails: FormattedError) => {
  */
 export const ApiProvider = forwardRef<ApiContextType, PropsWithChildren<Record<string, never>>>(({ children }, ref) => {
   const toast = useToast();
+
+  const { t } = useTranslation();
 
   /**
    * Handles errors with Label Studio-specific logic including:
@@ -106,7 +110,7 @@ export const ApiProvider = forwardRef<ApiContextType, PropsWithChildren<Record<s
         });
       } else {
         // Show modal for validation errors or non-4xx
-        displayErrorModal(errorDetails);
+        displayErrorModal(errorDetails, t);
       }
     },
     [toast],
@@ -136,7 +140,8 @@ export const ApiProvider = forwardRef<ApiContextType, PropsWithChildren<Record<s
         redirectUrl = absoluteURL("/projects");
       }
 
-      sessionStorage.setItem("redirectMessage", "The page or resource you were looking for does not exist.");
+      let { t } = useTranslation();
+      sessionStorage.setItem("redirectMessage", t("providers.redirectMessage"));
       location.href = redirectUrl;
     }
   }, []);

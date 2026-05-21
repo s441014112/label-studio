@@ -17,6 +17,9 @@ import { useDrag } from "../../hooks/useDrag";
 import { clamp, isDefined } from "../../utils/utilities";
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH, PANEL_HEADER_HEIGHT_PADDED } from "./constants";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 export type PanelBaseExclusiveProps = "name" | "title";
 
 type ResizeHandler = (name: PanelType, width: number, height: number, top: number, left: number) => void;
@@ -165,8 +168,10 @@ export const PanelBase: FC<PanelBaseProps> = ({
     return null;
   }, [detached, visible, alignment]);
 
+  const { t } = useTranslation();
+
   const tooltipText = useMemo(() => {
-    return `${visible ? "Collapse" : "Expand"} ${tooltip}`;
+    return `${visible ? t("editor.components.sidepanels.collapse") : t("editor.components.sidepanels.expand")} ${tooltip}`;
   }, [visible, tooltip]);
 
   useEffect(() => {

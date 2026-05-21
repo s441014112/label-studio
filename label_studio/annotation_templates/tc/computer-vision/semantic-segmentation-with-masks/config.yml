@@ -1,0 +1,24 @@
+title: "使用遮罩進行語義分割"
+type: community
+group: 電腦視覺
+order: 2
+image: /static/templates/semantic-segmentation-with-masks.png
+details: |
+  <h1>使用畫筆遮罩對圖片區域進行分割</h1>
+  <dl>
+    <dt>產業應用</dt>
+    <dd>自動駕駛、醫學影像、衛星圖像、農業、城市規劃、環境監測</dd>
+    <dt>相關模型</dt>
+    <dd>Mask R-CNN、U-Net、DeepLab、FCN、SAM、Segment Anything</dd>
+    <dt>領域術語</dt>
+    <dd>圖片分割、畫筆工具、遮罩標註、像素級</dd>
+  </dl>
+config: |
+  <View>
+    <Image name="image" value="$image" zoom="true"/>
+    <BrushLabels name="tag" toName="image">
+      <Label value="Airplane" background="rgba(255, 0, 0, 0.7)"/>
+      <Label value="Car" background="rgba(0, 0, 255, 0.7)"/>
+    </BrushLabels>
+  </View>
+

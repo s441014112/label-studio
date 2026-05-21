@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 from core.feature_flags import flag_set
 from core.permissions import all_permissions
 from core.redis import start_job_async_or_sync
+from core.translations import get_response_message, TranslatableString as _S
 from core.utils.common import batch
 from core.utils.exceptions import extract_message
 from django.conf import settings
@@ -40,6 +41,15 @@ from .serializers import (
 logger = logging.getLogger(__name__)
 
 
+def _detect_lang(request):
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
+
+
 @method_decorator(
     name='get',
     decorator=extend_schema(
@@ -58,12 +68,12 @@ logger = logging.getLogger(__name__)
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.param.project_id'),
             ),
         ],
         responses={
             200: OpenApiResponse(
-                description='Export formats',
+                description=_S('schema.resp.export_formats'),
                 response={
                     'type': 'array',
                     'items': {'type': 'string', 'title': 'Export format'},
@@ -83,11 +93,32 @@ class ExportFormatsListAPI(generics.RetrieveAPIView):
     permission_required = all_permissions.projects_view
 
     def get_queryset(self):
-        return Project.objects.filter(organization=self.request.user.active_organization)
+        return Project.objects.filter(created_by=self.request.user)
 
     def get(self, request, *args, **kwargs):
         project = self.get_object()
         formats = DataExport.get_export_formats(project)
+        lang = _detect_lang(request)
+        for f in formats:
+            name = f.get('name', '')
+            if name:
+                translated_title = get_response_message(f'export.format.{name.lower()}.title', language=lang)
+                translated_desc = get_response_message(f'export.format.{name.lower()}.description', language=lang)
+                if translated_title != f'export.format.{name.lower()}.title':
+                    f['title'] = translated_title
+                if translated_desc != f'export.format.{name.lower()}.description':
+                    f['description'] = translated_desc
+                tags = f.get('tags', [])
+                if tags:
+                    translated_tags = []
+                    for tag in tags:
+                        key = f'export.tag.{tag.lower().replace(" ", "_")}'
+                        translated = get_response_message(key, language=lang)
+                        if translated != key:
+                            translated_tags.append(translated)
+                        else:
+                            translated_tags.append(tag)
+                    f['tags'] = translated_tags
         return Response(formats)
 
 
@@ -99,31 +130,31 @@ class ExportFormatsListAPI(generics.RetrieveAPIView):
                 name='export_type',
                 type=OpenApiTypes.STR,
                 location='query',
-                description='Selected export format (JSON by default)',
+                description=_S('schema.param.selected_export_format'),
             ),
             OpenApiParameter(
                 name='download_all_tasks',
                 type=OpenApiTypes.BOOL,
                 location='query',
-                description='If true, download all tasks regardless of status. If false, download only annotated tasks.',
+                description=_S('schema.param.download_all_tasks'),
             ),
             OpenApiParameter(
                 name='download_resources',
                 type=OpenApiTypes.BOOL,
                 location='query',
-                description='If true, download all resource files such as images, audio, and others relevant to the tasks.',
+                description=_S('schema.param.download_resources'),
             ),
             OpenApiParameter(
                 name='ids',
                 many=True,
                 location='query',
-                description='Specify a list of task IDs to retrieve only the details for those tasks.',
+                description=_S('schema.param.ids_list'),
             ),
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.param.project_id'),
             ),
         ],
         tags=['Export'],
@@ -158,7 +189,7 @@ class ExportFormatsListAPI(generics.RetrieveAPIView):
         deprecated=True,
         responses={
             200: OpenApiResponse(
-                description='Exported data',
+                description=_S('schema.resp.exported_data'),
                 response={
                     'title': 'Export file',
                     'description': 'Export file with results',
@@ -178,7 +209,7 @@ class ExportAPI(generics.RetrieveAPIView):
     permission_required = all_permissions.projects_change
 
     def get_queryset(self):
-        return Project.objects.filter(organization=self.request.user.active_organization)
+        return Project.objects.filter(created_by=self.request.user)
 
     def get_task_queryset(self, queryset):
         # Import here to avoid circular dependencies
@@ -270,7 +301,7 @@ class ProjectExportFiles(generics.RetrieveAPIView):
     permission_required = all_permissions.projects_change
 
     def get_queryset(self):
-        return Project.objects.filter(organization=self.request.user.active_organization)
+        return Project.objects.filter(created_by=self.request.user)
 
     def get(self, request, *args, **kwargs):
         # project permission check
@@ -304,7 +335,7 @@ class ProjectExportFilesAuthCheck(APIView):
         except ValueError:
             return Response({'detail': 'Incorrect filename in export'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        generics.get_object_or_404(Project.objects.filter(organization=self.request.user.active_organization), pk=pk)
+        generics.get_object_or_404(Project.objects.filter(created_by=self.request.user), pk=pk)
         return Response({'detail': 'auth ok'}, status=status.HTTP_200_OK)
 
 
@@ -313,13 +344,13 @@ class ProjectExportFilesAuthCheck(APIView):
     decorator=extend_schema(
         tags=['Export'],
         summary='List all export snapshots',
-        description='Returns a list of exported files for a specific project by ID.',
+        description=_S('schema.action.list_exports'),
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.param.project_id'),
             )
         ],
         extensions={
@@ -334,13 +365,13 @@ class ProjectExportFilesAuthCheck(APIView):
     decorator=extend_schema(
         tags=['Export'],
         summary='Create new export snapshot',
-        description='Create a new export request to start a background task and generate an export file for a specific project by ID.',
+        description=_S('schema.action.create_export'),
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.param.project_id'),
             )
         ],
         extensions={
@@ -406,19 +437,19 @@ class ExportListAPI(generics.ListCreateAPIView):
     decorator=extend_schema(
         tags=['Export'],
         summary='Get export snapshot by ID',
-        description='Retrieve information about an export file by export ID for a specific project.',
+        description=_S('schema.action.get_export'),
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.param.project_id'),
             ),
             OpenApiParameter(
                 name='export_pk',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='Primary key identifying the export file.',
+                description=_S('schema.param.export_pk'),
             ),
         ],
         extensions={
@@ -433,19 +464,19 @@ class ExportListAPI(generics.ListCreateAPIView):
     decorator=extend_schema(
         tags=['Export'],
         summary='Delete export snapshot',
-        description='Delete an export file by specified export ID.',
+        description=_S('schema.action.delete_export'),
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.param.project_id'),
             ),
             OpenApiParameter(
                 name='export_pk',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='Primary key identifying the export file.',
+                description=_S('schema.param.export_pk'),
             ),
         ],
         extensions={
@@ -513,24 +544,24 @@ class ExportDetailAPI(generics.RetrieveDestroyAPIView):
                 name='exportType',
                 type=OpenApiTypes.STR,
                 location='query',
-                description='Selected export format',
+                description=_S('schema.param.selected_export_format'),
             ),
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.param.project_id'),
             ),
             OpenApiParameter(
                 name='export_pk',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='Primary key identifying the export file.',
+                description=_S('schema.param.export_pk'),
             ),
         ],
         responses={
             (200, 'application/*'): OpenApiResponse(
-                description='Export file',
+                description=_S('schema.resp.export_file'),
                 response={
                     'type': 'string',
                     'format': 'binary',
@@ -575,7 +606,7 @@ class ExportDownloadAPI(generics.RetrieveAPIView):
             if export_type is not None and export_type != 'JSON':
                 converted_file = snapshot.converted_formats.filter(export_type=export_type).first()
                 if converted_file is None:
-                    raise NotFound(f'{export_type} format is not converted yet')
+                    raise NotFound(get_response_message('export.format_not_converted', language=_detect_lang(request), export_type=export_type))
                 file = converted_file.file
 
             if isinstance(file.storage, FileSystemStorage):
@@ -635,7 +666,7 @@ def async_convert(converted_format_id, export_type, project, hostname, download_
     snapshot = converted_format.export
     converted_file = snapshot.convert_file(export_type, download_resources=download_resources, hostname=hostname)
     if converted_file is None:
-        raise ValidationError('No converted file found, probably there are no annotations in the export snapshot')
+        raise ValidationError(get_response_message('export.no_converted_file'))
     md5 = Export.eval_md5(converted_file)
     ext = converted_file.name.split('.')[-1]
 
@@ -666,20 +697,20 @@ def set_convert_background_failure(job, connection, type, value, traceback_obj):
     decorator=extend_schema(
         tags=['Export'],
         summary='Export conversion',
-        description='Convert export snapshot to selected format',
+        description=_S('schema.action.convert_export'),
         request=ExportConvertSerializer,
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this project.',
+                description=_S('schema.param.project_id'),
             ),
             OpenApiParameter(
                 name='export_pk',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='Primary key identifying the export file.',
+                description=_S('schema.param.export_pk'),
             ),
         ],
         responses={
@@ -717,7 +748,7 @@ class ExportConvertAPI(generics.CreateAPIView):
         ).get_or_create(export=snapshot, export_type=export_type)
 
         if not created:
-            raise ValidationError(f'Conversion to {export_type} already started')
+            raise ValidationError(get_response_message('export.conversion_already_started', language=_detect_lang(request), export_type=export_type))
 
         start_job_async_or_sync(
             async_convert,

@@ -8,13 +8,16 @@ import ToolMixin from "../mixins/Tool";
 import { FF_LSDV_4930, isFF } from "../utils/feature-flags";
 import BaseTool from "./Base";
 
+import i18n from "../../../../apps/labelstudio/src/translations/i18n";
+
 const ToolView = observer(({ item }) => {
+
   return (
     <Tool
       ariaLabel="move-tool"
       active={item.selected}
       icon={<IconMoveTool />}
-      label="Move"
+      label={ i18n.t("editor.tools.move") }
       shortcut={item.shortcut}
       extraShortcuts={item.extraShortcuts}
       onClick={() => {

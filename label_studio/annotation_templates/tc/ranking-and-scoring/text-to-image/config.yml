@@ -1,0 +1,72 @@
+title: "文生圖"
+type: community
+group: 排序與評分
+image: /static/templates/text-to-image.png
+details: |
+  <h1>評估文字到圖片產生模型的品質</h1>
+  <dl>
+    <dt>產業應用</dt>
+    <dd>AI圖片產生、內容創作、設計、廣告、遊戲開發</dd>
+    <dt>相關模型</dt>
+    <dd>Stable Diffusion、DALL-E、Midjourney</dd>
+    <dt>領域術語</dt>
+    <dd>文生圖、圖片產生、生成AI、擴散模型</dd>
+  </dl>
+config: |
+  <View>
+    <View className="ch-title">
+      <Text name="prompt" value="$prompt"/>
+    </View>
+    <View className="highlight">
+      <Choices name="images" toName="prompt" value="$images" choice="multiple" layout="inline"/>
+    </View>
+    <Style>
+    .ch-title {
+      font-size: 2em;
+      text-align: center;
+    }
+    .ch-title .lsf-richtext__line:before {
+      display: none;
+    }
+    .highlight .ant-checkbox {
+      position: absolute;
+      opacity: 0;
+    }
+    .ant-checkbox+span {
+      border: 4px solid transparent;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .ant-checkbox-checked+span {
+      border-color: var(--color-primary-border-subtle);
+    }
+    .ant-checkbox+span sup {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      z-index: 2;
+      display: block;
+      width: 24px;
+      line-height: 16px;
+      text-align: center;
+    }
+    </Style>
+  </View>
+  <!-- {"data": {
+    "prompt": "An astronaut riding a horse in a photorealistic style",
+    "images": [{
+      "value": "id123#0",
+  	"style": "margin: 5px",
+      "html": "<img width='400' src='https://cdn.openai.com/dall-e-2/demos/text2im/astronaut/horse/photo/0.jpg'/>"
+    },
+  {
+      "value": "id123#1",
+  	"style": "margin: 5px",
+      "html": "<img width='400' src='https://cdn.openai.com/dall-e-2/demos/text2im/astronaut/horse/photo/1.jpg'/>"
+    }, {
+      "value": "id123#2",
+  	"style": "margin: 5px",
+      "html": "<img width='400' src='https://cdn.openai.com/dall-e-2/demos/text2im/astronaut/horse/photo/2.jpg'/>"
+    }
+    ]
+  }} -->

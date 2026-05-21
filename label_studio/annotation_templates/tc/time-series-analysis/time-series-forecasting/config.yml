@@ -1,0 +1,42 @@
+title: "時間序列預測"
+type: community
+group: 時間序列分析
+image: /static/templates/time-series-forecasting.png
+details: |
+  <h1>對時間序列趨勢進行標註以用於預測</h1>
+  <dl>
+    <dt>產業應用</dt>
+    <dd>銷售預測、庫存規劃、需求預測、金融預測、天氣預測</dd>
+    <dt>相關模型</dt>
+    <dd>Prophet、ARIMA、LSTM、Transformer</dd>
+    <dt>領域術語</dt>
+    <dd>預測、時間序列、趨勢、forecasting</dd>
+  </dl>
+config: |
+  <View>
+      <!-- Control tag for region labels -->
+      <Header value="Select predictable region spans in time series:"/>
+      <TimeSeriesLabels name="predictable" toName="stock">
+          <Label value="Regions" background="red" />
+      </TimeSeriesLabels>
+
+      <!-- Object tag for time series data source -->
+      <TimeSeries name="stock" valueType="url" value="$csv"
+                  sep=","
+                  timeColumn="time"
+                  timeFormat="%Y-%m-%d %H:%M:%S.%f"
+                  timeDisplayFormat="%Y-%m-%d"
+                  overviewChannels="value">
+
+          <Channel column="value"
+                   displayFormat=",.1f"
+                   strokeColor="#1f77b4"
+                   legend="Stock Value"/>
+      </TimeSeries>
+      <Header value="Forecast next trend:"/>
+      <Choices name="trend_forecast" toName="stock">
+          <Choice value="Up"/>
+          <Choice value="Down"/>
+          <Choice value="Steady"/>
+      </Choices>
+  </View>

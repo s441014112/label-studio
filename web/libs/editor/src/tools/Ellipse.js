@@ -23,7 +23,8 @@ const _Tool = types
         };
       },
       get viewTooltip() {
-        return "Ellipse region";
+        const t = self.t;
+        return t ? t('editor.tools.ellipse_region', { defaultValue: "Ellipse region" }) : "Ellipse region";
       },
       get iconComponent() {
         return self.dynamic ? NodeViews.EllipseRegionModel.altIcon : NodeViews.EllipseRegionModel.icon;

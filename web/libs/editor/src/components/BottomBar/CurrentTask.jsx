@@ -20,6 +20,8 @@ export const CurrentTask = observer(({ store }) => {
   const [initialCommentLength, setInitialCommentLength] = useState(0);
   const [visibleComments, setVisibleComments] = useState(0);
 
+  const t = store.t;
+
   useEffect(() => {
     store.commentStore.setAddedCommentThisSession(false);
 
@@ -72,24 +74,24 @@ export const CurrentTask = observer(({ store }) => {
 
   // Memoized messages for previous button
   const prevButtonMessage = useMemo(() => {
-    return !store.canGoPrevTask ? "No previous task" : "Previous task";
+    return !store.canGoPrevTask ? t("editor.components.bottomBar.no_previous_task") : t("editor.components.bottomBar.previous_task");
   }, [store.canGoPrevTask]);
 
   // Memoized messages for next button
   const nextButtonMessage = useMemo(() => {
     if (requiresAnnotationSubmission) {
-      return "Submit an annotation to continue";
+      return t("editor.components.bottomBar.submit_and_continue");
     }
     if (canNavigateNext) {
-      return "Next task";
+      return t("editor.components.bottomBar.next_task");
     }
     if (canPostponeTask) {
-      return "Postpone task";
+      return t("editor.components.bottomBar.postpone_task");
     }
     if (!canSkipOrPostpone) {
-      return "Cannot postpone: task cannot be skipped";
+      return t("editor.components.bottomBar.cannot_skip");
     }
-    return "No next task available";
+    return t("editor.components.bottomBar.no_next_task");
   }, [requiresAnnotationSubmission, canNavigateNext, canPostponeTask, canSkipOrPostpone]);
 
   if (store.hasInterface("annotations:comments") && isFF(FF_DEV_4174)) {

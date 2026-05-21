@@ -8,6 +8,8 @@ import type { JsonViewerProps } from "./types";
 import { ReaderViewButton } from "./reader-view-button";
 import styles from "./json-viewer.module.scss";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+
 // Custom Label Studio theme for json-edit-react
 // Note: Colors are applied via SCSS using :global selectors because
 // json-edit-react doesn't support CSS variables in theme configuration
@@ -80,7 +82,7 @@ export const JsonViewer: FC<JsonViewerProps> = ({
     () => [
       {
         id: "all",
-        label: "All",
+        label: i18n.t("datamanager.components.table.all"),
         filterFn: () => true,
       },
       ...customFilters,
@@ -203,14 +205,14 @@ export const JsonViewer: FC<JsonViewerProps> = ({
                   <IconSearch className={styles.searchIcon} />
                   <input
                     type="text"
-                    placeholder="Search keys or values"
+                    placeholder=""
                     value={searchText}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
                     className={styles.searchInput}
                     aria-label="Search JSON"
                   />
                   {searchText && (
-                    <Tooltip title="Clear Search">
+                    <Tooltip title="">
                       <Button
                         look="string"
                         variant="primary"
@@ -238,7 +240,7 @@ export const JsonViewer: FC<JsonViewerProps> = ({
                     </Button>
                   ))}
                   {activeFilter && (
-                    <Tooltip title="Reset filters">
+                    <Tooltip title={ i18n.t("datamanager.components.table.reset_filters") }>
                       <Button
                         look="outlined"
                         variant="neutral"
@@ -256,7 +258,7 @@ export const JsonViewer: FC<JsonViewerProps> = ({
         )}
         <div className={clsx(styles.jsonEditorContainer, inset && styles.inset)} style={{ minHeight, maxHeight }}>
           {showCopyButton && (
-            <Tooltip title={copied ? "Copied!" : "Copy JSON"}>
+            <Tooltip title={copied ? i18n.t("datamanager.components.table.copied") : i18n.t("datamanager.components.table.copy_json")}>
               <Button
                 look="outlined"
                 variant="neutral"

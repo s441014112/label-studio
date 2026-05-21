@@ -101,7 +101,6 @@ export const FlyoutMenu = ({ items, icon }) => {
           .elem("icon")
           .mix(isClicked ? "isClicked" : "")
           .toClassName()}
-        title="Zoom presets (click to see options)"
       >
         {icon}
       </div>

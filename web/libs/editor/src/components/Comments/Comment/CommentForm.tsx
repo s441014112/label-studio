@@ -14,6 +14,9 @@ import { NewTaxonomy as Taxonomy, type TaxonomyPath } from "../../../components/
 import { CommentFormButtons } from "./CommentFormButtons";
 import { taxonomyPathsToSelectedItems, COMMENT_TAXONOMY_OPTIONS } from "../../../utils/commentClassification";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 export type CommentFormProps = {
   commentStore: any;
   annotationStore: any;
@@ -123,6 +126,8 @@ export const CommentForm: FC<CommentFormProps> = observer(({ commentStore, annot
   const selections = useMemo(() => taxonomyPathsToSelectedItems(classifications?.default?.values), [classifications]);
   const classificationsItems = commentStore.commentClassificationsItems;
 
+  const t = useTranslation();
+
   const updateCommentClassifications = useCallback(
     (classifications: object | null) => {
       const currentComment = getCurrentComment();
@@ -157,7 +162,7 @@ export const CommentForm: FC<CommentFormProps> = observer(({ commentStore, annot
         <TextArea
           actionRef={actionRef}
           name="comment"
-          placeholder="Add a comment"
+          placeholder={ t("editor.components.comments.add_a_comment") }
           value={text}
           rows={ROWS}
           maxRows={MAX_ROWS}

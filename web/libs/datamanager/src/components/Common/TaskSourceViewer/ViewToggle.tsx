@@ -9,17 +9,18 @@ interface ViewToggleProps {
   onViewChange: (view: ViewMode) => void;
   /** Additional CSS class */
   className?: string;
+  t?: any;  // 国际化实例
 }
 
 /**
  * ViewToggle - Controls for switching between Code and Interactive view modes
  */
-export const ViewToggle = ({ view, onViewChange, className }: ViewToggleProps) => {
+export const ViewToggle = ({ view, onViewChange, className, t }: ViewToggleProps) => {
   return (
     <Tabs value={view} onValueChange={(newValue: string) => onViewChange(newValue as ViewMode)} variant="default">
       <TabsList className={className}>
-        <TabsTrigger value="code">Code</TabsTrigger>
-        <TabsTrigger value="interactive">Interactive</TabsTrigger>
+        <TabsTrigger value="code">{ t("datamanager.components.table.code") }</TabsTrigger>
+        <TabsTrigger value="interactive">{ t("datamanager.components.table.interactive") }</TabsTrigger>
       </TabsList>
     </Tabs>
   );

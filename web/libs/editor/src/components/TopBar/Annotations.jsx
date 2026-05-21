@@ -22,6 +22,8 @@ export const Annotations = observer(({ store, annotationStore, commentStore }) =
   const enableCreateAnnotation = store.hasInterface("annotations:add-new");
   const groundTruthEnabled = store.hasInterface("ground-truth");
 
+  const t = store.t;
+
   const entities = [];
 
   if (enablePredictions) entities.push(...annotationStore.predictions);
@@ -89,10 +91,11 @@ export const Annotations = observer(({ store, annotationStore, commentStore }) =
     return null;
   };
 
-  const renderAnnotation = (ent, i) => {
+  const renderAnnotation = (ent, i, store) => {
     return (
       <Annotation
         key={`${ent.pk ?? ent.id}${ent.type}`}
+        store={store}
         entity={ent}
         aria-label={`${ent.type} ${i + 1}`}
         selected={ent === annotationStore.selected}
@@ -114,15 +117,15 @@ export const Annotations = observer(({ store, annotationStore, commentStore }) =
     );
   };
 
-  const renderAnnotationList = (entities) => {
+  const renderAnnotationList = (entities, store) => {
     const _drafts = [];
     const _annotations = [];
 
     entities.forEach((obj, i) => {
       if (obj.pk) {
-        _annotations.push(renderAnnotation(obj, i));
+        _annotations.push(renderAnnotation(obj, i, store));
       } else {
-        _drafts.push(renderAnnotation(obj, i));
+        _drafts.push(renderAnnotation(obj, i, store));
       }
     });
 
@@ -139,8 +142,8 @@ export const Annotations = observer(({ store, annotationStore, commentStore }) =
       <div className={cn("annotations-list").toClassName()} ref={dropdownRef}>
         <div className={cn("annotations-list").elem("selected").toClassName()}>
           <Annotation
-            aria-label="Annotations List Toggle"
             entity={annotationStore.selected}
+            store={store}
             onClick={(e) => {
               e.stopPropagation();
               setOpened(!opened);
@@ -161,10 +164,10 @@ export const Annotations = observer(({ store, annotationStore, commentStore }) =
         {opened && (
           <div className={cn("annotations-list").elem("list").toClassName()}>
             {store.hasInterface("annotations:add-new") && (
-              <CreateAnnotation annotationStore={annotationStore} onClick={() => setOpened(false)} />
+              <CreateAnnotation annotationStore={annotationStore} store={store} onClick={() => setOpened(false)} />
             )}
 
-            {renderAnnotationList(entities)}
+            {renderAnnotationList(entities, store)}
           </div>
         )}
       </div>
@@ -172,7 +175,7 @@ export const Annotations = observer(({ store, annotationStore, commentStore }) =
   ) : null;
 });
 
-const CreateAnnotation = observer(({ annotationStore, onClick }) => {
+const CreateAnnotation = observer(({ annotationStore, store, onClick }) => {
   const onCreateAnnotation = useCallback(() => {
     const c = annotationStore.createAnnotation();
 
@@ -180,29 +183,33 @@ const CreateAnnotation = observer(({ annotationStore, onClick }) => {
     onClick();
   }, [annotationStore, onClick]);
 
+  const t = store.t;
+
   return (
     <div
       className={cn("annotations-list").elem("create").toClassName()}
-      aria-label="Create Annotation"
+      aria-label={ t("editor.components.topbar.create_annotation") }
       onClick={onCreateAnnotation}
     >
       <Space size="small">
         <Userpic className={cn("annotations-list").elem("userpic").mod({ prediction: true }).toClassName()}>
           <IconPlusCircle />
         </Userpic>
-        Create Annotation
+        { t("editor.components.topbar.create_annotation") }
       </Space>
     </div>
   );
 });
 
-const Annotation = observer(({ entity, selected, onClick, extra, ...props }) => {
+const Annotation = observer(({ entity, selected, store, onClick, extra, ...props }) => {
   const isPrediction = entity.type === "prediction";
   const username = userDisplayName(
     entity.user ?? {
       firstName: entity.createdBy || "Admin",
     },
   );
+
+  const t = store.t;
 
   return (
     <div {...props} className={cn("annotations-list").elem("entity").mod({ selected }).toClassName()} onClick={onClick}>
@@ -228,7 +235,7 @@ const Annotation = observer(({ entity, selected, onClick, extra, ...props }) => 
               </div>
             ) : (
               <div className={cn("annotations-list").elem("created").toClassName()}>
-                created,{" "}
+                { t("editor.components.topbar.created") },{" "}
                 <TimeAgo className={cn("annotations-list").elem("date").toClassName()} date={entity.createdDate} />
               </div>
             )}

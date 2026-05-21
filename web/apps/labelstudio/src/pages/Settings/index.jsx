@@ -39,7 +39,7 @@ const pages = {
 };
 
 export const SettingsPage = {
-  title: "Settings",
+  title: "sideMenu.settings",
   path: "/settings",
   exact: true,
   layout: MenuLayout,

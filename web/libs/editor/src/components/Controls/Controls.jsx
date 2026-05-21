@@ -8,6 +8,9 @@ import { Button, Tooltip } from "@humansignal/ui";
 import { IconInfoOutline } from "@humansignal/icons";
 import { cn } from "../../utils/bem";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 export default inject("store")(
   observer(({ item, store }) => {
     /**
@@ -22,6 +25,8 @@ export default inject("store")(
     const { userGenerate, sentUserGenerate, versions } = item;
     const { enableHotkeys, enableTooltips } = store.settings;
 
+    const { t } = useTranslation();
+
     /**
      * Task information
      */
@@ -32,7 +37,7 @@ export default inject("store")(
     const updateButtonClassName = cn("update-btn").toClassName();
 
     if (store.task) {
-      taskInformation = <h4 className={`${styles.task} ${taskInfoClassName}`}>Task ID: {store.task.id}</h4>;
+      taskInformation = <h4 className={`${styles.task} ${taskInfoClassName}`}>{ t("editor.components.controls.task_id") }: {store.task.id}</h4>;
     }
 
     /**
@@ -65,7 +70,7 @@ export default inject("store")(
       const canSkip = !skipDisabled || hasForceSkipPermission;
       const skipButtonDisabled = disabled || !canSkip;
 
-      const skipTooltip = canSkip ? "Cancel (skip) task: [ Ctrl+Space ]" : "This task cannot be skipped";
+      const skipTooltip = canSkip ? t("editor.components.controls.cancel_skip") : t("editor.components.controls.task_can_not_skip");
 
       const showInfoIcon = skipButtonDisabled && hasForceSkipPermission;
 
@@ -73,7 +78,7 @@ export default inject("store")(
         skipButton = (
           <>
             {showInfoIcon && (
-              <Tooltip title="Annotators and Reviewers will not be able to skip this task">
+              <Tooltip title={ t("editor.components.controls.task_not_skip") }>
                 <IconInfoOutline width={20} height={20} className="text-neutral-content ml-auto cursor-pointer" />
               </Tooltip>
             )}
@@ -84,7 +89,7 @@ export default inject("store")(
               tooltip={skipTooltip}
               className={`${styles.skip} ${skipButtonClassName}`}
             >
-              Skip {buttons.skip}
+              { t("editor.components.controls.skip") } {buttons.skip}
             </Button>
           </>
         );
@@ -97,10 +102,10 @@ export default inject("store")(
             look="primary"
             icon={<CheckOutlined />}
             onClick={store.submitAnnotation}
-            tooltip="Save results: [ Ctrl+Enter ]"
+            tooltip={ t("editor.components.controls.save_result") }
             className={`${styles.submit} ${submitButtonClassName}`}
           >
-            Submit {buttons.submit}
+            { t("editor.components.controls.submit") } {buttons.submit}
           </Button>
         );
       }
@@ -112,10 +117,10 @@ export default inject("store")(
             look="primary"
             icon={<CheckCircleOutlined />}
             onClick={store.updateAnnotation}
-            tooltip="Update this task: [ Alt+Enter ]"
+            tooltip={ t("editor.components.controls.update") }
             className={updateButtonClassName}
           >
-            {sentUserGenerate || versions.result ? "Update" : "Submit"} {buttons.update}
+            {sentUserGenerate || versions.result ? t("editor.components.controls.update") : t("editor.components.controls.submit")} {buttons.update}
           </Button>
         );
       }

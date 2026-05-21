@@ -13,6 +13,7 @@ interface FieldRendererProps {
   error?: string;
   isEditMode?: boolean;
   formData?: Record<string, any>; // Add formData to check dependencies
+  t: any; // i18n
 }
 
 export const FieldRenderer: React.FC<FieldRendererProps> = ({
@@ -23,6 +24,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   error,
   isEditMode = false,
   formData = {},
+  t,
 }) => {
   // Check if field should be disabled based on dependencies
   const isDisabledByDependency = () => {
@@ -98,11 +100,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     tooltip: "",
     tooltipIcon: null,
     required: isFieldRequired(field, isEditMode),
-    label: field.label,
-    description: field.description || "",
+    label: t(field.label),
+    description: t(field.description) || "",
     footer: error ? <div className="text-negative-content">{error}</div> : "",
     className: error ? "border-negative-content" : "",
-    placeholder: field.placeholder,
+    placeholder: t(field.placeholder),
     autoComplete: field.autoComplete,
     readOnly: field.readOnly || false,
     disabled: isFieldDisabled(),
@@ -110,7 +112,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
   // Enhanced description for access key fields in edit mode
   const getEnhancedDescription = () => {
-    return field.description || "";
+    return t(field.description) || "";
   };
 
   switch (field.type) {
@@ -157,13 +159,13 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     case "select":
       return (
         <div className="space-y-2">
-          <Label text={field.label} description={field.description} />
+          <Label text={t(field.label)} description={t(field.description)} />
           <Select
             name={field.name}
             value={value ?? ""}
             onChange={(selectedValue) => handleSelectChange(selectedValue)}
             options={field.options || []}
-            placeholder={field.placeholder}
+            placeholder={t(field.placeholder)}
             disabled={isFieldDisabled()}
           />
           {error && <p className="text-sm text-negative-content">{error}</p>}
@@ -176,9 +178,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <Toggle
             checked={value || false}
             onChange={(e) => handleToggleChange(e.target.checked)}
-            aria-label={field.label}
-            label={field.label}
-            description={field.description}
+            aria-label={t(field.label)}
+            label={t(field.label)}
+            description={t(field.description)}
             disabled={isDisabled}
           />
         </div>
@@ -190,7 +192,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       return (
         <Counter
           name={field.name}
-          label={field.label}
+          label={t(field.label)}
           value={counterValue}
           min={field.min || 0}
           max={field.max || 100}

@@ -3,6 +3,7 @@
 import logging
 
 from core.permissions import AllPermissions
+from core.translations import TranslatableString as _S
 from data_manager.actions import DataManagerAction
 from django.utils.timezone import now
 from tasks.models import Annotation, Prediction, Task
@@ -90,7 +91,7 @@ def predictions_to_annotations_form(user, project):
                 {
                     'type': 'select',
                     'name': 'model_version',
-                    'label': 'Choose predictions',
+                    'label': _S('dm.form.choose_predictions'),
                     'options': versions,
                     'value': first,
                 }
@@ -103,13 +104,11 @@ actions: list[DataManagerAction] = [
     {
         'entry_point': predictions_to_annotations,
         'permission': all_permissions.tasks_change,
-        'title': 'Create Annotations From Predictions',
+        'title': _S('dm.action.create_annotations_from_predictions.title'),
         'order': 91,
         'dialog': {
-            'title': 'Create Annotations From Predictions',
-            'text': 'Create annotations from predictions using selected predictions set '
-            'for each selected task. '
-            'Your account will be assigned as an owner to those annotations. ',
+            'title': _S('dm.action.create_annotations_from_predictions.dialog_title'),
+            'text': _S('dm.action.create_annotations_from_predictions.dialog_text'),
             'type': 'confirm',
             'form': predictions_to_annotations_form,
         },

@@ -10,6 +10,9 @@ import TreeStructure from "../TreeStructure/TreeStructure";
 
 import styles from "./Taxonomy.module.scss";
 
+import "../../../../../apps/labelstudio/src/translations/i18n"
+import { useTranslation } from "react-i18next";
+
 type TaxonomyPath = string[];
 type onAddLabelCallback = (path: string[]) => any;
 type onDeleteLabelCallback = (path: string[]) => any;
@@ -187,13 +190,15 @@ const Item: React.FC<RowProps> = ({ style, item, dimensionCallback, maxWidth, is
   const limitReached = maxUsagesReached && !checked;
   const disabled = onlyLeafsAllowed || limitReached || !isEditable;
 
+  const { t } = useTranslation();
+
   const onClick = () => onlyLeafsAllowed && toggle(id);
   const arrowStyle = !isLeaf ? { transform: isOpen ? "rotate(180deg)" : "rotate(90deg)" } : { display: "none" };
 
   const title = onlyLeafsAllowed
-    ? "Only leaf nodes allowed"
+    ? t("editor.components.taxonomy.only_leaf_nodes")
     : limitReached
-      ? `Maximum ${maxUsages} items already selected`
+      ? t("editor.components.taxonomy.only_leaf_nodes", { max: maxUsages })
       : undefined;
 
   const setIndeterminate = useCallback(
@@ -288,11 +293,11 @@ const Item: React.FC<RowProps> = ({ style, item, dimensionCallback, maxWidth, is
                                 addChild(id);
                               }}
                             >
-                              Add Inside
+                              { t("editor.components.taxonomy.add_inside") }
                             </Menu.Item>
                             {item.row.origin === "session" && (
                               <Menu.Item key="delete" className={styles.taxonomy__action} onClick={onDelete}>
-                                Delete
+                                { t("editor.components.taxonomy.delete") }
                               </Menu.Item>
                             )}
                           </Menu>
@@ -370,6 +375,8 @@ const TaxonomyDropdown = ({ show, flatten, items, dropdownRef, isEditable }: Tax
 
   const list = search ? filterTreeByPredicate(flatten, predicate) : items;
 
+  const { t } = useTranslation();
+
   useEffect(() => {
     const input = inputRef.current;
 
@@ -413,7 +420,7 @@ const TaxonomyDropdown = ({ show, flatten, items, dropdownRef, isEditable }: Tax
         autoComplete="off"
         className={styles.taxonomy__search}
         name="taxonomy__search"
-        placeholder="Search..."
+        placeholder={ t("editor.components.taxonomy.search") }
         onInput={onInput}
         ref={inputRef}
       />
@@ -443,7 +450,7 @@ const TaxonomyDropdown = ({ show, flatten, items, dropdownRef, isEditable }: Tax
                 onClick={addInside}
                 aria-label="Add new label"
               >
-                Add
+                { t("editor.components.taxonomy.add") }
               </Button>
             </div>
           ) : null}
@@ -489,6 +496,8 @@ const Taxonomy = ({
 
   const [selected, setInternalSelected] = useState(externalSelected);
 
+  const { t } = useTranslation();
+  
   const contextValue: TaxonomySelectedContextValue = useMemo(() => {
     const setSelected = (path: TaxonomyPath, value: boolean) => {
       const newSelected = value ? [...selected, path] : selected.filter((current) => !isArraysEqual(current, path));
@@ -572,7 +581,7 @@ const Taxonomy = ({
         <SelectedList isEditable={isEditable} flatItems={flatten} />
         <div className={["htx-taxonomy", styles.taxonomy, isOpenClassName].join(" ")} ref={taxonomyRef}>
           <span onClick={() => setOpen((val) => !val)}>
-            {options.placeholder || "Click to add..."}
+            {options.placeholder || t("editor.components.taxonomy.click_to_add") }
             <IconChevron stroke="#09f" />
           </span>
           <TaxonomyDropdown

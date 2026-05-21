@@ -1,6 +1,9 @@
 import { Select } from "@humansignal/ui";
 import { useCallback, useMemo } from "react";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from 'react-i18next';
+
 type Sample = {
   title: string;
   url: string;
@@ -16,9 +19,6 @@ export function SampleDatasetSelect({
   sample?: Sample;
   onSampleApplied: (sample?: Sample) => void;
 }) {
-  const title = useMemo(() => {
-    return sample?.title ?? "Select sample";
-  }, [sample]);
 
   const onSelect = useCallback(
     (value: string) => {
@@ -29,6 +29,8 @@ export function SampleDatasetSelect({
     },
     [samples, onSampleApplied],
   );
+
+  const { t } = useTranslation();
 
   const options = useMemo(() => {
     return samples.map((sample) => ({
@@ -56,7 +58,7 @@ export function SampleDatasetSelect({
 
   return (
     <div className="flex gap-3 items-center">
-      <span className="text-neutral-content-subtler">or use a sample dataset</span>
+      <span className="text-neutral-content-subtler">{ t("common.blocks.use_sample_dataset") }</span>
       <Select
         value={sample?.url ?? undefined}
         placeholder="Select sample"

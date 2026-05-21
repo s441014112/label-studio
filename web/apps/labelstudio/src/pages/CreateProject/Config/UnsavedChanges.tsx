@@ -3,6 +3,8 @@ import { Button } from "@humansignal/ui";
 import { LeaveBlocker, type LeaveBlockerCallbacks } from "../../../components/LeaveBlocker/LeaveBlocker";
 import { modal } from "../../../components/Modal/Modal";
 import { Space } from "../../../components/Space/Space";
+import "../../../translations/i18n";
+import { useTranslation } from "react-i18next";
 
 type SaveAndLeaveButtonProps = {
   onSave: () => Promise<void>;
@@ -40,8 +42,8 @@ export const unsavedChangesModal = ({
   cancelText,
   discardText,
   okText,
-  title = "You have unsaved changes.",
-  body = "Would you like to save them before leaving?",
+  title = "",
+  body = "",
   ...props
 }: UnsavedChangesModalProps) => {
   let modalInstance: any = undefined;
@@ -103,6 +105,9 @@ type UnsavedChangesProps = {
 export const UnsavedChanges = ({ hasChanges, onSave }: UnsavedChangesProps) => {
   const saveHandlerRef = useRef(onSave);
   saveHandlerRef.current = onSave;
+
+  const { t } = useTranslation();
+
   const blockHandler = useCallback(async ({ continueCallback, cancelCallback }: LeaveBlockerCallbacks) => {
     const wrappedOnSave = async () => {
       const result = await saveHandlerRef.current?.();
@@ -116,6 +121,11 @@ export const UnsavedChanges = ({ hasChanges, onSave }: UnsavedChangesProps) => {
     };
 
     unsavedChangesModal({
+      title: t("pages.create_project.config.modal_title"),
+      body: t("pages.create_project.config.modal_body"),
+      cancelText: t("pages.create_project.config.cancel"),
+      discardText: t("pages.create_project.config.leave"),
+      okText: t("pages.create_project.config.save"),
       onSave: wrappedOnSave,
       onCancel: cancelCallback,
       onDiscard: continueCallback,

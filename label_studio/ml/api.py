@@ -3,6 +3,7 @@
 import logging
 
 from core.feature_flags import flag_set
+from core.translations import TranslatableString as _S
 from core.permissions import ViewClassPermission, all_permissions
 from django.conf import settings
 from django.utils.decorators import method_decorator
@@ -106,7 +107,7 @@ _ml_backend_schema = {
             host=(settings.HOSTNAME or 'https://localhost:8080')
         ),
         parameters=[
-            OpenApiParameter(name='project', type=OpenApiTypes.INT, location='query', description='Project ID'),
+            OpenApiParameter(name='project', type=OpenApiTypes.INT, location='query', description=_S('schema.param.project_filter')),
         ],
         extensions={
             'x-fern-sdk-group-name': 'ml',
@@ -247,7 +248,7 @@ class MLBackendDetailAPI(generics.RetrieveUpdateDestroyAPIView):
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this ML backend.',
+                description=_S('schema.param.ml_backend_id'),
             ),
         ],
         request={
@@ -262,9 +263,9 @@ class MLBackendDetailAPI(generics.RetrieveUpdateDestroyAPIView):
             },
         },
         responses={
-            200: OpenApiResponse(description='Training has successfully started.'),
+            200: OpenApiResponse(description=_S('schema.resp.training_started')),
             500: OpenApiResponse(
-                description='Training error',
+                description=_S('schema.resp.training_error'),
                 response={
                     'description': 'Error message',
                     'type': 'string',
@@ -304,13 +305,13 @@ class MLBackendTrainAPI(APIView):
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this ML backend.',
+                description=_S('schema.param.ml_backend_id'),
             ),
         ],
         responses={
-            200: OpenApiResponse(description='Predicting has successfully started.'),
+            200: OpenApiResponse(description=_S('schema.resp.predicting_started')),
             500: OpenApiResponse(
-                description='Predicting error',
+                description=_S('schema.resp.predicting_error'),
                 response={
                     'description': 'Error message',
                     'type': 'string',
@@ -376,12 +377,12 @@ class MLBackendPredictTestAPI(APIView):
                 name='id',
                 type=OpenApiTypes.INT,
                 location='path',
-                description='A unique integer value identifying this ML backend.',
+                description=_S('schema.param.ml_backend_id'),
             ),
         ],
         request=MLInteractiveAnnotatingRequest,
         responses={
-            200: OpenApiResponse(description='Interactive annotation has succeeded.'),
+            200: OpenApiResponse(description=_S('schema.resp.interactive_annotation_succeeded')),
         },
         extensions={
             'x-fern-sdk-group-name': 'ml',
@@ -439,10 +440,10 @@ class MLBackendInteractiveAnnotating(APIView):
     decorator=extend_schema(
         tags=['Machine Learning'],
         summary='Get model versions',
-        description='Get available versions of the model.',
+        description=_S('schema.action.get_model_versions'),
         responses={
             200: OpenApiResponse(
-                description='List of available versions.',
+                description=_S('schema.resp.model_versions_list'),
                 response={
                     'type': 'object',
                     'properties': {

@@ -5,6 +5,9 @@ import { cn } from "../../../utils/bem";
 import "./RelationsControls.scss";
 import { IconOutlinerEyeClosed, IconOutlinerEyeOpened, IconSortDown, IconSortUp } from "@humansignal/icons";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next"; 
+
 const RelationsControlsComponent: FC<any> = ({ relationStore }) => {
   return (
     <div className={cn("relation-controls").toClassName()}>
@@ -31,6 +34,8 @@ const ToggleRelationsVisibilityButton = observer<FC<ToggleRelationsVisibilityBut
   const isDisabled = !relationStore?.relations?.length;
   const isAllHidden = !(!isDisabled && relationStore.isAllHidden);
 
+  const { t } = useTranslation();
+
   // This comes from an Elem tag that was set without a name. The CSS was fixed to make it work,
   // but this is clearly bad CSS usage.
   return (
@@ -41,7 +46,7 @@ const ToggleRelationsVisibilityButton = observer<FC<ToggleRelationsVisibilityBut
       size="small"
       disabled={isDisabled}
       onClick={toggleRelationsVisibility}
-      aria-label={isAllHidden ? "Show all" : "Hide all"}
+      aria-label={isAllHidden ? t("editor.components.sidepanels.show_all") : t("editor.components.sidepanels.hide_all")}
       icon={
         isAllHidden ? (
           <IconOutlinerEyeClosed width={16} height={16} />
@@ -49,7 +54,7 @@ const ToggleRelationsVisibilityButton = observer<FC<ToggleRelationsVisibilityBut
           <IconOutlinerEyeOpened width={16} height={16} />
         )
       }
-      tooltip={isAllHidden ? "Show all" : "Hide all"}
+      tooltip={isAllHidden ? t("editor.components.sidepanels.show_all") : t("editor.components.sidepanels.hide_all")}
       tooltipTheme="dark"
     />
   );
@@ -72,6 +77,8 @@ const ToggleRelationsOrderButton = observer<FC<ToggleRelationsOrderButtonProps>>
   const isDisabled = !relationStore?.relations?.length;
   const isAsc = relationStore.order === "asc";
 
+  const { t } = useTranslation();
+
   // This comes from an Elem tag that was set without a name. The CSS was fixed to make it work,
   // but this is clearly bad CSS usage.
   return (
@@ -82,9 +89,9 @@ const ToggleRelationsOrderButton = observer<FC<ToggleRelationsOrderButtonProps>>
       size="small"
       onClick={toggleRelationsOrder}
       disabled={isDisabled}
-      aria-label={isAsc ? "Order by oldest" : "Order by newest"}
+      aria-label={isAsc ? t("editor.components.sidepanels.order_by_oldest") : t("editor.components.sidepanels.order_by_newest")}
       icon={isAsc ? <IconSortUp /> : <IconSortDown />}
-      tooltip={isAsc ? "Order by oldest" : "Order by newest"}
+      tooltip={isAsc ? t("editor.components.sidepanels.order_by_oldest") : t("editor.components.sidepanels.order_by_newest")}
       tooltipTheme="dark"
     />
   );

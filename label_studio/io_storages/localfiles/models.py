@@ -13,6 +13,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save, pre_delete
+from core.translations import get_response_message
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from io_storages.base_models import (
@@ -84,28 +85,20 @@ class LocalFilesMixin(models.Model):
         example_path = Path(settings.LOCAL_FILES_DOCUMENT_ROOT) / 'dataset1'
 
         if not path.exists():
-            raise ValidationError(f'Absolute local path "{self.path}" does not exist')
+            raise ValidationError(get_response_message('storage.localfiles.path_not_exist', path=self.path))
         if document_root == path:
             raise ValidationError(
-                f'Absolute local path "{self.path}" cannot be the same as '
-                f'LOCAL_FILES_DOCUMENT_ROOT="{settings.LOCAL_FILES_DOCUMENT_ROOT}" by security reasons. Please add a subdirectory. '
-                f'For example: "{example_path}".'
+                get_response_message('storage.localfiles.path_same_as_root', path=self.path, root=settings.LOCAL_FILES_DOCUMENT_ROOT, example=str(example_path))
             )
         if document_root not in path.parents:
             raise ValidationError(
-                f'Absolute local path "{self.path}" must be a subdirectory of '
-                f'LOCAL_FILES_DOCUMENT_ROOT="{settings.LOCAL_FILES_DOCUMENT_ROOT}" by security reasons. '
-                f'For example: "{example_path}".'
+                get_response_message('storage.localfiles.path_not_subdirectory', path=self.path, root=settings.LOCAL_FILES_DOCUMENT_ROOT, example=str(example_path))
             )
         if settings.LOCAL_FILES_SERVING_ENABLED is False:
             raise ValidationError(
-                'Serving local files from the host filesystem can be a security risk, so '
-                'LOCAL_FILES_SERVING_ENABLED is disabled by default. '
-                'To enable Local Files storage, set the LOCAL_FILES_SERVING_ENABLED environment '
-                'variable to "true" and restart Label Studio. See '
-                'https://labelstud.io/guide/storage.html#Local-storage for details.'
-                '\n\n'
-                f'{self.community_auto_hint()}'
+                get_response_message('storage.localfiles.serving_disabled')
+                + '\n\n'
+                + f'{self.community_auto_hint()}'
             )
 
 

@@ -167,19 +167,26 @@ class DatabaseIsLockedRetryMiddleware(CommonMiddleware):
             sleep_time *= backoff
         return response
 
-
+#将X-Api-Key: abc123转换为Authorization: Token abc123
+#Django REST Framework 只认标准的 Authorization: Token xxx
 class XApiKeySupportMiddleware:
     """Middleware that adds support for the X-Api-Key header, by having its value supersede
-    anything that's set in the Authorization header."""
+    anything that's set in the Authorization header.
+    支持 X-Api-Key 请求头
+    让它的值 覆盖/替代 Authorization 请求头里的内容
+    """
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
+        # 如果请求头里带了 HTTP_X_API_KEY（即 X-Api-Key）
         if 'HTTP_X_API_KEY' in request.META:
+            # 把它转成：Authorization: Token 你的key
             request.META['HTTP_AUTHORIZATION'] = f'Token {request.META["HTTP_X_API_KEY"]}'
+            # 删掉原来的 X-Api-Key
             del request.META['HTTP_X_API_KEY']
-
+        # 继续正常处理请求
         return self.get_response(request)
 
 

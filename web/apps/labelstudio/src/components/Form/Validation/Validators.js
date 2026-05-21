@@ -1,9 +1,13 @@
 import { isDefined, isEmptyString } from "../../../utils/helpers";
 import "./Validation.scss";
+import "../../../translations/i18n"
+import { useTranslation } from "react-i18next";
 
 export const required = (fieldName, value) => {
   if (!isDefined(value) || isEmptyString(value)) {
-    return `${fieldName} is required`;
+
+    let t = useTranslation();
+    return t('components.form.validation.required', { fieldName })
   }
 };
 
@@ -11,12 +15,15 @@ export const matchPattern = (pattern) => (fieldName, value) => {
   pattern = typeof pattern === "string" ? new RegExp(pattern) : pattern;
 
   if (!isEmptyString(value) && value.match(pattern) === null) {
-    return `${fieldName} must match the pattern ${pattern}`;
+    let t = useTranslation();
+
+    return t('components.form.validation.match_pattern', { fieldName, pattern });
   }
 };
 
 export const json = (fieldName, value) => {
-  const err = `${fieldName} must be valid JSON string`;
+  let t = useTranslation();
+  const err = t('components.form.validation.json_string_valid', { fieldName });
 
   if (!isDefined(value) || value.trim().length === 0) return;
 
@@ -32,9 +39,12 @@ export const json = (fieldName, value) => {
 };
 
 export const regexp = (fieldName, value) => {
+
+  let t = useTranslation();
+  
   try {
     new RegExp(value);
   } catch (err) {
-    return `${fieldName} must be a valid regular expression`;
+    return t('components.form.validation.json_string_valid', { fieldName });
   }
 };

@@ -50,10 +50,10 @@
 
   {% if settings.FRONTEND_SENTRY_DSN %}
     <!-- Sentry -->
-    <script
+    <!-- <script
     src="https://browser.sentry-cdn.com/5.17.0/bundle.min.js"
     integrity="sha384-lowBFC6YTkvMIWPORr7+TERnCkZdo5ab00oH5NkFLeQUAmBTLGwJpFjF6djuxJ/5"
-    crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script> -->
   {% endif %}
 
   <script nonce="{{request.csp_nonce}}">
@@ -178,9 +178,9 @@
     polling: {% if feature_flags.fflag_dev_disable_polling_killswitch_short %}false{% else %}true{% endif %},
     hostname: "{{settings.HOSTNAME}}",
     version: {{ versions|json_dumps_ensure_ascii|safe }},
-    sentry_dsn: {% if settings.FRONTEND_SENTRY_DSN %}"{{ settings.FRONTEND_SENTRY_DSN }}"{% else %}null{% endif %},
+    sentry_dsn: "",
     sentry_rate: "{{ settings.FRONTEND_SENTRY_RATE }}",
-    sentry_environment: "{{ settings.FRONTEND_SENTRY_ENVIRONMENT }}",
+    sentry_environment: "",
     editor_keymap: mergedEditorKeymap,
     feature_flags: {{ feature_flags|json_dumps_ensure_ascii|safe }},
     feature_flags_default_value: {{ settings.FEATURE_FLAGS_DEFAULT_VALUE|json_dumps_ensure_ascii|safe }},

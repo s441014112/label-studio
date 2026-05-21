@@ -14,6 +14,9 @@ import { Button, IconExternal, Typography, Tooltip } from "@humansignal/ui";
 import { getDocsUrl } from "../../../../../../editor/src/utils/docs";
 import { ABILITY, useAuth } from "@humansignal/core/providers/AuthProvider";
 
+import i18n from "../../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 declare global {
   interface Window {
     APP_SETTINGS?: {
@@ -78,6 +81,8 @@ const renderEmptyStateLayout = ({
     height: 40,
   });
 
+  const { t } = useTranslation();
+
   const content = (
     <div className={wrapperClassName}>
       <div className={`flex items-center justify-center ${iconBackground} ${iconColor} rounded-full p-tight mb-4`}>
@@ -85,7 +90,7 @@ const renderEmptyStateLayout = ({
       </div>
 
       <Typography variant="headline" size="medium" className="mb-tight" id={ariaLabelledBy}>
-        {title}
+        { t(title) }
       </Typography>
 
       <Typography
@@ -93,7 +98,7 @@ const renderEmptyStateLayout = ({
         className={`text-neutral-content-subtler max-w-xl ${actions || additionalContent ? "mb-tight" : ""}`}
         id={ariaDescribedBy}
       >
-        {description}
+        { t(description) }
       </Typography>
 
       {additionalContent}
@@ -137,22 +142,22 @@ const renderEmptyStateLayout = ({
 // Storage provider icons component
 const StorageProviderIcons = () => (
   <div className="flex items-center justify-center gap-base mb-wide" data-testid="dm-storage-provider-icons">
-    <Tooltip title="Amazon S3">
+    <Tooltip title={ i18n.t("pages.settings.storage_setting.amazon_s3")}>
       <div className="flex items-center justify-center p-2" aria-label="Amazon S3">
         <IconCloudProviderS3 width={32} height={32} className="text-neutral-content-subtler" />
       </div>
     </Tooltip>
-    <Tooltip title="Google Cloud Storage">
+    <Tooltip title={ i18n.t("pages.settings.storage_setting.google_cloud_storage")}>
       <div className="flex items-center justify-center p-2" aria-label="Google Cloud Storage">
         <IconCloudProviderGCS width={32} height={32} className="text-neutral-content-subtler" />
       </div>
     </Tooltip>
-    <Tooltip title="Azure Blob Storage">
+    <Tooltip title={ i18n.t("pages.settings.storage_setting.azure_storage")}>
       <div className="flex items-center justify-center p-2" aria-label="Azure Blob Storage">
         <IconCloudProviderAzure width={32} height={32} className="text-neutral-content-subtler" />
       </div>
     </Tooltip>
-    <Tooltip title="Redis Storage">
+    <Tooltip title={ i18n.t("pages.settings.storage_setting.redis_storage")}>
       <div className="flex items-center justify-center p-2" aria-label="Redis Storage">
         <IconCloudProviderRedis width={32} height={32} className="text-neutral-content-subtler" />
       </div>
@@ -222,11 +227,11 @@ export const EmptyState: FC<EmptyStateProps> = ({
       icon: <IconSearch />,
       iconBackground: "bg-warning-background",
       iconColor: "text-warning-icon",
-      title: "No tasks found",
-      description: "Try adjusting or clearing the filters to see more results",
+      title: "datamanager.components.mainview.no_task_available",
+      description: "datamanager.components.mainview.see_more_results",
       actions: (
         <Button variant="primary" look="outlined" onClick={onClearFilters} data-testid="dm-clear-filters-button">
-          Clear Filters
+          { i18n.t("datamanager.components.mainview.clear_filters") }
         </Button>
       ),
     });
@@ -240,8 +245,8 @@ export const EmptyState: FC<EmptyStateProps> = ({
     if (userRole === "REVIEWER") {
       return renderEmptyStateLayout({
         icon: <IconCheck />,
-        title: "No tasks available for review or labeling",
-        description: "Tasks imported to this project will appear here",
+        title: "datamanager.components.mainview.no_task_available",
+        description: "datamanager.components.mainview.tasks_imported_appear_here",
       });
     }
 
@@ -253,8 +258,8 @@ export const EmptyState: FC<EmptyStateProps> = ({
       if (isAutoDistribution) {
         return renderEmptyStateLayout({
           icon: <IconLsLabeling />,
-          title: "Start labeling tasks",
-          description: "Tasks you've labeled will appear here",
+          title: "datamanager.components.mainview.start_label_task",
+          description: "datamanager.components.mainview.tasks_labeled_appear_here",
           actions: (
             <Button
               variant="primary"
@@ -263,7 +268,7 @@ export const EmptyState: FC<EmptyStateProps> = ({
               onClick={onLabelAllTasks}
               data-testid="dm-label-all-tasks-button"
             >
-              Label All Tasks
+              { i18n.t("datamanager.components.mainview.label_all_tasks") }
             </Button>
           ),
         });
@@ -272,16 +277,16 @@ export const EmptyState: FC<EmptyStateProps> = ({
       if (isManualDistribution) {
         return renderEmptyStateLayout({
           icon: <IconInbox />,
-          title: "No tasks available",
-          description: "Tasks assigned to you will appear here",
+          title: "datamanager.components.mainview.no_task_available",
+          description: "datamanager.components.mainview.tasks_assigned_to_you",
         });
       }
 
       // Fallback for annotators with unknown distribution setting
       return renderEmptyStateLayout({
         icon: <IconInbox width={40} height={40} />,
-        title: "No tasks available",
-        description: "Tasks will appear here when they become available",
+        title: "datamanager.components.mainview.no_task_available",
+        description: "datamanager.components.mainview.tasks_appear_when_become_available",
       });
     }
   }
@@ -289,8 +294,8 @@ export const EmptyState: FC<EmptyStateProps> = ({
   // Default case: show import functionality (existing behavior for Owners/Admins/Managers)
   return renderEmptyStateLayout({
     icon: <IconUpload />,
-    title: "Import data to get your project started",
-    description: "Connect your cloud storage or upload files from your computer",
+    title: "datamanager.components.mainview.import_data_to_start",
+    description: "datamanager.components.mainview.connect_your_cloud_storage",
     testId: "empty-state-label",
     ariaLabelledBy: "dm-empty-title",
     ariaDescribedBy: "dm-empty-desc",
@@ -305,7 +310,7 @@ export const EmptyState: FC<EmptyStateProps> = ({
             onClick={onOpenSourceStorageModal}
             data-testid="dm-connect-source-storage-button"
           >
-            Connect Cloud Storage
+            { i18n.t("datamanager.components.mainview.connect_cloud_storage") }
           </Button>
         )}
 
@@ -317,11 +322,11 @@ export const EmptyState: FC<EmptyStateProps> = ({
             onClick={onOpenImportModal}
             data-testid="dm-import-button"
           >
-            Import
+            { i18n.t("datamanager.components.mainview.import") }
           </Button>
         )}
       </>
     ),
-    footer: <DocumentationLink />,
+    footer: <></>,
   });
 };

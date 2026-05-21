@@ -1,3 +1,4 @@
+from core.translations import get_response_message
 from core.utils.common import load_func
 from core.validators import JSONSchemaValidator
 from django.conf import settings
@@ -30,6 +31,16 @@ class Webhook(models.Model):
     """
 
     organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE, related_name='webhooks')
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+        related_name='webhooks',
+        verbose_name=_('created by'),
+    )
 
     project = models.ForeignKey(
         'projects.Project', null=True, on_delete=models.CASCADE, related_name='webhooks', default=None
@@ -71,7 +82,7 @@ class Webhook(models.Model):
     def validate_actions(self, actions):
         actions_meta = [WebhookAction.ACTIONS[action] for action in actions]
         if self.project and any((meta.get('organization-only') for meta in actions_meta)):
-            raise ValidationError("Project webhook can't contain organization-only action.")
+            raise ValidationError(get_response_message('webhook.no_org_action_on_project'))
         return actions
 
     def set_actions(self, actions):

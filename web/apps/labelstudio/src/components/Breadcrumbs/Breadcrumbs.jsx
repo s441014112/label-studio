@@ -8,11 +8,15 @@ import { Dropdown } from "@humansignal/ui";
 import { Menu } from "../Menu/Menu";
 import "./Breadcrumbs.scss";
 
+import "../../translations/i18n";
+import { useTranslation } from "react-i18next";
+
 export const Breadcrumbs = () => {
   const config = useConfig();
   const reactBreadcrumbs = useBreadcrumbs();
   const findComponent = useFindRouteComponent();
   const [breadcrumbs, setBreadcrumbs] = useState(reactBreadcrumbs);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (reactBreadcrumbs.length) {
@@ -41,7 +45,7 @@ export const Breadcrumbs = () => {
                 .mod({ faded: index === item.length - 1 })
                 .toClassName()}
             >
-              {item.title}
+              {t(item.title)}
             </span>
           );
 

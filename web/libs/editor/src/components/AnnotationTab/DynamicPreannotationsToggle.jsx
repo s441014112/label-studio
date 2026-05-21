@@ -6,6 +6,8 @@ import ToolsManager from "../../tools/Manager";
 import { cn } from "../../utils/bem";
 import "./DynamicPreannotationsToggle.scss";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+
 export const DynamicPreannotationsToggle = inject("store")(
   observer(({ store }) => {
     const enabled = store.hasInterface("auto-annotation") && !store.forceAutoAnnotation;
@@ -29,7 +31,7 @@ export const DynamicPreannotationsToggle = inject("store")(
                   ToolsManager.allInstances().forEach((inst) => inst.selectDefault());
                 }
               }}
-              label="Auto-Annotation"
+              label={ i18n.t("editor.components.annotation.auto_annotation") }
               data-testid="bottombar-auto-annotation-toggle"
             />
           </Space>

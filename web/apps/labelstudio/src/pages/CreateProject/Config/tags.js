@@ -3,23 +3,23 @@ const OBJECTS = {
     type: "Image",
     settings: {
       strokeWidth: {
-        title: "Width of region borders",
+        title: "pages.create_project.config.Width_of_region_borders",
         type: Number,
         param: ($obj, value) => $obj.$controls.forEach(($control) => $control.setAttribute("strokeWidth", value)),
         value: ($obj) => $obj.$controls[0]?.getAttribute("strokeWidth") ?? 1,
       },
       zoom: {
-        title: "Allow image zoom (ctrl+wheel)",
+        title: "pages.create_project.config.Allow_image_zoom_ctrl",
         type: Boolean,
         param: "zoom",
       },
       zoomControl: {
-        title: "Show controls to zoom in and out",
+        title: "pages.create_project.config.Show_controls_to_zoom_in_and_out",
         type: Boolean,
         param: "zoomControl",
       },
       rotateControl: {
-        title: "Show controls to rotate image",
+        title: "pages.create_project.config.Show_controls_to_rotate_image",
         type: Boolean,
         param: "rotateControl",
       },
@@ -29,7 +29,7 @@ const OBJECTS = {
     type: "Text",
     settings: {
       granularity: {
-        title: "Select text by words",
+        title: "pages.create_project.config.Select_text_by_words",
         type: Boolean,
         param: ($obj, value) =>
           value ? $obj.setAttribute("granularity", "word") : $obj.removeAttribute("granularity"),
@@ -68,7 +68,7 @@ const Labels = {
   type: "Labels",
   settings: {
     placeLabelsLeft: {
-      title: "Display labels:",
+      title: "pages.create_project.config.Display_labels",
       type: ["bottom", "left", "right", "top"],
       control: true,
       when: ($tag) => $tag.$object.tagName !== "Video",
@@ -114,7 +114,7 @@ const Labels = {
       },
     },
     filter: {
-      title: "Add filter for long list of labels",
+      title: "pages.create_project.config.Add_filter_for_long_list_of_labels",
       type: Boolean,
       control: true,
       param: ($obj, value) => {

@@ -11,7 +11,6 @@
     "ls:watch": "nx run labelstudio:build:development --watch",
     "ls:build": "nx run labelstudio:build:production",
     "ls:unit": "nx run labelstudio:unit",
-    "ls:e2e": "nx run labelstudio-e2e:e2e",
     "lsf:watch": "nx run editor:build:development --watch",
     "lsf:serve": "cross-env NODE_ENV=development FRONTEND_HOSTNAME=http://localhost:3000 MODE=standalone nx run editor:serve:development",
     "lsf:e2e": "cd libs/editor/tests/e2e && yarn test",

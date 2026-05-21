@@ -9,9 +9,10 @@ type Props = {
   store: MSTStore["annotationStore"];
   annotations: MSTAnnotation[];
   root: any;
+  rootstore: any;
 };
 
-export const ViewAll = ({ store: annotationStore, annotations, root }: Props) => {
+export const ViewAll = ({ store: annotationStore, annotations, root, rootstore }: Props) => {
   const [tab, setTab] = usePersistentState<"summary" | "compare">("view-all-tab", "summary");
 
   if (annotationStore.store.hasInterface("annotations:summary") && ff.isActive(ff.FF_SUMMARY)) {
@@ -20,24 +21,24 @@ export const ViewAll = ({ store: annotationStore, annotations, root }: Props) =>
         <Tabs variant="default" value={tab} onValueChange={(value) => setTab(value as "summary" | "compare")}>
           <TabsList>
             <TabsTrigger value="summary" data-testid="compare-all-summary-tab">
-              Summary
+              { rootstore.t("editor.components.app.summary")  }
             </TabsTrigger>
             <TabsTrigger value="compare" data-testid="compare-all-side-by-side-tab">
-              Side-by-side
+              { rootstore.t("editor.components.app.side_by_side")  }
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="summary">
-            <TaskSummary store={annotationStore} annotations={annotations} />
+            <TaskSummary store={annotationStore} annotations={annotations} rootstore={rootstore} />
           </TabsContent>
 
           <TabsContent value="compare">
-            <Grid store={annotationStore} annotations={annotations} root={root} />
+            <Grid store={annotationStore} annotations={annotations} root={root} rootstore={rootstore} />
           </TabsContent>
         </Tabs>
       </div>
     );
   }
 
-  return <Grid store={annotationStore} annotations={annotations} root={root} />;
+  return <Grid store={annotationStore} annotations={annotations} root={root} rootstore={rootstore} />;
 };

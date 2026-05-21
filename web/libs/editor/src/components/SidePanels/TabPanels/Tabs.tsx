@@ -8,6 +8,9 @@ import { type BaseProps, Side, type TabProps } from "./types";
 import { determineDroppableArea, determineLeftOrRight } from "./utils";
 import { Button } from "../../../common/Button/Button";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 const classAddedTabs: (Element | undefined)[] = [];
 
 enum DragOverHeightClasses {
@@ -209,6 +212,8 @@ export const Tabs = (
     ? props.panelViews[props.breakPointActiveTab].component
     : props.panelViews?.find((view) => view.active)?.component;
 
+  const { t } = useTranslation();
+
   return (
     <>
       <div className={cn("tabs").toClassName()}>
@@ -228,7 +233,7 @@ export const Tabs = (
                   panelKey={props.name}
                   tabIndex={index}
                   active={view.active}
-                  tabTitle={view.title}
+                  tabTitle={t(view.title)}
                   panelWidth={props.width}
                   viewLength={props.panelViews.length}
                   locked={props.locked}
@@ -268,7 +273,7 @@ export const Tabs = (
                 cursor: "pointer",
               }}
               onClick={() => props.setBottomCollapsed?.(!props.bottomCollapsed)}
-              title={props.bottomCollapsed ? "Expand Bottom Panel" : "Collapse Bottom Panel"}
+              title={props.bottomCollapsed ? t("editor.components.sidepanels.expand_bottom_panel") : t("editor.components.sidepanels.collapse_bottom_panel")}
             >
               {props.bottomCollapsed ? <IconExpandSmall /> : <IconCollapseSmall />}
             </Button>

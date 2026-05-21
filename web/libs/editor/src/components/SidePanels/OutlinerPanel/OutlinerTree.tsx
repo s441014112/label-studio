@@ -29,6 +29,9 @@ import type { EventDataNode, Key } from "rc-tree/es/interface";
 import ResizeObserver from "../../../utils/resize-observer";
 import { RegionLabel } from "./RegionLabel";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 const { localStorage } = window;
 const localStoreName = "collapsed-label-pos";
 const MIN_REGIONS_TREE_ROW_HEIGHT = 34;
@@ -409,6 +412,8 @@ const RootTitle: FC<any> = observer(
       [collapsed],
     );
 
+    const { t } = useTranslation();
+
     return (
       <div className={cn("outliner-item").toClassName()}>
         <div className={cn("outliner-item").elem("content").toClassName()}>
@@ -420,7 +425,7 @@ const RootTitle: FC<any> = observer(
             )}
             {(item?.isDrawing || item?.incomplete) && (
               <span className={cn("outliner-item").elem("incomplete").toClassName()}>
-                <Tooltip title={`Incomplete ${item.type?.replace("region", "") ?? "region"}`}>
+                <Tooltip title={t("editor.components.sidepanels.region", { type: item.type?.replace("region", "") ?? t("editor.components.sidepanels.region") })}>
                   <IconWarning />
                 </Tooltip>
               </span>
@@ -507,6 +512,8 @@ const RegionControls: FC<RegionControlsProps> = injector(
       item.setLocked((locked: boolean) => !locked);
     }, []);
 
+    const { t } = useTranslation();
+
     return (
       <div
         className={cn("outliner-item")
@@ -515,7 +522,7 @@ const RegionControls: FC<RegionControlsProps> = injector(
           .toClassName()}
       >
         {isFF(FF_DEV_3873) ? (
-          <Tooltip title={"Confidence Score"}>
+          <Tooltip title={ t("editor.components.sidepanels.confidence_score") }>
             <div className={cn("outliner-item").elem("control-wrapper").toClassName()}>
               <div className={cn("outliner-item").elem("control").mod({ type: "predict" }).toClassName()}>
                 {item?.origin === "prediction" && <IconSparks style={{ width: 18, height: 18 }} />}
@@ -553,7 +560,7 @@ const RegionControls: FC<RegionControlsProps> = injector(
               onClick={onToggleLocked}
               variant="neutral"
               look="string"
-              tooltip={item?.locked ? "Unlock Region" : "Lock Region"}
+              tooltip={item?.locked ? t("editor.components.sidepanels.unlock_region") : t("editor.components.sidepanels.lock_region") }
             />
           </div>
           <div className={cn("outliner-item").elem("control").mod({ type: "visibility" }).toClassName()}>

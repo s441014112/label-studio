@@ -12,6 +12,7 @@ interface ProviderFormProps {
   onBlur?: (name: string, value: any) => void;
   isEditMode?: boolean;
   target?: "import" | "export";
+  t: any; //  i18n
 }
 
 /**
@@ -61,6 +62,7 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({
   onBlur,
   isEditMode = false,
   target,
+  t,
 }) => {
   const getHiddenFields = (field: FieldDefinition | MessageDefinition) =>
     field.type === "hidden" && (!target || !field.target || field.target === target);
@@ -78,6 +80,7 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({
           error={errors[field.name]}
           isEditMode={isEditMode}
           formData={formData}
+          t={t}
         />
       ))}
 
@@ -129,6 +132,7 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({
                         error={errors[field.name]}
                         isEditMode={isEditMode}
                         formData={formData}
+                        t={t}
                       />
                     )}
                   </div>

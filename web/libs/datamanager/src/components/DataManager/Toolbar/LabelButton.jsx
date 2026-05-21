@@ -6,6 +6,9 @@ import { IconChevronDown } from "@humansignal/icons";
 import { Dropdown } from "@humansignal/ui";
 import { Menu } from "../../Common/Menu/Menu";
 
+import i18n from "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 const injector = inject(({ store }) => {
   const { dataStore, currentView } = store;
   const totalTasks = store.project?.task_count ?? store.project?.task_number ?? 0;
@@ -24,6 +27,8 @@ export const LabelButton = injector(({ store, canLabel, size, target, selectedCo
   const disabled = target === "annotations";
   const triggerRef = useRef();
   const [isOpen, setIsOpen] = useState(false);
+
+  const { t } = useTranslation();
 
   const handleClickOutside = useCallback((e) => {
     const el = triggerRef.current;
@@ -94,14 +99,13 @@ export const LabelButton = injector(({ store, canLabel, size, target, selectedCo
             style={primaryStyle}
             onClick={onLabelAll}
           >
-            Label {selectedCount ? selectedCount : "All"} Task
-            {!selectedCount || selectedCount > 1 ? "s" : ""}
+            { selectedCount > 1 ? t("datamanager.components.datamanager.label_all_tasks") : t("datamanager.components.datamanager.label_task", { count: selectedCount }) }
           </Button>
           <Dropdown.Trigger
             alignment="bottom-right"
             content={
               <Menu size="compact">
-                <Menu.Item onClick={onLabelVisible}>Label Tasks As Displayed</Menu.Item>
+                <Menu.Item onClick={onLabelVisible}>{ t("datamanager.components.datamanager.label_tasks_as_displayed") }</Menu.Item>
               </Menu>
             }
           >

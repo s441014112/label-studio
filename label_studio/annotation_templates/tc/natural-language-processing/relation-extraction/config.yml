@@ -1,0 +1,34 @@
+title: "關係抽取"
+type: community
+group: 自然語言處理
+order: 5
+image: /static/templates/relation-extraction.png
+details: |
+  <h1>標註文字中實體之間的關係</h1>
+  <dl>
+    <dt>產業應用</dt>
+    <dd>知識圖譜、藥物發現、法律分析、情報分析、生物醫學研究、供應鏈分析</dd>
+    <dt>相關模型</dt>
+    <dd>BERT、BioBERT、spaCy、REBEL</dd>
+    <dt>領域術語</dt>
+    <dd>關係提取、實體關係、知識圖譜、三元組</dd>
+  </dl>
+config: |
+  <View>
+     <Relations>
+      <Relation value="org:founded_by"/>
+      <Relation value="org:founded"/>
+    </Relations>
+    <Labels name="label" toName="text">
+      <Label value="Organization" background="orange"/>
+      <Label value="Person" background="green"/>
+      <Label value="Datetime" background="blue"/>
+    </Labels>
+
+    <Text name="text" value="$text"/>
+  </View>
+
+  <!-- {"data": {
+    "text": "Microsoft was founded by Bill Gates and Paul Allen on April 4, 1975, to develop and sell BASIC interpreters for the Altair 8800."
+  }} -->
+

@@ -6,6 +6,9 @@ import { FilterLine } from "./FilterLine/FilterLine";
 import { IconChevronRight, IconPlus } from "@humansignal/icons";
 import "./Filters.scss";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 const injector = inject(({ store }) => ({
   store,
   views: store.viewsStore,
@@ -48,6 +51,8 @@ export const Filters = injector(({ views, currentView, filters }) => {
     [currentView.availableFilters],
   );
 
+  const { t } = useTranslation();
+
   return (
     <div className={cn("filters").mod({ sidebar: sidebarEnabled }).toClassName()}>
       <div className={cn("filters").elem("list").mod({ withFilters: !!filters.length }).toClassName()}>
@@ -65,7 +70,7 @@ export const Filters = injector(({ views, currentView, filters }) => {
             />
           ))
         ) : (
-          <div className={cn("filters").elem("empty").toClassName()}>No filters applied</div>
+          <div className={cn("filters").elem("empty").toClassName()}>{ t("datamanager.components.datamanager.no_filters_applied") }</div>
         )}
       </div>
       <div className={cn("filters").elem("actions").toClassName()}>
@@ -75,7 +80,7 @@ export const Filters = injector(({ views, currentView, filters }) => {
           onClick={() => currentView.createFilter()}
           leading={<IconPlus className="!h-3 !w-3" />}
         >
-          Add {filters.length ? "Another Filter" : "Filter"}
+          { filters.length ? t("datamanager.components.datamanager.add_another_filter") : t("datamanager.components.datamanager.add_filter") }
         </Button>
 
         {!sidebarEnabled ? (
@@ -83,7 +88,7 @@ export const Filters = injector(({ views, currentView, filters }) => {
             look="string"
             type="link"
             size="small"
-            tooltip="Pin to sidebar"
+            tooltip={ t("datamanager.components.datamanager.pin_to_sidebar") }
             onClick={() => views.expandFilters()}
             aria-label="Pin filters to sidebar"
           >

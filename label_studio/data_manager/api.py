@@ -4,6 +4,7 @@ import logging
 
 from asgiref.sync import async_to_sync, sync_to_async
 from core.feature_flags import flag_set
+from core.translations import TranslatableString as _S
 from core.permissions import ViewClassPermission, all_permissions
 from core.utils.common import int_from_request, load_func
 from core.utils.params import bool_from_request
@@ -56,9 +57,9 @@ _view_request_body = {
     decorator=extend_schema(
         tags=['Data Manager'],
         summary='List views',
-        description='List all views for a specific project.',
+        description=_S('schema.action.list_views'),
         parameters=[
-            OpenApiParameter(name='project', type=OpenApiTypes.INT, location='query', description='Project ID'),
+            OpenApiParameter(name='project', type=OpenApiTypes.INT, location='query', description=_S('schema.param.project_filter')),
         ],
         extensions={
             'x-fern-sdk-group-name': 'views',
@@ -72,7 +73,7 @@ _view_request_body = {
     decorator=extend_schema(
         tags=['Data Manager'],
         summary='Create view',
-        description='Create a view for a specific project.',
+        description=_S('schema.action.create_view'),
         request=_view_request_body,
         responses={201: ViewSerializer},
         extensions={
@@ -87,9 +88,9 @@ _view_request_body = {
     decorator=extend_schema(
         tags=['Data Manager'],
         summary='Get view details',
-        description='Get the details about a specific view in the data manager',
+        description=_S('schema.action.get_view'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description='View ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description=_S('schema.param.view_id')),
         ],
         extensions={
             'x-fern-sdk-group-name': 'views',
@@ -103,10 +104,10 @@ _view_request_body = {
     decorator=extend_schema(
         tags=['Data Manager'],
         summary='Put view',
-        description='Overwrite view data with updated filters and other information for a specific project.',
+        description=_S('schema.action.update_view'),
         request=_view_request_body,
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description='View ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description=_S('schema.param.view_id')),
         ],
         extensions={
             'x-fern-audiences': ['internal'],
@@ -118,9 +119,9 @@ _view_request_body = {
     decorator=extend_schema(
         tags=['Data Manager'],
         summary='Update view',
-        description='Update view data with additional filters and other information for a specific project.',
+        description=_S('schema.action.partial_update_view'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description='View ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description=_S('schema.param.view_id')),
         ],
         request=_view_request_body,
         responses={200: ViewSerializer},
@@ -136,9 +137,9 @@ _view_request_body = {
     decorator=extend_schema(
         tags=['Data Manager'],
         summary='Delete view',
-        description='Delete a specific view by ID.',
+        description=_S('schema.action.delete_view'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description='View ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description=_S('schema.param.view_id')),
         ],
         extensions={
             'x-fern-sdk-group-name': 'views',
@@ -165,13 +166,13 @@ class ViewAPI(viewsets.ModelViewSet):
     @extend_schema(
         tags=['Data Manager'],
         summary='Delete all project views',
-        description='Delete all views for a specific project.',
+        description=_S('schema.action.delete_all_views'),
         parameters=[
             OpenApiParameter(
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
                 required=True,
             ),
         ],
@@ -200,9 +201,9 @@ class ViewAPI(viewsets.ModelViewSet):
     @extend_schema(
         tags=['Data Manager'],
         summary='Update order of views',
-        description='Update the order field of views based on the provided list of view IDs',
+        description=_S('schema.action.reorder_views'),
         request=ViewOrderSerializer,
-        responses={200: OpenApiResponse(description='View order updated successfully')},
+        responses={200: OpenApiResponse(description=_S('schema.resp.view_order_updated'))},
         extensions={
             'x-fern-sdk-group-name': 'views',
             'x-fern-sdk-method-name': 'update_order',
@@ -234,7 +235,7 @@ class ViewAPI(viewsets.ModelViewSet):
         return Response(status=200)
 
     def get_queryset(self):
-        return View.objects.filter(project__organization=self.request.user.active_organization).order_by('order', 'id')
+        return View.objects.filter(project__created_by=self.request.user).order_by('order', 'id')
 
 
 class TaskPagination(PageNumberPagination):
@@ -438,13 +439,13 @@ class TaskListAPI(generics.ListCreateAPIView):
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
                 required=True,
             )
         ],
         responses={
             200: OpenApiResponse(
-                description='Columns retrieved successfully',
+                description=_S('schema.resp.columns_retrieved'),
                 examples=[
                     OpenApiExample(
                         name='response',
@@ -475,8 +476,8 @@ class TaskListAPI(generics.ListCreateAPIView):
                     )
                 ],
             ),
-            400: OpenApiResponse(description='Invalid project ID supplied'),
-            404: OpenApiResponse(description='Project not found'),
+            400: OpenApiResponse(description=_S('schema.resp.invalid_project_id')),
+            404: OpenApiResponse(description=_S('schema.resp.project_not_found')),
         },
         extensions={
             'x-fern-audiences': ['internal'],
@@ -484,14 +485,21 @@ class TaskListAPI(generics.ListCreateAPIView):
     ),
 )
 class ProjectColumnsAPI(APIView):
+    # 1. 权限：必须拥有项目查看权限
     permission_required = all_permissions.projects_view
 
     def get(self, request):
+        # 2. 从请求参数里获取 project ID
         pk = int_from_request(request.GET, 'project', 1)
+        # 3. 根据 ID 查项目，不存在就返回 404
         project = generics.get_object_or_404(Project, pk=pk)
+        # 4. 检查当前用户是否有权限访问这个项目
         self.check_object_permissions(request, project)
+        # 5. 加载系统配置的「获取所有列」函数
         GET_ALL_COLUMNS = load_func(settings.DATA_MANAGER_GET_ALL_COLUMNS)
+        # 6. 获取项目的所有列数据
         data = GET_ALL_COLUMNS(project, request.user)
+        # 7. 返回数据给前端
         return Response(data)
 
 
@@ -500,7 +508,7 @@ class ProjectColumnsAPI(APIView):
     decorator=extend_schema(
         tags=['Data Manager'],
         summary='Get project state',
-        description='Retrieve the project state for the data manager.',
+        description=_S('schema.action.get_project_state'),
         extensions={
             'x-fern-audiences': ['internal'],
         },
@@ -535,19 +543,19 @@ class ProjectStateAPI(APIView):
     decorator=extend_schema(
         tags=['Data Manager'],
         summary='Get actions',
-        description='Retrieve all the registered actions with descriptions that data manager can use.',
+        description=_S('schema.action.list_actions'),
         parameters=[
             OpenApiParameter(
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
                 required=True,
             ),
         ],
         responses={
             200: OpenApiResponse(
-                description='Actions retrieved successfully',
+                description=_S('schema.resp.actions_retrieved'),
                 response={
                     'type': 'array',
                     'title': 'Action list',
@@ -637,7 +645,7 @@ class ProjectStateAPI(APIView):
                 name='id',
                 type=OpenApiTypes.STR,
                 location='query',
-                description='Action name ID, see the full list of actions in the `GET api/actions` request',
+                description=_S('schema.param.action_name_id'),
                 enum=[
                     'retrieve_tasks_predictions',
                     'predictions_to_annotations',
@@ -656,18 +664,17 @@ class ProjectStateAPI(APIView):
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
                 required=True,
             ),
             OpenApiParameter(
                 name='view',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='View ID (optional, it has higher priority than filters, '
-                'selectedItems and ordering from the request body payload)',
+                description=_S('schema.param.view_id_optional'),
             ),
         ],
-        responses={200: OpenApiResponse(description='Action performed successfully')},
+        responses={200: OpenApiResponse(description=_S('schema.resp.action_performed'))},
         extensions={
             'x-fern-sdk-group-name': 'actions',
             'x-fern-sdk-method-name': 'create',
@@ -722,19 +729,19 @@ class ProjectActionsAPI(APIView):
     decorator=extend_schema(
         tags=['Data Manager'],
         summary='Get action form',
-        description='Get the form configuration for a specific action.',
+        description=_S('schema.action.get_action_form'),
         parameters=[
             OpenApiParameter(
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
                 required=True,
             )
         ],
         responses={
             200: OpenApiResponse(
-                description='Action form configuration returned successfully',
+                description=_S('schema.resp.action_form_returned'),
                 response={
                     'type': 'object',
                     'description': 'Form configuration object',

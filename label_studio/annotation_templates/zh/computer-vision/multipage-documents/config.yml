@@ -1,0 +1,34 @@
+title: "多页文档"
+type: community
+group: 计算机视觉
+image: /static/templates/multipage.png
+details: |
+  <h1>对多页文档中的文本区域进行分类</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>文档处理、档案数字化、合同审查、法律文档、报告分析</dd>
+    <dt>相关模型</dt>
+    <dd>LayoutLM、Donut、BERT</dd>
+    <dt>领域术语</dt>
+    <dd>多页、文档分类、区域标注、OCR</dd>
+  </dl>
+config: |
+  <View>
+    <RectangleLabels name="rectangles" toName="pdf" showInline="true">
+      <Label value="Title" background="green" />
+      <Label value="Date" background="blue" />
+      <Label value="Author" background="gold"/>
+      <Label value="Organization" background="pink"/>
+      <Label value="Amount" background="red"/>
+    </RectangleLabels>
+    <Image valueList="$pages" name="pdf"/>
+  </View>
+  
+  
+  <!-- {
+  "pages": [
+      "https://htx-pub.s3.amazonaws.com/demo/images/demo_stock_purchase_agreement/0001.jpg",
+      "https://htx-pub.s3.amazonaws.com/demo/images/demo_stock_purchase_agreement/0002.jpg",
+      "https://htx-pub.s3.amazonaws.com/demo/images/demo_stock_purchase_agreement/0003.jpg"
+    ]
+  } -->

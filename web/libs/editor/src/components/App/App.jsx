@@ -82,18 +82,18 @@ class App extends Component {
     document.body.focus();
   }
 
-  renderSuccess() {
+  renderSuccess(store) {
     return (
       <div className={cn("editor").toClassName()}>
-        <Result status="success" title={getEnv(this.props.store).messages.DONE} />
+        <Result status="success" title={store.t(getEnv(this.props.store).messages.DONE)}  />
       </div>
     );
   }
 
-  renderNoAnnotation() {
+  renderNoAnnotation(store) {
     return (
       <div className={cn("editor").toClassName()}>
-        <Result status="success" title={getEnv(this.props.store).messages.NO_COMP_LEFT} />
+        <Result status="success" title={store.t(getEnv(this.props.store).messages.NO_COMP_LEFT)} />
       </div>
     );
   }
@@ -110,8 +110,8 @@ class App extends Component {
           paddingBottom: "30vh",
         }}
       >
-        <Result status="success" title={getEnv(this.props.store).messages.NO_NEXT_TASK} />
-        <div className={cn("sub__result").toClassName()}>All tasks in the queue have been completed</div>
+        <Result status="success" title={store.t(getEnv(this.props.store).messages.NO_NEXT_TASK)} />
+        <div className={cn("sub__result").toClassName()}>{ store.t("editor.components.app.all_tasks_been_completed") }</div>
         {store.taskHistory.length > 0 && (
           <Button
             onClick={(e) => store.prevTask(e, true)}
@@ -119,17 +119,17 @@ class App extends Component {
             className="mx-0 my-4"
             aria-label="Previous task"
           >
-            Go to Previous Task
+            { store.t("editor.components.app.goto_previous_task") }
           </Button>
         )}
       </div>
     );
   }
 
-  renderNoAccess() {
+  renderNoAccess(store) {
     return (
       <div className={cn("editor").toClassName()}>
-        <Result status="warning" title={getEnv(this.props.store).messages.NO_ACCESS} />
+        <Result status="warning" title={store.t(getEnv(this.props.store).messages.NO_ACCESS)} />
       </div>
     );
   }
@@ -193,7 +193,7 @@ class App extends Component {
       sortAnnotations(entities);
     }
 
-    return <ViewAll store={as} annotations={entities} root={as.root} />;
+    return <ViewAll store={as} annotations={entities} root={as.root} rootstore={this.props.store} />;
   }
 
   renderRelations(selectedStore) {
@@ -229,11 +229,11 @@ class App extends Component {
 
     if (store.noTask) return this.renderNothingToLabel(store);
 
-    if (store.noAccess) return this.renderNoAccess();
+    if (store.noAccess) return this.renderNoAccess(store);
 
-    if (store.labeledSuccess) return this.renderSuccess();
+    if (store.labeledSuccess) return this.renderSuccess(store);
 
-    if (!root) return this.renderNoAnnotation();
+    if (!root) return this.renderNoAnnotation(store);
 
     const viewingAll = as.viewingAll;
 
@@ -266,7 +266,7 @@ class App extends Component {
                 <InstructionsModal
                   visible={store.showingDescription}
                   onCancel={() => store.toggleDescription()}
-                  title={store.hasInterface("review") ? "Review Instructions" : "Labeling Instructions"}
+                  title={store.hasInterface("review") ? store.t("editor.components.app.review_instructions") : store.t("editor.components.app.labeling_instructions")}
                 >
                   {store.description}
                 </InstructionsModal>

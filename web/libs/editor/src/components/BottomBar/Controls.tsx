@@ -26,6 +26,8 @@ import {
 
 import "./Controls.scss";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+
 // these buttons can be reused inside custom buttons or can be replaces with custom buttons
 type SupportedInternalButtons = "accept" | "reject";
 // special places for custom buttons — before, after or instead of internal buttons
@@ -43,7 +45,7 @@ type ControlButtonProps = {
   onClick: (e: React.MouseEvent) => void;
 };
 
-export const EMPTY_SUBMIT_TOOLTIP = "Empty annotations denied in this project";
+export const EMPTY_SUBMIT_TOOLTIP = i18n.t("editor.components.bottomBar.empty_submit");
 
 /**
  * Custom action button component, rendering buttons from store.customButtons
@@ -168,7 +170,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
           const selected = store.annotationStore?.selected;
 
           if (store.hasInterface("comments:reject")) {
-            handleActionWithComments(e, action, "Please enter a comment before rejecting");
+            handleActionWithComments(e, action, i18n.t("editor.components.bottomBar.enter_comment_before_reject"));
           } else {
             selected?.submissionInProgress();
             await store.commentStore.commentFormSubmit();
@@ -182,14 +184,14 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
     } else if (annotation.skipped) {
       buttons.push(
         <div className={cn("controls").elem("skipped-info").toClassName()} key="skipped">
-          <IconBan /> Was skipped
+          <IconBan /> { i18n.t("editor.components.bottomBar.was_skipped") }
         </div>,
       );
       buttons.push(<UnskipButton key="unskip" disabled={disabled} store={store} />);
     } else {
       if (store.hasInterface("skip")) {
         const onSkipWithComment = (e: React.MouseEvent, action: () => any) => {
-          handleActionWithComments(e, action, "Please enter a comment before skipping");
+          handleActionWithComments(e, action, i18n.t("editor.components.bottomBar.please_enter_comment"));
         };
 
         buttons.push(<SkipButton key="skip" disabled={disabled} store={store} onSkipWithComment={onSkipWithComment} />);
@@ -236,7 +238,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
               }}
               data-testid={`bottombar-${isUpdate ? "update" : "submit"}-and-exit-button`}
             >
-              {`${isUpdate ? "Update" : "Submit"} and exit`}
+              { isUpdate ? i18n.t("editor.components.bottomBar.update_and_exit"): i18n.t("editor.components.bottomBar.submit_and_exit")} 
             </Button>
           </div>
         );
@@ -247,7 +249,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
           ? store.overlapReachedMessage
           : submitDisabled
             ? EMPTY_SUBMIT_TOOLTIP
-            : "Save results: [ Ctrl+Enter ]";
+            : "";
 
         buttons.push(
           <ButtonTooltip key="submit" title={title}>
@@ -268,7 +270,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
                   }}
                   data-testid="bottombar-submit-button"
                 >
-                  Submit
+                  { i18n.t("editor.components.bottomBar.submit") }
                 </Button>
                 {useExitOption ? (
                   <Dropdown.Trigger
@@ -320,7 +322,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
                 }}
                 data-testid="bottombar-update-button"
               >
-                {isUpdate ? "Update" : "Submit"}
+                {isUpdate ? i18n.t("editor.components.bottomBar.update") : i18n.t("editor.components.bottomBar.submit") }
               </Button>
               {useExitOption ? (
                 <Dropdown.Trigger

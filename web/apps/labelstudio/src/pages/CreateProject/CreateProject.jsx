@@ -17,6 +17,9 @@ import { Input, TextArea } from "../../components/Form";
 import { FF_LSDV_E_297, isFF } from "../../utils/feature-flags";
 import { createURL } from "../../components/HeidiTips/utils";
 
+import i18n from "../../translations/i18n";
+import { useTranslation } from "react-i18next";
+
 const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, setDescription, show = true }) =>
   !show ? null : (
     <form
@@ -28,7 +31,7 @@ const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, 
     >
       <div className="w-full flex flex-col gap-2">
         <label className="w-full" htmlFor="project_name">
-          Project Name
+          { i18n.t("pages.create_project.project_name.name_title")}
         </label>
         <Input
           name="name"
@@ -42,12 +45,12 @@ const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, 
       </div>
       <div className="w-full flex flex-col gap-2">
         <label className="w-full" htmlFor="project_description">
-          Description
+          { i18n.t("pages.create_project.project_name.name_title")}
         </label>
         <TextArea
           name="description"
           id="project_description"
-          placeholder="Optional description of your project"
+          placeholder={ i18n.t("pages.create_project.project_name.description_placeholder")}
           rows="4"
           style={{ minHeight: 100 }}
           value={description}
@@ -55,7 +58,7 @@ const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, 
           className="project-description w-full"
         />
       </div>
-      {isFF(FF_LSDV_E_297) && (
+      {/* {isFF(FF_LSDV_E_297) && (
         <div className="w-full flex flex-col gap-2">
           <label>
             Workspace
@@ -81,7 +84,7 @@ const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, 
           </Typography>
           <HeidiTips collection="projectCreation" />
         </div>
-      )}
+      )} */}
     </form>
   );
 
@@ -97,6 +100,8 @@ export const CreateProject = ({ onClose }) => {
   const [error, setError] = React.useState();
   const [description, setDescription] = React.useState("");
   const [sample, setSample] = React.useState(null);
+
+  const { t } = useTranslation();
 
   const setStep = React.useCallback((step) => {
     _setStep(step);
@@ -117,9 +122,9 @@ export const CreateProject = ({ onClose }) => {
   const rootClass = cn("create-project");
   const tabClass = rootClass.elem("tab");
   const steps = {
-    name: <span className={tabClass.mod({ disabled: !!error })}>Project Name</span>,
-    import: <span className={tabClass.mod({ disabled: uploadDisabled })}>Data Import</span>,
-    config: "Labeling Setup",
+    name: <span className={tabClass.mod({ disabled: !!error })}>{ t("pages.create_project.project_name.name_title") }</span>,
+    import: <span className={tabClass.mod({ disabled: uploadDisabled })}>{ t("pages.create_project.project_name.data_import") }</span>,
+    config: t("pages.create_project.project_name.labeling_setup"),
   };
 
   // name intentionally skipped from deps:
@@ -200,7 +205,7 @@ export const CreateProject = ({ onClose }) => {
     <Modal onHide={onDelete} closeOnClickOutside={false} allowToInterceptEscape fullscreen visible bare>
       <div className={rootClass}>
         <Modal.Header>
-          <h1>Create Project</h1>
+          <h1>{ t("pages.create_project.title") }</h1>
           <ToggleItems items={steps} active={step} onSelect={setStep} />
 
           <Space>
@@ -209,9 +214,9 @@ export const CreateProject = ({ onClose }) => {
               look="outlined"
               onClick={onDelete}
               waiting={waiting}
-              aria-label="Cancel project creation"
+              aria-label={ t("pages.create_project.cancel") }
             >
-              Cancel
+              { t("pages.create_project.cancel") }
             </Button>
             <Button
               look="primary"
@@ -220,7 +225,7 @@ export const CreateProject = ({ onClose }) => {
               waitingClickable={false}
               disabled={!project || uploadDisabled || error}
             >
-              Save
+              { t("pages.create_project.save_button") }
             </Button>
           </Space>
         </Modal.Header>

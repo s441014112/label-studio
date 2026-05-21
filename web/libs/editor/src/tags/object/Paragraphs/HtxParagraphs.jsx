@@ -16,6 +16,7 @@ import { cn } from "../../../utils/bem";
 import { cnm } from "@humansignal/shad/utils";
 import { ff } from "@humansignal/core";
 import { useHotkey } from "../../../hooks/useHotkey";
+import { withTranslation } from "react-i18next";
 
 const audioDefaultProps = { crossOrigin: "anonymous" };
 const isSyncedBuffering = ff.isActive(ff.FF_SYNCED_BUFFERING);
@@ -953,7 +954,7 @@ class HtxParagraphsView extends Component {
   };
 
   renderWrapperHeader() {
-    const { item } = this.props;
+    const { item, t } = this.props;
 
     return (
       <div className={styles.wrapper_header}>
@@ -977,9 +978,9 @@ class HtxParagraphsView extends Component {
                   canScroll: !this.state.canScroll,
                 });
               }}
-              label={"Auto-scroll"}
+              label={t("editor.tools.auto_scroll")}
             />
-            <Tooltip alignment="top-left" title="Automatically sync transcript scrolling with audio playback">
+            <Tooltip alignment="top-left" title={ t("editor.tools.auto_scroll_tooltip", { defaultValue: "Automatically sync transcript scrolling with audio playback" }) }>
               <IconHelp />
             </Tooltip>
           </div>
@@ -1026,4 +1027,6 @@ class HtxParagraphsView extends Component {
   }
 }
 
-export const HtxParagraphs = inject("store")(observer(HtxParagraphsView));
+export const HtxParagraphs = withTranslation()(
+  inject("store")(observer(HtxParagraphsView))
+);

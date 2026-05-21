@@ -66,6 +66,25 @@ except (ModuleNotFoundError, ImportError):
 from core import version
 from core.utils.exceptions import LabelStudioDatabaseLockedException
 
+EXCEPTION_TRANSLATION_MAP = {
+    'LabelStudioDatabaseException': 'error.database',
+    'LabelStudioDatabaseLockedException': 'error.database_locked_multi',
+    'ProjectExistException': 'project.duplicate_title',
+    'InvalidUploadUrlError': 'error.invalid_upload_url',
+    'AnnotationDuplicateError': 'annotation.duplicate',
+    'TokenExistsError': 'auth.token_already_exists',
+}
+
+
+def _resolve_exception_translation_key(exc):
+    if hasattr(exc, 'translation_key'):
+        return exc.translation_key
+    for base in type(exc).__mro__:
+        cls_name = base.__name__
+        if cls_name in EXCEPTION_TRANSLATION_MAP:
+            return EXCEPTION_TRANSLATION_MAP[cls_name]
+    return None
+
 # these functions will be included to another modules, don't remove them
 from core.utils.params import int_from_request
 
@@ -88,10 +107,17 @@ def custom_exception_handler(exc, context):
     :return: response with error desc
     """
     exception_id = uuid.uuid4()
+    request = context.get('request') if context else None
+
+    lang = None
+    if request:
+        lang = request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
 
     sentry_skip = False
     if isinstance(exc, APIException) and exc.status_code < 500:
-        # Skipping Sentry for non-500 unhandled exceptions
         sentry_skip = True
 
     logger.error(
@@ -102,29 +128,47 @@ def custom_exception_handler(exc, context):
 
     exc = _override_exceptions(exc)
 
-    # error body structure
+    from core.translations import gettext
+
     response_data = {
         'id': exception_id,
-        'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,  # default value
+        'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
         'version': label_studio.__version__,
-        'detail': 'Unknown error',  # default value
+        'detail': gettext('error.unknown', language=lang),
         'exc_info': None,
     }
 
     if hasattr(exc, 'display_context'):
         response_data['display_context'] = deepcopy(exc.display_context)
 
-    # try rest framework handler
     response = exception_handler(exc, context)
     if response is not None:
         response_data['status_code'] = response.status_code
 
         if 'detail' in response.data and isinstance(response.data['detail'], ErrorDetail):
-            response_data['detail'] = response.data['detail']
+            response_data['detail'] = str(response.data['detail'])
+            exc_key = _resolve_exception_translation_key(exc)
+            if exc_key:
+                response_data['detail'] = gettext(exc_key, language=lang)
+            elif response.status_code >= 500:
+                response_data['detail'] = gettext('error.internal_server', language=lang)
+            elif response.status_code == 400:
+                response_data['detail'] = gettext('error.bad_request', language=lang)
+            elif response.status_code == 401:
+                response_data['detail'] = gettext('error.unauthorized', language=lang)
+            elif response.status_code == 403:
+                response_data['detail'] = gettext('error.forbidden', language=lang)
+            elif response.status_code == 404:
+                response_data['detail'] = gettext('error.not_found', language=lang)
+            elif response.status_code == 405:
+                response_data['detail'] = gettext('error.method_not_allowed', language=lang)
+            elif response.status_code == 409:
+                response_data['detail'] = gettext('error.conflict', language=lang)
+            elif response.status_code == 429:
+                response_data['detail'] = gettext('error.too_many_requests', language=lang)
             response.data = response_data
-        # move validation errors to separate namespace
         else:
-            response_data['detail'] = 'Validation error'
+            response_data['detail'] = gettext('error.validation', language=lang)
             response_data['validation_errors'] = (
                 response.data if isinstance(response.data, dict) else {'non_field_errors': response.data}
             )
@@ -133,17 +177,16 @@ def custom_exception_handler(exc, context):
     # non-standard exception
     else:
         if sentry_sdk_loaded:
-            # pass exception to sentry
             set_tag('exception_id', exception_id)
             capture_exception(exc)
 
         exc_tb = tb.format_exc()
         logger.debug(exc_tb)
-        response_data['detail'] = str(exc)
+        exc_key = _resolve_exception_translation_key(exc)
+        response_data['detail'] = gettext(exc_key, language=lang) if exc_key else gettext('error.internal_server', language=lang)
         if not settings.DEBUG_MODAL_EXCEPTIONS:
             exc_tb = None
         response_data['exc_info'] = exc_tb
-        # Thrown by sdk when label config is invalid
         if isinstance(exc, LabelStudioXMLSyntaxErrorSentryIgnored):
             response_data['status_code'] = status.HTTP_400_BAD_REQUEST
             response = Response(status=status.HTTP_400_BAD_REQUEST, data=response_data)
@@ -378,9 +421,9 @@ def get_latest_version():
         latest_version = data['info']['version']
         upload_time = data.get('releases', {}).get(latest_version, [{}])[-1].get('upload_time', None)
     except Exception:
-        logger.warning("Can't get latest version", exc_info=True)
-    else:
-        return {'latest_version': latest_version, 'upload_time': upload_time}
+        logger.debug("Can't get latest version", exc_info=False)
+        return None
+    return {'latest_version': latest_version, 'upload_time': upload_time}
 
 
 def current_version_is_outdated(latest_version):
@@ -515,7 +558,8 @@ def collect_versions(force=False):
     settings.VERSIONS = result
     return result
 
-
+#Label Studio 专门用来从请求中获取「当前组织 ID」的工具函数，作用是兼容旧版、自动修复用户组织
+#从用户 或 会话 (session) 里取出当前组织 ID，并自动修复丢失的 active_organization
 def get_organization_from_request(request):
     """Helper for backward compatibility with org_pk in session"""
     # TODO remove session logic in next release

@@ -97,6 +97,11 @@ class Organization(OrganizationMixin, models.Model):
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
 
     contact_info = models.EmailField(_('contact info'), blank=True, null=True)
+    tenant_sid = models.BigIntegerField(
+        _('租户 sid'), null=True, blank=True, default=None, db_index=True, unique=True, help_text='IAM 系统租户唯一标识'
+    )
+    tenant_id = models.CharField(_('租户 id'), max_length=256, blank=True, default='', db_index=True)
+    tenant_name = models.CharField(_('租户名称'), max_length=256, blank=True, default='')
 
     def __str__(self):
         return self.title + ', id=' + str(self.pk)

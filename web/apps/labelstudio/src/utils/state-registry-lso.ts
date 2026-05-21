@@ -20,6 +20,7 @@
  */
 
 import { stateRegistry, StateType } from "@humansignal/app-common";
+import "../translations/i18n";
 
 // ============================================================================
 // Project States (LSO Core)
@@ -34,7 +35,7 @@ stateRegistry.registerBatch({
     type: StateType.INITIAL,
     label: "Created",
     tooltips: {
-      project: "Project has been created and is ready for configuration",
+      project: "states.project.created_tooltips",
     },
   },
 
@@ -42,8 +43,8 @@ stateRegistry.registerBatch({
     type: StateType.IN_PROGRESS,
     label: "In Progress",
     tooltips: {
-      project: "Annotation work is in progress on this project",
-      task: "Task is being annotated",
+      project: "states.project.inProgress_tooltips",
+      task: "states.task.inProgress_tooltips",
     },
   },
 
@@ -51,8 +52,8 @@ stateRegistry.registerBatch({
     type: StateType.TERMINAL,
     label: "Completed",
     tooltips: {
-      project: "All work on this project is completed",
-      task: "Task has been completed",
+      project: "states.project.completed_tooltips",
+      task: "states.task.completed_tooltips",
     },
   },
 });
@@ -68,17 +69,29 @@ stateRegistry.registerBatch({
 if (process.env.NODE_ENV === "development") {
   const lsoStates = ["CREATED", "ANNOTATION_IN_PROGRESS", "COMPLETED"];
 
-  const missingStates = lsoStates.filter((state) => !stateRegistry.isRegistered(state));
+  const missingStates = lsoStates.filter(
+    (state) => !stateRegistry.isRegistered(state),
+  );
 
   if (missingStates.length > 0) {
-    console.error("[LSO State Registry] Missing state registrations:", missingStates);
+    console.error(
+      "[LSO State Registry] Missing state registrations:",
+      missingStates,
+    );
   } else {
-    console.log("[LSO State Registry] ✅ All LSO states registered successfully");
-    console.log(`[LSO State Registry] Registered ${lsoStates.length} LSO states`);
+    console.log(
+      "[LSO State Registry] ✅ All LSO states registered successfully",
+    );
+    console.log(
+      `[LSO State Registry] Registered ${lsoStates.length} LSO states`,
+    );
   }
 
   // Log all registered states for debugging
   if (process.env.DEBUG_STATE_REGISTRY) {
-    console.log("[LSO State Registry] All registered states:", stateRegistry.getAllStates());
+    console.log(
+      "[LSO State Registry] All registered states:",
+      stateRegistry.getAllStates(),
+    );
   }
 }

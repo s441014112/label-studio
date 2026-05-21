@@ -4,22 +4,24 @@ import { z } from "zod";
 
 export const azureProvider: ProviderConfig = {
   name: "azure",
-  title: "Azure Blob Storage",
-  description: "Configure your Azure Blob Storage connection with all required Label Studio settings",
+  title: "pages.settings.providers.azure.azure_blob",
+  description: "pages.settings.providers.azure.desc",
   icon: IconCloudProviderAzure,
   fields: [
     {
       name: "container",
       type: "text",
-      label: "Container Name",
+      label: "pages.settings.providers.azure.container",
       required: true,
       placeholder: "my-azure-container",
-      schema: z.string().min(1, "Container name is required"),
+      schema: z
+        .string()
+        .min(1, "pages.settings.providers.azure.container_schema"),
     },
     {
       name: "prefix",
       type: "text",
-      label: "Bucket prefix",
+      label: "pages.settings.providers.azure.prefix",
       placeholder: "path/to/files",
       schema: z.string().optional().default(""),
       target: "export",
@@ -27,27 +29,26 @@ export const azureProvider: ProviderConfig = {
     {
       name: "account_name",
       type: "password",
-      label: "Account Name",
+      label: "pages.settings.providers.azure.account_name",
       autoComplete: "off",
       accessKey: true,
-      placeholder: "mystorageaccount",
+      placeholder: "",
       schema: z.string().optional().default(""),
     },
     {
       name: "account_key",
       type: "password",
-      label: "Account Key",
+      label: "pages.settings.providers.azure.account_key",
       autoComplete: "new-password",
       accessKey: true,
-      placeholder: "Your storage account key",
+      placeholder: "pages.settings.providers.azure.account_key_placeholder",
       schema: z.string().optional().default(""),
     },
     {
       name: "presign",
       type: "toggle",
-      label: "Use pre-signed URLs (On) / Proxy through the platform (Off)",
-      description:
-        "When pre-signed URLs are enabled, all data bypasses the platform and user browsers directly read data from storage",
+      label: "pages.settings.providers.azure.presign_label",
+      description: "pages.settings.providers.azure.presign_desc",
       schema: z.boolean().default(true),
       target: "import",
       resetConnection: false,
@@ -55,7 +56,7 @@ export const azureProvider: ProviderConfig = {
     {
       name: "presign_ttl",
       type: "counter",
-      label: "Expire pre-signed URLs (minutes)",
+      label: "pages.settings.providers.azure.pre_signed_url",
       min: 1,
       max: 10080,
       step: 1,

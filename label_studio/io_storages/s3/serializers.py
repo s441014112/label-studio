@@ -5,12 +5,23 @@ import os
 
 from botocore.exceptions import ClientError, ParamValidationError
 from botocore.handlers import validate_bucket_name
+from core.translations import get_response_message
 from io_storages.s3.models import S3ExportStorage, S3ImportStorage
 from io_storages.serializers import ExportStorageSerializer, ImportStorageSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
+
+
+def _detect_language(serializer_self):
+    request = serializer_self.context.get('request') if hasattr(serializer_self, 'context') else None
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
 
 
 class S3StorageSerializerMixin:
@@ -35,6 +46,7 @@ class S3StorageSerializerMixin:
         data = super().validate(data)
         if not data.get('bucket', None):
             return data
+        lang = _detect_language(self)
 
         storage = self.instance
         if storage:
@@ -49,27 +61,23 @@ class S3StorageSerializerMixin:
         try:
             storage.validate_connection()
         except ParamValidationError:
-            raise ValidationError('Wrong credentials for S3 {bucket_name}'.format(bucket_name=storage.bucket))
+            raise ValidationError(get_response_message('storage.s3.wrong_credentials', language=lang, bucket_name=storage.bucket))
         except ClientError as e:
             if (
                 e.response.get('Error').get('Code') in ['SignatureDoesNotMatch', '403']
                 or e.response.get('ResponseMetadata').get('HTTPStatusCode') == 403
             ):
-                raise ValidationError(
-                    'Cannot connect to S3 {bucket_name} with specified AWS credentials'.format(
-                        bucket_name=storage.bucket
-                    )
-                )
+                raise ValidationError(get_response_message('storage.s3.cannot_connect', language=lang, bucket_name=storage.bucket))
             if (
                 e.response.get('Error').get('Code') in ['NoSuchBucket', '404']
                 or e.response.get('ResponseMetadata').get('HTTPStatusCode') == 404
             ):
-                raise ValidationError('Cannot find bucket {bucket_name} in S3'.format(bucket_name=storage.bucket))
+                raise ValidationError(get_response_message('storage.s3.bucket_not_found', language=lang, bucket_name=storage.bucket))
         except TypeError as e:
             logger.info(f'It seems access keys are incorrect: {e}', exc_info=True)
-            raise ValidationError('It seems access keys are incorrect')
+            raise ValidationError(get_response_message('storage.s3.access_keys_incorrect', language=lang))
         except KeyError:
-            raise ValidationError(f'{storage.url_scheme}://{storage.bucket}/{storage.prefix} not found.')
+            raise ValidationError(get_response_message('storage.s3.path_not_found', language=lang, url_scheme=storage.url_scheme, bucket=storage.bucket, prefix=storage.prefix))
         return data
 
 

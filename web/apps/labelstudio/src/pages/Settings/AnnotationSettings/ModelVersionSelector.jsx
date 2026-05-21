@@ -2,6 +2,8 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { useAPI } from "../../../providers/ApiProvider";
 import { Select } from "../../../components/Form";
 import { ProjectContext } from "../../../providers/ProjectProvider";
+import "../../../translations/i18n";
+import { useTranslation } from "react-i18next";
 
 export const ModelVersionSelector = ({
   name = "model_version",
@@ -16,6 +18,8 @@ export const ModelVersionSelector = ({
   const [models, setModels] = useState([]);
   const [version, setVersion] = useState(null);
   const [placeholder, setPlaceholder] = useState("");
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     setVersion(project?.[valueName] || null);
@@ -50,7 +54,7 @@ export const ModelVersionSelector = ({
 
     if (modelVersions?.static?.length > 0) {
       const staticModels = modelVersions.static.map((item) => {
-        const label = `${item.model_version} (${item.count} predictions)`;
+        const label = `${item.model_version} (${item.count} ${ t("pages.settings.annotation_settings.predictions") })`;
 
         return {
           group: "Predictions",
@@ -63,7 +67,7 @@ export const ModelVersionSelector = ({
     }
 
     if (!modelVersions?.static?.length && !modelVersions?.live?.length) {
-      setPlaceholder("No model or predictions available");
+      setPlaceholder(t("pages.settings.annotation_settings.no_valid_model_or_predictions"));
     }
 
     setLoading(false);
@@ -75,7 +79,7 @@ export const ModelVersionSelector = ({
 
   return (
     <div>
-      <label>Select which predictions or which model you want to use:</label>
+      <label>{ t("pages.settings.annotation_settings.select_model_or_predictions") }:</label>
       <div style={{ display: "flex", alignItems: "center", width: 400 }}>
         <div style={{ flex: 1, paddingRight: 16 }}>
           <Select
@@ -84,7 +88,7 @@ export const ModelVersionSelector = ({
             value={version}
             onChange={setVersion}
             options={[...models, ...versions]}
-            placeholder={placeholder || "Please select model or predictions"}
+            placeholder={placeholder || t("pages.settings.annotation_settings.please_select_model_or_predictions") }
             isInProgress={loading}
             {...props}
           />

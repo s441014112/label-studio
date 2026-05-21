@@ -68,7 +68,6 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.Co
                 className="absolute right-3 !p-0"
                 style={{ top: "12px" }}
                 leading={<IconClose />}
-                aria-label="Close"
                 data-testid="drawer-close-button"
               />
             </DialogPrimitive.Close>

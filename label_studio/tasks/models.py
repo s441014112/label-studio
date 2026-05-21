@@ -17,6 +17,7 @@ from core.current_request import get_current_request
 from core.feature_flags import flag_set
 from core.label_config import SINGLE_VALUED_TAGS
 from core.redis import start_job_async_or_sync
+from core.translations import get_response_message
 from core.utils.common import (
     find_first_one_to_one_related_field_by_prefix,
     load_func,
@@ -271,7 +272,7 @@ class Task(TaskMixin, FsmHistoryStateModel):
                 # alien's skipped annotations are not counted at all
                 q = Q(was_cancelled=True) & ~Q(completed_by=user)
             else:
-                raise ValidationError(f'Invalid SkipQueue value: {self.project.skip_queue}')
+                raise ValidationError(get_response_message('task.invalid_skip_queue', value=self.project.skip_queue))
 
             # for LSE we also need to exclude rejected queue
             rejected_q = self.get_rejected_query()
@@ -595,7 +596,7 @@ class AnnotationManager(models.Manager):
         return AnnotationQuerySetWithFSM(self.model, using=self._db)
 
     def for_user(self, user):
-        return self.get_queryset().filter(project__organization=user.active_organization)
+        return self.get_queryset().filter(project__organization=user.active_organization, completed_by=user)
 
     def with_state(self):
         """Return queryset with FSM state annotated."""
@@ -1058,7 +1059,7 @@ class Prediction(models.Model):
             # full representation of result
             for item in result:
                 if not isinstance(item, dict):
-                    raise ValidationError('Each item in prediction result should be dict')
+                    raise ValidationError(get_response_message('prediction.item_must_be_dict'))
             # TODO: check consistency with project.label_config
             return result
 
@@ -1091,7 +1092,7 @@ class Prediction(models.Model):
                         }
                     ]
         else:
-            raise ValidationError(f'Incorrect format {type(result)} for prediction result {result}')
+            raise ValidationError(get_response_message('prediction.incorrect_format', type=type(result), result=result))
 
     def update_task(self):
         update_fields = ['updated_at']

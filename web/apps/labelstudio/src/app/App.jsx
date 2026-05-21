@@ -54,7 +54,7 @@ const browserHistory = createBrowserHistory({
 
 window.LSH = browserHistory;
 
-initSentry(browserHistory);
+// initSentry(browserHistory);
 
 const App = ({ content }) => {
   return (
@@ -91,5 +91,5 @@ const content = document.querySelector("#main-content");
 render(<App content={content.innerHTML} />, root);
 
 if (module?.hot) {
-  module.hot.accept(); // Enable HMR for React components
+  module.hot.accept(); // 支持热更新
 }

@@ -1,0 +1,37 @@
+title: "變點檢測"
+type: community
+group: 時間序列分析
+image: /static/templates/change-point-detection.png
+details: |
+  <h1>檢測時間序列中的變化點</h1>
+  <dl>
+    <dt>產業應用</dt>
+    <dd>異常檢測、趨勢分析、品質控制、金融分析、系統監控</dd>
+    <dt>相關模型</dt>
+    <dd>ruptures、Prophet、統計方法</dd>
+    <dt>領域術語</dt>
+    <dd>變點、變化檢測、時間序列、異常</dd>
+  </dl>
+config: |
+  <View>
+      <!-- Control tag for region labels -->
+      <TimeSeriesLabels name="label" toName="ts">
+          <Label value="Change" background="red" />
+      </TimeSeriesLabels>
+
+      <!-- Object tag for time series data source -->
+      <TimeSeries name="ts" valueType="url" value="$csv"
+                  sep=","
+                  timeColumn="time"
+                  timeFormat="%Y-%m-%d %H:%M:%S.%f"
+                  timeDisplayFormat="%Y-%m-%d"
+                  overviewChannels="velocity">
+
+          <Channel column="velocity"
+                   units="miles/h"
+                   displayFormat=",.1f"
+                   strokeColor="#1f77b4"
+                   legend="Velocity"/>
+      </TimeSeries>
+  </View>
+

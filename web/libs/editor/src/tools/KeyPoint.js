@@ -20,7 +20,8 @@ const _Tool = types
       };
     },
     get viewTooltip() {
-      return "Key Point";
+      const t = self.t;
+      return t ? t('editor.tools.key_point', { defaultValue: "Key Point" }) : "Key Point";
     },
     get iconComponent() {
       return self.dynamic ? NodeViews.KeyPointRegionModel.altIcon : NodeViews.KeyPointRegionModel.icon;

@@ -18,6 +18,9 @@ import { FF_LOPS_E_3, isFF } from "../../../utils/feature-flags";
 import { DensityToggle } from "../../DataManager/Toolbar/DensityToggle";
 import { TaskSourceViewer } from "../TaskSourceViewer";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 const Decorator = (decoration) => {
   return {
     get(col) {
@@ -63,6 +66,8 @@ export const Table = observer(
     const [toolbarVisible, setToolbarVisible] = useState(true);
     // Track last clicked row ID for shift-click range selection
     const lastClickedId = useRef(null);
+
+    const { t } = useTranslation();
 
     // Reset virtualizer cache when rowHeight changes
     useEffect(() => {
@@ -176,7 +181,7 @@ export const Table = observer(
             className="w-6 h-6 p-0 text-primary-content hover:text-primary-content-hover"
             onClick={() => {
               const modalInstance = modal({
-                title: `Source for task ${out?.id}`,
+                title: `${t("datamanager.components.table.show_task_source")}${out?.id}`,
                 style: { width: 900 },
                 header: null, // Will be set by renderToggle
                 body: (
@@ -194,7 +199,7 @@ export const Table = observer(
               });
             }}
             leading={<Icon icon={IconCode} />}
-            tooltip="Show task source"
+            tooltip={ t("datamanager.components.table.show_task_source") } 
           />
         );
       },
@@ -223,10 +228,10 @@ export const Table = observer(
           <FieldsButton
             className={cn("table-toolbar").elem("customize-button").toString()}
             wrapper={FieldsButton.Checkbox}
-            title={"Columns"}
+            title={t("datamanager.components.table.columns")}
             size="small"
             trailingIcon={<Icon icon={IconChevronDown} />}
-            tooltip={"Customize Columns"}
+            tooltip={t("datamanager.components.table.customize_columns")}
             data-testid="columns-picker-quickview"
           />
           <DensityToggle size="small" onChange={onDensityChange} data-testid="density-toggle-quickview" />

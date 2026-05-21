@@ -25,6 +25,7 @@ class JWTAuthenticationMiddleware:
                 JWT_ACCESS_TOKEN_ENABLED = flag_set(
                     'fflag__feature_develop__prompts__dia_1829_jwt_token_auth', user=user
                 )
+                #当请求携带有效的 JWT Bearer Token，且组织开启了 api_tokens_enabled 时，会 直接给 request.user 赋值为实际的 User 对象 （不再是懒加载对象）
                 if JWT_ACCESS_TOKEN_ENABLED and user.active_organization.jwt.api_tokens_enabled:
                     request.user = user
                     request.is_jwt = True

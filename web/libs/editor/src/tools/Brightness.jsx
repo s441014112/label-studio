@@ -9,12 +9,15 @@ import { Tool } from "../components/Toolbar/Tool";
 import { Range } from "../common/Range/Range";
 import { IconBrightnessTool } from "@humansignal/icons";
 
+import i18n from "../../../../apps/labelstudio/src/translations/i18n";
+
 const ToolView = observer(({ item }) => {
+
   return (
     <Tool
       active={item.selected}
-      ariaLabel="brightness"
-      label="Brightness"
+      ariaLabel={ i18n.t("editor.tools.brightness") }
+      label={ i18n.t("editor.tools.brightness") }
       controlsOnHover
       controls={[
         <Range

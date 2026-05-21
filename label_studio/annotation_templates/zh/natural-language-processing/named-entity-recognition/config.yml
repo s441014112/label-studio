@@ -1,0 +1,27 @@
+title: "命名实体识别"
+type: community
+group: 自然语言处理
+order: 3
+image: /static/templates/named-entity-recognition.png
+details: |
+  <h1>从文本中提取命名实体</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>法律文档、合同、医疗记录、临床笔记、新闻文章、新闻报道、金融文档、合规、监管、尽职调查、文档处理、文本挖掘、知识提取、结构化数据提取</dd>
+    <dt>相关模型</dt>
+    <dd>BERT、spaCy、Stanford NER、Flair、transformer 模型</dd>
+    <dt>领域术语</dt>
+    <dd>NLP、NER、信息抽取、实体提取、实体链接</dd>
+  </dl>
+config: |
+  <View>
+    <Labels name="label" toName="text">
+      <Label value="PER" background="red"/>
+      <Label value="ORG" background="darkorange"/>
+      <Label value="LOC" background="orange"/>
+      <Label value="MISC" background="green"/>
+    </Labels>
+
+    <Text name="text" value="$text"/>
+  </View>
+

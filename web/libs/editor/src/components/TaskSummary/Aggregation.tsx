@@ -10,6 +10,9 @@ import { isActive, FF_FIT_720_LAZY_LOAD_ANNOTATIONS } from "@humansignal/core/li
 
 import styles from "./TaskSummary.module.scss";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 type DistributionData = {
   total_annotations: number;
   distributions: Record<
@@ -289,6 +292,8 @@ export const AggregationTableRow = ({
   const [hasOverflow, setHasOverflow] = useState(false);
   const rowRef = useRef<HTMLTableRowElement>(null);
 
+  const { t } = useTranslation();
+
   // For non-lazy loading mode, compute from annotations as before
   const useApiData = isActive(FF_FIT_720_LAZY_LOAD_ANNOTATIONS) && taskId;
 
@@ -336,15 +341,15 @@ export const AggregationTableRow = ({
                   className="flex items-center gap-2 font-semibold text-neutral-content hover:text-neutral-content transition-colors cursor-pointer"
                 >
                   <IconChevronDown size={16} className={cnm("transition-transform", isExpanded && "rotate-180")} />
-                  Distribution
+                  { t("editor.components.taskSummary.distribution") }
                 </button>
               ) : (
-                <span className="font-semibold text-neutral-content">Distribution</span>
+                <span className="font-semibold text-neutral-content">{ t("editor.components.taskSummary.distribution") }</span>
               )}
               {/* Show total count from API */}
               {useApiData && distributionData && (
                 <span className="text-xs text-neutral-content-subtle">
-                  {distributionData.total_annotations} annotations
+                  {distributionData.total_annotations} { t("editor.components.taskSummary.annotations") }
                 </span>
               )}
             </div>

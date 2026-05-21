@@ -1,0 +1,23 @@
+title: "声音事件检测"
+type: community
+group: 音频/语音处理
+image: /static/templates/sound-event-detection.png
+details: |
+  <h1>在音频中检测和标注声音事件</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>环境监测、安全监控、智能家居、工业检测、野生动物监测</dd>
+    <dt>相关模型</dt>
+    <dd>PANNs、CRNN、YAMNet、AudioSet</dd>
+    <dt>领域术语</dt>
+    <dd>声音事件、音频检测、声学事件、SED</dd>
+  </dl>
+config: |
+  <View>
+    <Labels name="label" toName="audio" zoom="true" hotkey="ctrl+enter">
+      <Label value="Event A" background="red"/>
+      <Label value="Event B" background="green"/>
+    </Labels>
+    <Audio name="audio" value="$audio"/>
+  </View>
+

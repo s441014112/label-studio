@@ -152,6 +152,7 @@ def get_current_request():
 
 class ThreadLocalMiddleware(CommonMiddleware):
     def process_request(self, request):
+        #设置 request 的同时，如果 request.user 已经存在，会触发懒加载并将 user 存入线程本地变量供全局访问
         CurrentContext.set_request(request)
 
 

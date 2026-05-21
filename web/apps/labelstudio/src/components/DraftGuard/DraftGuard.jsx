@@ -1,6 +1,8 @@
 import { useContext, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { ToastContext } from "@humansignal/ui";
+import "../../translations/i18n"
+import { useTranslation } from "react-i18next";
 
 export const DRAFT_GUARD_KEY = "DRAFT_GUARD";
 
@@ -11,6 +13,9 @@ export const draftGuardCallback = {
 export const DraftGuard = () => {
   const toast = useContext(ToastContext);
   const history = useHistory();
+
+  // 国际化
+  const { t } = useTranslation();
 
   useEffect(() => {
     const unblock = () => {
@@ -37,10 +42,10 @@ export const DraftGuard = () => {
           const status = res?.$meta?.status;
 
           if (status === 200 || status === 201) {
-            toast.show({ message: "Draft saved successfully", type: "info" });
+            toast.show({ message: t("components.draftGuard.draft_save"), type: "info" });
             unblock();
           } else if (status !== undefined) {
-            toast.show({ message: "There was an error saving your draft", type: "error" });
+            toast.show({ message: t("components.draftGuard.draft_save"), type: "error" });
           } else {
             unblock();
           }

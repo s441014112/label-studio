@@ -13,6 +13,8 @@ import { guidGenerator } from "../core/Helpers";
 import { IconMagicWandTool } from "@humansignal/icons";
 import { Tool } from "../components/Toolbar/Tool";
 
+import i18n from "../../../../apps/labelstudio/src/translations/i18n";
+
 /**
  * Technical Overview:
  *
@@ -66,9 +68,10 @@ import { Tool } from "../components/Toolbar/Tool";
  */
 
 const ToolView = observer(({ item }) => {
+
   return (
     <Tool
-      label="Magic Wand"
+      label={ i18n.t("editor.tools.magic_wand") }
       ariaLabel="magicwand"
       shortcut="tool:magic-wand"
       active={item.selected}
@@ -244,10 +247,12 @@ const _Tool = types
 
         let msg;
 
+        const t = self.t;
+
         if (self.rotation) {
-          msg = "The Magic Wand is not supported on rotated images";
+          msg = t ? t('editor.tools.magicwand_not_support_image', { defaultValue: "The Magic Wand is not supported on rotated images" }) : "The Magic Wand is not supported on rotated images";
         } else {
-          msg = "The Magic Wand is not supported if the crosshair is turned on";
+          msg = t ? t('editor.tools.magicwand_not_support_cross', { defaultValue: "The Magic Wand is not supported if the crosshair is turned on" }) : "The Magic Wand is not supported if the crosshair is turned on";
         }
 
         alert(msg);

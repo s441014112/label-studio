@@ -8,6 +8,8 @@ import "./FilterLine.scss";
 import { FilterOperation } from "./FilterOperation";
 import { Icon } from "../../Common/Icon/Icon";
 
+import i18n from "../../../../../../apps/labelstudio/src/translations/i18n";
+
 const Conjunction = observer(({ index, view }) => {
   return (
     <FilterDropdown
@@ -33,7 +35,7 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
         {/* Main filter row */}
         <div className={cn("filterLine").elem("column").mix("conjunction")}>
           {index === 0 ? (
-            <span style={{ fontSize: 12, paddingRight: 5 }}>Where</span>
+            <span style={{ fontSize: 12, paddingRight: 5 }}>{ i18n.t("datamanager.components.filters.where") }</span>
           ) : (
             <Conjunction index={index} view={view} />
           )}
@@ -151,7 +153,7 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
     <div className={cn("filterLine").mod({ hasChild: !!childFilter })}>
       <div className={cn("filterLine").elem("column").mix("conjunction")}>
         {index === 0 ? (
-          <span style={{ fontSize: 12, paddingRight: 5 }}>Where</span>
+          <span style={{ fontSize: 12, paddingRight: 5 }}>{ i18n.t("datamanager.components.filters.where") }</span>
         ) : (
           <Conjunction index={index} view={view} />
         )}

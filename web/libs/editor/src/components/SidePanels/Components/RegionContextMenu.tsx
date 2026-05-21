@@ -6,6 +6,8 @@ import { type FC, useCallback, useMemo, useState } from "react";
 import { cn } from "../../../utils/bem";
 import { ContextMenu, type ContextMenuAction, ContextMenuTrigger, type MenuActionOnClick } from "../../ContextMenu";
 
+import i18n from "../../../../../../apps/labelstudio/src/translations/i18n";
+
 export const RegionContextMenu: FC<{ item: any }> = observer(({ item }: { item: any }) => {
   const [open, setOpen] = useState(false);
   const regionLink = useMemo(() => {
@@ -26,7 +28,7 @@ export const RegionContextMenu: FC<{ item: any }> = observer(({ item }: { item: 
       copyLink();
       ctx.dropdown?.close();
       toast.show({
-        message: "Region link copied to clipboard",
+        message: i18n.t("editor.components.sidepanels.copy_to_clipboard"),
         type: ToastType.info,
       });
     },
@@ -36,7 +38,7 @@ export const RegionContextMenu: FC<{ item: any }> = observer(({ item }: { item: 
   const actions = useMemo<ContextMenuAction[]>(
     () => [
       {
-        label: "Copy Region Link",
+        label: i18n.t("editor.components.sidepanels.copy_region_link"),
         onClick: onCopyLink,
         icon: <IconLink />,
       },

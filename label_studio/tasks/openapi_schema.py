@@ -17,6 +17,8 @@ result_example = [
     }
 ]
 
+from core.translations import TranslatableString as _S
+
 task_response_example = {
     'id': 1,
     'data': {'image': 'https://example.com/image.jpg', 'text': 'Hello, AI!'},
@@ -90,12 +92,12 @@ task_request_schema = {
     'type': 'object',
     'properties': {
         'data': {
-            'title': 'Task data',
-            'description': 'Task data dictionary with arbitrary keys and values',
+            'title': _S('schema.task.data_title'),
+            'description': _S('schema.task.data_desc'),
             'type': 'object',
             'example': {'image': 'https://example.com/image.jpg', 'text': 'Hello, world!'},
         },
-        'project': {'type': 'integer', 'description': 'Project ID'},
+        'project': {'type': 'integer', 'description': _S('schema.common.project_id')},
     },
     'example': {
         'data': {'image': 'https://example.com/image.jpg', 'text': 'Hello, world!'},
@@ -110,18 +112,18 @@ annotation_request_schema = {
         'result': {
             'type': 'array',
             'items': {'type': 'object'},
-            'description': 'Labeling result in JSON format. Read more about the format in [the Label Studio documentation.](https://labelstud.io/guide/task_format)',
+            'description': _S('schema.annotation.result_desc'),
             'example': result_example,
         },
-        'task': {'type': 'integer', 'description': 'Corresponding task for this annotation'},
-        'project': {'type': 'integer', 'description': 'Project ID for this annotation'},
-        'completed_by': {'type': 'integer', 'description': 'User ID of the person who created this annotation'},
-        'updated_by': {'type': 'integer', 'description': 'Last user who updated this annotation'},
-        'was_cancelled': {'type': 'boolean', 'description': 'User skipped the task'},
-        'ground_truth': {'type': 'boolean', 'description': 'This annotation is a Ground Truth'},
+        'task': {'type': 'integer', 'description': _S('schema.annotation.task_desc')},
+        'project': {'type': 'integer', 'description': _S('schema.annotation.project_desc')},
+        'completed_by': {'type': 'integer', 'description': _S('schema.annotation.completed_by_desc')},
+        'updated_by': {'type': 'integer', 'description': _S('schema.annotation.updated_by_desc')},
+        'was_cancelled': {'type': 'boolean', 'description': _S('schema.annotation.was_cancelled_desc')},
+        'ground_truth': {'type': 'boolean', 'description': _S('schema.annotation.ground_truth_desc')},
         'lead_time': {
             'type': 'number',
-            'description': 'How much time it took to annotate the task (in seconds)',
+            'description': _S('schema.annotation.lead_time_desc'),
             'example': 100.5,
         },
     },
@@ -137,21 +139,21 @@ annotation_request_schema = {
 prediction_request_schema = {
     'type': 'object',
     'properties': {
-        'task': {'type': 'integer', 'description': 'Task ID for which the prediction is created'},
+        'task': {'type': 'integer', 'description': _S('schema.prediction.task_desc')},
         'result': {
             'type': 'array',
             'items': {'type': 'object'},
-            'description': 'Prediction result in JSON format. Read more about the format in [the Label Studio documentation.](https://labelstud.io/guide/predictions)',
+            'description': _S('schema.prediction.result_desc'),
             'example': result_example,
         },
         'score': {
             'type': 'number',
-            'description': 'Prediction score. Can be used in Data Manager to sort task by model confidence. Task with the lowest score will be shown first.',
+            'description': _S('schema.prediction.score_desc'),
             'example': 0.95,
         },
         'model_version': {
             'type': 'string',
-            'description': 'Model version - tag for predictions that can be used to filter tasks in Data Manager, as well as select specific model version for showing preannotations in the labeling interface',
+            'description': _S('schema.prediction.model_version_desc'),
             'example': 'yolo-v8',
         },
     },

@@ -4,16 +4,16 @@ import { Tooltip, Button } from "@humansignal/ui";
 import { cn } from "../../utils/bem";
 import "./HistoryActions.scss";
 
-export const EditingHistory = observer(({ entity }) => {
+export const EditingHistory = observer(({ entity, t }) => {
   const { history } = entity;
 
   return (
     <div className={cn("history-buttons").toClassName()}>
-      <Tooltip title="Undo">
+      <Tooltip title={ t("editor.components.bottomBar.undo") }>
         <Button
           variant="neutral"
           size="small"
-          aria-label="Undo"
+          aria-label={ t("editor.components.bottomBar.undo") }
           look="string"
           disabled={!history?.canUndo}
           onClick={() => entity.undo()}
@@ -22,12 +22,12 @@ export const EditingHistory = observer(({ entity }) => {
           data-testid="bottombar-undo-button"
         />
       </Tooltip>
-      <Tooltip title="Redo">
+      <Tooltip title={ t("editor.components.bottomBar.redo") }>
         <Button
           variant="neutral"
           size="small"
           look="string"
-          aria-label="Redo"
+          aria-label={ t("editor.components.bottomBar.redo") }
           disabled={!history?.canRedo}
           onClick={() => entity.redo()}
           className="aspect-square"
@@ -35,12 +35,12 @@ export const EditingHistory = observer(({ entity }) => {
           data-testid="bottombar-redo-button"
         />
       </Tooltip>
-      <Tooltip title="Reset">
+      <Tooltip title={ t("editor.components.bottomBar.reset") }>
         <Button
           variant="negative"
           look="string"
           size="small"
-          aria-label="Reset"
+          aria-label={ t("editor.components.bottomBar.reset") }
           disabled={!history?.canUndo}
           onClick={() => history?.reset()}
           className="aspect-square"

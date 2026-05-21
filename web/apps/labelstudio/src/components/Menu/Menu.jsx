@@ -4,6 +4,8 @@ import { useDropdown } from "@humansignal/ui";
 import "./Menu.scss";
 import { MenuContext } from "./MenuContext";
 import { MenuItem } from "./MenuItem";
+import i18n from "../../translations/i18n";
+import { useTranslation } from "react-i18next";
 
 export const Menu = forwardRef(
   ({ children, className, style, size, selectedKeys, closeDropdownOnItemClick, contextual }, ref) => {
@@ -65,7 +67,7 @@ Menu.Builder = (url, menuItems) => {
     if (typeof pagePath === "function") {
       return (
         <Menu.Item key={index} onClick={pagePath}>
-          {pageLabel}
+          { i18n.t(pageLabel) }
         </Menu.Item>
       );
     }
@@ -74,7 +76,7 @@ Menu.Builder = (url, menuItems) => {
 
     return (
       <Menu.Item key={index} to={location} exact>
-        {pageLabel}
+        { i18n.t(pageLabel) }
       </Menu.Item>
     );
   });

@@ -1,0 +1,24 @@
+title: "使用掩码进行语义分割"
+type: community
+group: 计算机视觉
+order: 2
+image: /static/templates/semantic-segmentation-with-masks.png
+details: |
+  <h1>使用画笔掩码对图像区域进行分割</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>自动驾驶、医学影像、卫星图像、农业、城市规划、环境监测</dd>
+    <dt>相关模型</dt>
+    <dd>Mask R-CNN、U-Net、DeepLab、FCN、SAM、Segment Anything</dd>
+    <dt>领域术语</dt>
+    <dd>图像分割、画笔工具、掩码标注、像素级</dd>
+  </dl>
+config: |
+  <View>
+    <Image name="image" value="$image" zoom="true"/>
+    <BrushLabels name="tag" toName="image">
+      <Label value="Airplane" background="rgba(255, 0, 0, 0.7)"/>
+      <Label value="Car" background="rgba(0, 0, 255, 0.7)"/>
+    </BrushLabels>
+  </View>
+

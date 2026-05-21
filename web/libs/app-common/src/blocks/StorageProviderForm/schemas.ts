@@ -3,13 +3,19 @@ import type { FieldDefinition } from "./types/common";
 import { getProviderConfig } from "./providers";
 import { assembleSchema } from "./types/provider";
 
+import i18n from "apps/labelstudio/src/translations/i18n";
+
 // Step validation schemas
 export const step1Schema = z.object({
   provider: z.string().min(1, "Please select a storage provider"),
 });
 
 // Helper function to get provider-specific schema
-export const getProviderSchema = (provider: string, isEditMode = false, target?: "import" | "export") => {
+export const getProviderSchema = (
+  provider: string,
+  isEditMode = false,
+  target?: "import" | "export",
+) => {
   const providerConfig = getProviderConfig(provider);
   if (!providerConfig) {
     return z.object({}); // Empty schema for unknown providers
@@ -20,9 +26,15 @@ export const getProviderSchema = (provider: string, isEditMode = false, target?:
     {
       name: "title",
       type: "text",
-      label: "Storage Title",
+      label: i18n.t("common.blocks.storage_title"),
       required: true,
-      schema: z.string().min(1, "Storage title is required"),
+      schema: z
+        .string()
+        .min(
+          1,
+          i18n.t("common.blocks.storage_title") +
+            i18n.t("common.blocks.is_required"),
+        ),
     },
   ];
 
@@ -33,8 +45,8 @@ export const getProviderSchema = (provider: string, isEditMode = false, target?:
           {
             name: "can_delete_objects",
             type: "toggle",
-            label: "Can delete objects from storage",
-            description: "If unchecked, annotations will not be deleted from storage",
+            label: i18n.t("common.blocks.delete_objects_from_storage"),
+            description: i18n.t("common.blocks.unchecked_not_delete"),
             schema: z.boolean().default(false),
           },
         ]
@@ -42,7 +54,8 @@ export const getProviderSchema = (provider: string, isEditMode = false, target?:
 
   // Filter out message fields and combine with common fields
   const providerFields = providerConfig.fields.filter(
-    (field): field is FieldDefinition => "type" in field && field.type !== "message",
+    (field): field is FieldDefinition =>
+      "type" in field && field.type !== "message",
   );
 
   // Filter fields based on target if specified
@@ -50,12 +63,18 @@ export const getProviderSchema = (provider: string, isEditMode = false, target?:
     ? providerFields.filter((field) => !field.target || field.target === target)
     : providerFields;
 
-  const allFields = [...commonFields, ...exportFields, ...filteredProviderFields];
+  const allFields = [
+    ...commonFields,
+    ...exportFields,
+    ...filteredProviderFields,
+  ];
   return assembleSchema(allFields, isEditMode);
 };
 
 // Helper function to format validation errors in human-friendly format
-export const formatValidationErrors = (zodError: z.ZodError): Record<string, string> => {
+export const formatValidationErrors = (
+  zodError: z.ZodError,
+): Record<string, string> => {
   const errors: Record<string, string> = {};
 
   zodError.issues.forEach((issue) => {

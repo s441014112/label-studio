@@ -3,6 +3,8 @@ import { Form } from "antd";
 import { Button } from "@humansignal/ui";
 
 import { observer } from "mobx-react";
+import "../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
 
 const toJSON = (annotation) => {
   const id = annotation.pk || annotation.id;
@@ -53,26 +55,28 @@ const DebugComponent = ({ store }) => {
     input.value = JSON.stringify(json, null, 2);
   }, []);
 
+  const t = useTranslation();
+
   return (
     <div style={{ width: "100%" }}>
       <br />
-      <h2>Debug</h2>
+      <h2>{ t("editor.components.debug.debug") }</h2>
       <div>
-        <Button size="small" onClick={serializeAll} aria-label="Serialize all">
-          Serialize All Annotations
+        <Button size="small" onClick={serializeAll} aria-label={ t("editor.components.debug.serilaize_all_annotation") }>
+          { t("editor.components.debug.serilaize_all_annotation") }
         </Button>
-        <Button size="small" onClick={serializeCurrent} aria-label="Serialize current">
-          Serialize Current Annotation
+        <Button size="small" onClick={serializeCurrent} aria-label={ t("editor.components.debug.serilaize_current_annotation") }>
+          { t("editor.components.debug.serilaize_current_annotation") }
         </Button>
-        <Button size="small" onClick={loadTask} aria-label="Load task">
-          Simulate Loading Task
+        <Button size="small" onClick={loadTask} aria-label={ t("editor.components.debug.simulate_loading_task") }>
+          { t("editor.components.debug.simulate_loading_task") }
         </Button>
       </div>
 
       <Form>
         <div style={{ display: "flex" }}>
           <div style={{ flexBasis: "50%" }}>
-            <p>Data</p>
+            <p>{ t("editor.components.debug.data") }</p>
             <textarea
               style={{ width: "100%" }}
               ref={refData}
@@ -80,7 +84,7 @@ const DebugComponent = ({ store }) => {
               defaultValue={store.task.data}
               className="is-search"
             />
-            <p>Config</p>
+            <p>{ t("editor.components.debug.config") }</p>
             <textarea
               style={{ width: "100%" }}
               ref={refConfig}
@@ -90,7 +94,7 @@ const DebugComponent = ({ store }) => {
             />
           </div>
           <div style={{ flexBasis: "50%" }}>
-            <p>Annotations</p>
+            <p>{ t("editor.components.debug.annotations") }</p>
             <textarea
               style={{ width: "100%" }}
               ref={refAnnotations}

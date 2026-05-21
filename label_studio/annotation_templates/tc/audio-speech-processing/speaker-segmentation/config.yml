@@ -1,0 +1,22 @@
+title: "說話人分割"
+type: community
+group: 音訊/語音處理
+image: /static/templates/speaker-segmentation.png
+details: |
+  <h1>在音訊中識別並分割不同說話人的片段</h1>
+  <dl>
+    <dt>產業應用</dt>
+    <dd>會議分析、訪談處理、呼叫中心、對話AI、法律音訊處理</dd>
+    <dt>相關模型</dt>
+    <dd>pyannote、speechbrain、NVIDIA NeMo</dd>
+    <dt>領域術語</dt>
+    <dd>說話人分割、說話人日誌、diarization、音訊片段</dd>
+  </dl>
+config: |
+  <View>
+    <Labels name="label" toName="audio" zoom="true" hotkey="ctrl+enter">
+      <Label value="Speaker one" background="#00FF00"/>
+      <Label value="Speaker two" background="#12ad59"/>
+    </Labels>
+    <Audio name="audio" value="$audio" />
+  </View>

@@ -96,7 +96,7 @@ const Model = types
     },
 
     requiredModal() {
-      InfoModal.warning(self.requiredmessage || `Rating "${self.name}" is required.`);
+      InfoModal.warning(self.requiredmessage);
     },
 
     increaseValue() {

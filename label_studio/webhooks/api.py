@@ -1,13 +1,15 @@
 import django_filters
 from core.permissions import ViewClassPermission, all_permissions
+from core.translations import TranslatableString as _S
 from django.utils.decorators import method_decorator
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+
 from projects import models as project_models
 from rest_framework import generics
-from rest_framework.exceptions import NotFound
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -26,13 +28,13 @@ class WebhookFilterSet(django_filters.FilterSet):
     decorator=extend_schema(
         tags=['Webhooks'],
         summary='List all webhooks',
-        description='List all webhooks set up for your organization.',
+        description=_S('schema.action.list_webhooks'),
         parameters=[
             OpenApiParameter(
                 name='project',
                 type=OpenApiTypes.STR,
                 location='query',
-                description='Project ID',
+                description=_S('schema.param.project_filter'),
             ),
         ],
         extensions={
@@ -47,7 +49,7 @@ class WebhookFilterSet(django_filters.FilterSet):
     decorator=extend_schema(
         tags=['Webhooks'],
         summary='Create a webhook',
-        description='Create a webhook for your organization.',
+        description=_S('schema.action.create_webhook'),
         extensions={
             'x-fern-sdk-group-name': 'webhooks',
             'x-fern-sdk-method-name': 'create',
@@ -67,13 +69,10 @@ class WebhookListAPI(generics.ListCreateAPIView):
     )
 
     def get_queryset(self):
-        return Webhook.objects.filter(organization=self.request.user.active_organization)
+        return Webhook.objects.filter(created_by=self.request.user)
 
     def perform_create(self, serializer):
-        project = serializer.validated_data.get('project')
-        if project is None or project.organization_id != self.request.user.active_organization.id:
-            raise NotFound('Project not found.')
-        serializer.save(organization=self.request.user.active_organization)
+        serializer.save(created_by=self.request.user, organization=self.request.user.active_organization)
 
 
 @method_decorator(
@@ -141,7 +140,7 @@ class WebhookAPI(generics.RetrieveUpdateDestroyAPIView):
         return super().get_serializer_class()
 
     def get_queryset(self):
-        return Webhook.objects.filter(organization=self.request.user.active_organization)
+        return Webhook.objects.filter(created_by=self.request.user)
 
 
 @method_decorator(
@@ -149,10 +148,10 @@ class WebhookAPI(generics.RetrieveUpdateDestroyAPIView):
     decorator=extend_schema(
         tags=['Webhooks'],
         summary='Get all webhook actions',
-        description='Get descriptions of all available webhook actions to set up webhooks.',
+        description=_S('schema.action.list_webhook_actions'),
         responses={
             200: OpenApiResponse(
-                description='Object with webhook action descriptions.',
+                description=_S('schema.resp.webhook_actions'),
                 response={
                     'type': 'object',
                     'properties': {

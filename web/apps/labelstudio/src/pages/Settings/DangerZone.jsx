@@ -11,6 +11,8 @@ import { Spinner } from "../../components/Spinner/Spinner";
 import { useAPI } from "../../providers/ApiProvider";
 import { useProject } from "../../providers/ProjectProvider";
 import { cn } from "../../utils/bem";
+import "../../translations/i18n"
+import { useTranslation } from "react-i18next";
 
 export const DangerZone = () => {
   const { project } = useProject();
@@ -18,8 +20,9 @@ export const DangerZone = () => {
   const history = useHistory();
   const toast = useToast();
   const [processing, setProcessing] = useState(null);
+  const { t } = useTranslation();
 
-  useUpdatePageTitle(createTitleFromSegments([project?.title, "Danger Zone"]));
+  useUpdatePageTitle(createTitleFromSegments([project?.title, t("pages.settings.dangerZone.title")]));
 
   const showDangerConfirmation = ({ title, message, requiredWord, buttonText, onConfirm }) => {
     const isDev = process.env.NODE_ENV === "development";
@@ -38,7 +41,7 @@ export const DangerZone = () => {
               {message}
             </Typography>
             <Input
-              label={`To proceed, type "${requiredWord}" in the field below:`}
+              label={ t("pages.settings.dangerZone.type_required_below", { requiredWord })}
               value={inputValue}
               onChange={(e) => ctrl?.setState({ inputValue: e.target.value })}
               autoFocus
@@ -53,6 +56,8 @@ export const DangerZone = () => {
         const inputValue = (ctrl?.state?.inputValue || "").trim().toLowerCase();
         const isValid = isDev || inputValue === requiredWord.toLowerCase();
 
+        let { t } = useTranslation();
+
         return (
           <Space align="end">
             <Button
@@ -61,7 +66,7 @@ export const DangerZone = () => {
               onClick={() => ctrl?.hide()}
               data-testid="danger-zone-cancel-button"
             >
-              Cancel
+              { t("pages.settings.dangerZone.cancel") }
             </Button>
             <Button
               variant="negative"
@@ -81,36 +86,37 @@ export const DangerZone = () => {
   };
 
   const handleOnClick = (type) => () => {
+
     const actionConfig = {
       reset_cache: {
-        title: "Reset Cache",
+        title: t("pages.settings.dangerZone.reset_cache"),
         message: (
           <>
-            You are about to reset the cache for <strong>{project.title}</strong>. This action cannot be undone.
+            { t("pages.settings.dangerZone.reset_cache_tip") }<strong>{project.title}</strong>. { t("pages.settings.dangerZone.action_cannot_undone") }
           </>
         ),
         requiredWord: "cache",
-        buttonText: "Reset Cache",
+        buttonText: t("pages.settings.dangerZone.reset_cache"),
       },
       tabs: {
-        title: "Drop All Tabs",
+        title: t("pages.settings.dangerZone.drop_tabs"),
         message: (
           <>
-            You are about to drop all tabs for <strong>{project.title}</strong>. This action cannot be undone.
+            { t("pages.settings.dangerZone.drop_tabs_tip") }<strong>{project.title}</strong>. { t("pages.settings.dangerZone.action_cannot_undone") }
           </>
         ),
         requiredWord: "tabs",
-        buttonText: "Drop All Tabs",
+        buttonText: t("pages.settings.dangerZone.drop_tabs"),
       },
       project: {
-        title: "Delete Project",
+        title: t("pages.settings.dangerZone.delete_project"),
         message: (
           <>
-            You are about to delete the project <strong>{project.title}</strong>. This action cannot be undone.
+            { t("pages.settings.dangerZone.delete_project_tip") }<strong>{project.title}</strong>. { t("pages.settings.dangerZone.action_cannot_undone") }
           </>
         ),
         requiredWord: "delete",
-        buttonText: "Delete Project",
+        buttonText: t("pages.settings.dangerZone.delete_project"),
       },
     };
 
@@ -131,27 +137,27 @@ export const DangerZone = () => {
                 pk: project.id,
               },
             });
-            toast.show({ message: "Cache reset successfully" });
+            toast.show({ message: t("pages.settings.dangerZone.reset_cache_success") });
           } else if (type === "tabs") {
             await api.callApi("deleteTabs", {
               body: {
                 project: project.id,
               },
             });
-            toast.show({ message: "All tabs dropped successfully" });
+            toast.show({ message: t("pages.settings.dangerZone.drop_tabs_success") });
           } else if (type === "project") {
             await api.callApi("deleteProject", {
               params: {
                 pk: project.id,
               },
             });
-            toast.show({ message: "Project deleted successfully" });
+            toast.show({ message: t("pages.settings.dangerZone.delete_project_success") });
             history.replace("/projects");
           }
         } catch (error) {
           toast.show({ message: `Error: ${error.message}`, type: "error" });
         } finally {
-          setProcessing(null);
+          setProcessing(null);  
         }
       },
     });
@@ -159,38 +165,36 @@ export const DangerZone = () => {
 
   const buttons = useMemo(
     () => [
-      {
-        type: "annotations",
-        disabled: true, //&& !project.total_annotations_number,
-        label: `Delete ${project.total_annotations_number} Annotations`,
-      },
-      {
-        type: "tasks",
-        disabled: true, //&& !project.task_number,
-        label: `Delete ${project.task_number} Tasks`,
-      },
-      {
-        type: "predictions",
-        disabled: true, //&& !project.total_predictions_number,
-        label: `Delete ${project.total_predictions_number} Predictions`,
-      },
+      // {
+      //   type: "annotations",
+      //   disabled: true, //&& !project.total_annotations_number,
+      //   label: `Delete ${project.total_annotations_number} Annotations`,
+      // },
+      // {
+      //   type: "tasks",
+      //   disabled: true, //&& !project.task_number,
+      //   label: `Delete ${project.task_number} Tasks`,
+      // },
+      // {
+      //   type: "predictions",
+      //   disabled: true, //&& !project.total_predictions_number,
+      //   label: `Delete ${project.total_predictions_number} Predictions`,
+      // },
       {
         type: "reset_cache",
         help:
-          "Reset Cache may help in cases like if you are unable to modify the labeling configuration due " +
-          "to validation errors concerning existing labels, but you are confident that the labels don't exist. You can " +
-          "use this action to reset the cache and try again.",
-        label: "Reset Cache",
+          "pages.settings.dangerZone.reset_cache_help_first",
+        label: "pages.settings.dangerZone.reset_cache",
       },
       {
         type: "tabs",
-        help: "If the Data Manager is not loading, dropping all Data Manager tabs can help.",
-        label: "Drop All Tabs",
+        help: "pages.settings.dangerZone.drop_tabs_help",
+        label: "pages.settings.dangerZone.drop_tabs",
       },
       {
         type: "project",
-        help: "Deleting a project removes all tasks, annotations, and project data from the database.",
-        label: "Delete Project",
+        help: "pages.settings.dangerZone.delete_project_help",
+        label: "pages.settings.dangerZone.delete_project",
       },
     ],
     [project],
@@ -199,11 +203,10 @@ export const DangerZone = () => {
   return (
     <div className={cn("simple-settings")}>
       <Typography variant="headline" size="medium" className="mb-tighter">
-        Danger Zone
+        { t("pages.settings.dangerZone.title") }
       </Typography>
       <Typography variant="body" size="medium" className="text-neutral-content-subtler !mb-base">
-        Perform these actions at your own risk. Actions you take on this page can't be reverted. Make sure your data is
-        backed up.
+        { t("pages.settings.dangerZone.title_risk_tip") }
       </Typography>
 
       {project.id ? (
@@ -216,9 +219,9 @@ export const DangerZone = () => {
               btn.disabled !== true && (
                 <div className={cn("settings-wrapper")} key={btn.type}>
                   <Typography variant="title" size="large">
-                    {btn.label}
+                    { t(`${btn.label}`)}
                   </Typography>
-                  {btn.help && <Label description={btn.help} style={{ width: 600, display: "block" }} />}
+                  {btn.help && <Label description={ t(`${btn.help}`)} style={{ width: 600, display: "block" }} />}
                   <Button
                     key={btn.type}
                     variant="negative"
@@ -228,7 +231,7 @@ export const DangerZone = () => {
                     onClick={handleOnClick(btn.type)}
                     style={{ marginTop: 16 }}
                   >
-                    {btn.label}
+                    { t(`${btn.label}`)}
                   </Button>
                 </div>
               )
@@ -244,5 +247,5 @@ export const DangerZone = () => {
   );
 };
 
-DangerZone.title = "Danger Zone";
+DangerZone.title = "sideMenu.dangerZone";
 DangerZone.path = "/danger-zone";

@@ -3,6 +3,9 @@ import { Button, Tooltip } from "@humansignal/ui";
 import { IconCopyOutline } from "@humansignal/icons";
 import styles from "./CodeView.module.scss";
 
+import i18n from "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 interface CodeViewProps {
   /** JSON data to display */
   data: any;
@@ -16,6 +19,8 @@ interface CodeViewProps {
  */
 export const CodeView: FC<CodeViewProps> = ({ data }) => {
   const [copied, setCopied] = useState(false);
+
+  const { t } = useTranslation();
 
   // Format JSON for display
   const jsonString = useMemo(() => JSON.stringify(data, null, 2), [data]);
@@ -31,7 +36,7 @@ export const CodeView: FC<CodeViewProps> = ({ data }) => {
   return (
     <div className={styles.codeView}>
       <div className={styles.codeViewContent}>
-        <Tooltip title={copied ? "Copied!" : "Copy JSON"}>
+        <Tooltip title={copied ? t("datamanager.components.table.copied") : t("datamanager.components.table.copy_json")}>
           <Button
             look="outlined"
             variant="neutral"

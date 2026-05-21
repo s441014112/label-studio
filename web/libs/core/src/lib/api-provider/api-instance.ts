@@ -10,10 +10,30 @@ let apiInstance: APIProxy<Record<string, unknown>> | null = null;
  * @param config - Configuration for the API instance
  * @returns The initialized API instance
  */
-export function createApiInstance(config: ApiProviderConfig): APIProxy<Record<string, unknown>> {
+export function createApiInstance(
+  config: ApiProviderConfig,
+): APIProxy<Record<string, unknown>> {
   if (apiInstance) {
     console.warn("API instance already exists. Returning existing instance.");
     return apiInstance;
+  }
+
+  // 从当前页面的URL中，获取token、app_token、language参数, 并放到config.commonHeaders中
+  try {
+    const urlParams = new URLSearchParams(window.location.search) || {};
+    // urlParams 刷新页面就是null, 从本都缓存取
+    config.commonHeaders = {
+      ...config.commonHeaders,
+      Token: urlParams.get("token") || localStorage.getItem("token") || "",
+      "Digi-middleware-auth-app":
+        urlParams.get("digi-middleware-auth-app") ||
+        localStorage.getItem("digi-middleware-auth-app") ||
+        "",
+      "Accept-language":
+        urlParams.get("language") || localStorage.getItem("language") || "en",
+    };
+  } catch (error) {
+    console.error("Error parsing URL parameters:", error);
   }
 
   apiInstance = new APIProxy({
@@ -39,7 +59,9 @@ export function createApiInstance(config: ApiProviderConfig): APIProxy<Record<st
  */
 export function getApiInstance(): APIProxy<Record<string, unknown>> {
   if (!apiInstance) {
-    throw new Error("API instance not initialized. Call createApiInstance first.");
+    throw new Error(
+      "API instance not initialized. Call createApiInstance first.",
+    );
   }
   return apiInstance;
 }

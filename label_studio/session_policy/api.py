@@ -3,6 +3,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
+from core.translations import TranslatableString as _S
 from .models import SessionTimeoutPolicy
 from .serializers import SessionTimeoutPolicySerializer
 
@@ -12,7 +13,7 @@ from .serializers import SessionTimeoutPolicySerializer
     decorator=extend_schema(
         tags=['Session Policy'],
         summary='Retrieve Session Policy',
-        description='Retrieve session timeout policy for the currently active organization.',
+        description=_S('schema.action.get_session_policy'),
         responses={
             200: SessionTimeoutPolicySerializer,
         },
@@ -28,7 +29,7 @@ from .serializers import SessionTimeoutPolicySerializer
     decorator=extend_schema(
         tags=['Session Policy'],
         summary='Update Session Policy',
-        description='Update session timeout policy for the currently active organization.',
+        description=_S('schema.action.update_session_policy'),
         request=SessionTimeoutPolicySerializer,
         responses={
             200: SessionTimeoutPolicySerializer,

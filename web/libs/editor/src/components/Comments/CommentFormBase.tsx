@@ -6,6 +6,9 @@ import { TextArea } from "../../common/TextArea/TextArea";
 import { observer } from "mobx-react";
 import { Button } from "@humansignal/ui";
 
+import "../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 export type CommentFormProps = {
   value?: string;
   onChange?: (value: string) => void;
@@ -21,6 +24,8 @@ export const CommentFormBase: FC<CommentFormProps> = observer(
   ({ value = "", inline = true, onChange, onSubmit, onBlur, rows = 1, maxRows = 4, classifications }) => {
     const formRef = useRef<HTMLFormElement>(null);
     const actionRef = useRef<{ update?: (text?: string) => void; el?: RefObject<HTMLTextAreaElement> }>({});
+
+    const { t } = useTranslation();
 
     const submitHandler = useCallback(
       async (e?: any) => {
@@ -49,7 +54,7 @@ export const CommentFormBase: FC<CommentFormProps> = observer(
         <TextArea
           actionRef={actionRef}
           name="comment"
-          placeholder="Add a comment"
+          placeholder={ t("editor.components.comments.add_a_comment") }
           value={value}
           rows={rows}
           maxRows={maxRows}

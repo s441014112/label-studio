@@ -11,6 +11,9 @@ import { SpectrogramConfig } from "./SpectrogramConfig";
 import type { Waveform } from "../Waveform";
 import type { MutableRefObject } from "react";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next";
+
 const MAX_SPEED = 2.5;
 const MAX_ZOOM = 150;
 const MIN_SPEED = 0.5;
@@ -43,6 +46,8 @@ export const ConfigControl: FC<ConfigControlProps> = ({
   const [isTimeline, setTimeline] = useState(true);
   const [isAudioWave, setAudioWave] = useState(true);
   const { settings, changeSetting } = useContext(TimelineContext);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (layerVisibility) {
@@ -82,10 +87,10 @@ export const ConfigControl: FC<ConfigControlProps> = ({
     return (
       <div className={cn("audio-config").elem("buttons").toClassName()}>
         <div className={cn("audio-config").elem("menu-button").toClassName()} onClick={handleSetTimeline}>
-          {isTimeline ? "Hide" : "Show"} timeline
+          {isTimeline ? t("editor.libs.react.hide_timeline") : t("editor.libs.react.show_timeline") }
         </div>
         <div className={cn("audio-config").elem("menu-button").toClassName()} onClick={handleSetAudioWave}>
-          {isAudioWave ? "Hide" : "Show"} audio wave
+          {isAudioWave ? t("editor.libs.react.hide_audio_wave") : t("editor.libs.react.show_audio_wave")}
         </div>
       </div>
     );
@@ -99,8 +104,8 @@ export const ConfigControl: FC<ConfigControlProps> = ({
           max={MAX_SPEED}
           step={0.1}
           value={playbackSpeed}
-          description={"Playback speed"}
-          info={"Increase or decrease the playback speed"}
+          description={t("editor.libs.react.playback_speed")}
+          info={t("editor.libs.react.playback_speed_tooltip")}
           onChange={handleChangePlaybackSpeed}
         />
         <Slider
@@ -108,22 +113,22 @@ export const ConfigControl: FC<ConfigControlProps> = ({
           max={MAX_ZOOM}
           step={0.1}
           value={amp}
-          description={"Audio zoom y-axis"}
-          info={"Increase or decrease the appearance of amplitude"}
+          description={t("editor.libs.react.audio_zoom_yaxis")}
+          info={t("editor.libs.react.audio_zoom_yaxis_tooltip")}
           onChange={handleChangeAmp}
         />
         <div className={cn("audio-config").elem("toggle").toClassName()}>
           <Toggle
             checked={settings?.loopRegion}
             onChange={(e) => changeSetting?.("loopRegion", e.target.checked)}
-            label="Loop Regions"
+            label={t("editor.libs.react.loop_regions")}
           />
         </div>
         <div className={cn("audio-config").elem("toggle").toClassName()}>
           <Toggle
             checked={settings?.autoPlayNewSegments}
             onChange={(e) => changeSetting?.("autoPlayNewSegments", e.target.checked)}
-            label="Auto-play New Regions"
+            label={t("editor.libs.react.auto_play_new_regions")}
           />
         </div>
         {renderLayerToggles()}

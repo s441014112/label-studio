@@ -19,6 +19,7 @@ interface PreviewStepProps {
   filesPreview: any[] | null;
   formatSize: (bytes: number) => string;
   onImportSettingsChange?: () => void;
+  t: any;
 }
 
 const regexFilters = [
@@ -79,21 +80,22 @@ export const PreviewStep = ({
   filesPreview,
   formatSize,
   onImportSettingsChange,
+  t,
 }: PreviewStepProps) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold">Configure Import Settings & Preview Data</h2>
-        <p className="text-muted-foreground">Set up filters for your files and preview what will be synchronized</p>
+        <h2 className="text-xl font-semibold">{ t("common.blocks.configure_and_preview") }</h2>
+        <p className="text-muted-foreground">{ t("common.blocks.setup_filters_and_preview") }</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left Column Header */}
-        <h4>Import Configuration</h4>
+        <h4>{ t("common.blocks.import_configuration") }</h4>
 
         {/* Right Column Header with Button */}
         <div className="flex justify-between items-center">
-          <h4>Files Preview</h4>
+          <h4>{ t("common.blocks.files_preview") }</h4>
         </div>
 
         {/* Left Column: Configuration */}
@@ -112,11 +114,13 @@ export const PreviewStep = ({
               {/* Path/Bucket Prefix Section - Hide for localfiles since it has its own path field */}
               {type !== "localfiles" && (
                 <div className="space-y-2">
-                  <Label text={`${type === "redis" ? "Path to Files" : "Bucket Prefix"} (optional)`} />
+                  <Label text={`${type === "redis" ? t("common.blocks.path_to_files") : t("common.blocks.bucket_prefix")} (${t("common.blocks.optional")})`} />
                   <p className="text-sm text-muted-foreground">
-                    {type === "redis"
-                      ? "Specify the folder path within your storage where your files are located"
-                      : "Specify the folder path within your bucket where your files are located"}
+                    {
+                    type === "redis"
+                      ? t("common.blocks.files_located_storage")
+                      : t("common.blocks.files_located_bucket")
+                    }
                   </p>
                   <Input
                     id={type === "redis" ? "path" : "prefix"}
@@ -127,7 +131,7 @@ export const PreviewStep = ({
                       // Reset preview when prefix/path changes
                       onImportSettingsChange?.();
                     }}
-                    placeholder="path/to/files/ or leave empty for root"
+                    placeholder={ t("common.blocks.localfiles_placeholder") }
                     style={{ width: "100%" }}
                     required={false}
                     skip={false}
@@ -140,8 +144,8 @@ export const PreviewStep = ({
 
               {/* Import Method */}
               <div className="space-y-2">
-                <Label text="Import Method (optional)" />
-                <p className="text-sm text-muted-foreground">Choose how to interpret your data from storage</p>
+                <Label text={ t("common.blocks.import_method") } />
+                <p className="text-sm text-muted-foreground">{ t("common.blocks.interpret_from_storage") }</p>
                 <Select
                   name="use_blob_urls"
                   value={formData.use_blob_urls ? "Files" : "Tasks"}
@@ -162,22 +166,22 @@ export const PreviewStep = ({
                     [
                       {
                         value: "Files",
-                        label: "Files - Automatically creates a task for each storage object (e.g. JPG, MP3, TXT)",
+                        label: t("common.blocks.files_label"),
                       },
                       {
                         value: "Tasks",
-                        label: "Tasks - Treat each JSON, JSONL, or Parquet as one or more task definitions per file",
+                        label: t("common.blocks.tasks_label"),
                       },
                     ] as any
                   }
-                  placeholder="Select import method"
+                  placeholder={t("common.blocks.select_import_method")}
                 />
               </div>
 
               {/* File Filter Section */}
               <div className="space-y-2">
-                <Label text="File Name Filter (optional)" />
-                <p className="text-sm text-muted-foreground">Use regex patterns to filter which files are imported</p>
+                <Label text={ t("common.blocks.file_name_filter") } />
+                <p className="text-sm text-muted-foreground">{ t("common.blocks.file_name_filter_help_tip") }</p>
                 <Input
                   id="regex_filter"
                   name="regex_filter"
@@ -189,8 +193,8 @@ export const PreviewStep = ({
                   }}
                   placeholder={
                     formData.use_blob_urls
-                      ? ".*\\.(jpg|png)$ - imports only JPG, PNG files"
-                      : ".*\\.(json|jsonl|parquet)$ - imports task definitions"
+                      ? ".*\\.(jpg|png)$"
+                      : ".*\\.(json|jsonl|parquet)$"
                   }
                   style={{ width: "100%" }}
                   label=""
@@ -207,7 +211,7 @@ export const PreviewStep = ({
                 />
 
                 <div className="flex flex-wrap gap-x-2 items-center text-xs">
-                  <span className="text-muted-foreground">Common filters:</span>
+                  <span className="text-muted-foreground">{ t("common.blocks.common_filters") }:</span>
                   {regexFilters
                     .filter((r) => r.blob === formData.use_blob_urls)
                     .map((r) => {
@@ -239,8 +243,8 @@ export const PreviewStep = ({
               {/* Scan All Subfolders */}
               <div className="flex items-center justify-between">
                 <div>
-                  <Label text="Scan all sub-folders" className="block mb-2" />
-                  <p className="text-sm text-muted-foreground">Include files from all nested folders</p>
+                  <Label text={ t("common.blocks.scan_all_subfolders") } className="block mb-2" />
+                  <p className="text-sm text-muted-foreground">{ t("common.blocks.scan_folders_help") }</p>
                 </div>
                 <Toggle
                   checked={formData.recursive_scan ?? false}
@@ -270,10 +274,9 @@ export const PreviewStep = ({
                 <div className="rounded-full bg-muted p-3 mb-4">
                   <IconDocument className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <h3 className="font-medium mb-1">No Preview Available</h3>
+                <h3 className="font-medium mb-1">{ t("common.blocks.no_preview_available") }</h3>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  Configure your import settings and click "Load Preview" to see a sample of files that will be
-                  imported.
+                  { t("common.blocks.no_preview_available_help") }
                 </p>
               </div>
             ) : filesPreview.length === 0 ? (
@@ -282,10 +285,9 @@ export const PreviewStep = ({
                 <div className="rounded-full bg-muted p-3 mb-4">
                   <IconSearch className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <h3 className="font-medium mb-1">No Files Found</h3>
+                <h3 className="font-medium mb-1">{ t("common.blocks.no_files_found") }</h3>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  No files matching your current criteria were found. Try adjusting your filter settings and reload the
-                  preview.
+                  { t("common.blocks.no_files_found_help") }
                 </p>
               </div>
             ) : (
@@ -317,7 +319,7 @@ export const PreviewStep = ({
                               file.key
                             )
                           ) : (
-                            <span className="italic">... preview limit reached ...</span>
+                            <span className="italic">... { t("common.blocks.preview_limit_reach") } ...</span>
                           )}
                         </div>
                       </Tooltip>

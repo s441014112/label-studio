@@ -15,6 +15,9 @@ import { wrapArray } from "../../../utils/utilities";
 import { RegionItem } from "./RegionItem";
 import "./Relations.scss";
 
+import "../../../../../../apps/labelstudio/src/translations/i18n";
+import { useTranslation } from "react-i18next"; 
+
 const RealtionsComponent: FC<any> = ({ relationStore }) => {
   const relations = relationStore.orderedRelations;
 
@@ -73,7 +76,7 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
     }
   }, [relation.direction]);
 
-  // const;
+  const { t } = useTranslation();
 
   return (
     <div
@@ -94,7 +97,7 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
             {(hovered || relation.showMeta) && relation.hasRelations && (
               <Button
                 primary={relation.showMeta}
-                aria-label={`${relation.showMeta ? "Hide" : "Show"} Relation Labels`}
+                aria-label={relation.showMeta ? t("editor.components.sidepanels.hide_relation_labels") : t("editor.components.sidepanels.show_relation_labels") }
                 type={relation.showMeta ? undefined : "text"}
                 onClick={relation.toggleMeta}
                 style={{ padding: 0 }}
@@ -111,7 +114,7 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
                 size="small"
                 tooltip="Toggle Visibility"
                 onClick={relation.toggleVisibility}
-                aria-label={`${relation.visible ? "Hide" : "Show"} Relation`}
+                aria-label={relation.visible ? t("editor.components.sidepanels.hide_relation") : t("editor.components.sidepanels.show_relation") }
               >
                 {relation.visible ? (
                   <IconEyeOpened style={{ width: 20, height: 20 }} />
@@ -127,8 +130,8 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
                 variant="negative"
                 look="string"
                 size="small"
-                aria-label="Delete Relation"
-                tooltip="Delete Relation"
+                aria-label={ t("editor.components.sidepanels.delete_relation") }
+                tooltip={ t("editor.components.sidepanels.delete_relation") }
                 onClick={() => {
                   relation.node1.setHighlight(false);
                   relation.node2.setHighlight(false);
@@ -176,7 +179,7 @@ const RelationMeta: FC<any> = observer(({ relation }) => {
       <Select
         multiple={selectionMode}
         style={{ width: "100%" }}
-        placeholder="Select labels"
+        placeholder=""
         value={selectedValues}
         onChange={onChange}
         options={options}

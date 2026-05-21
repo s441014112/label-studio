@@ -1,0 +1,32 @@
+title: "意圖分類與槽位填充"
+type: community
+group: 對話AI
+image: /static/templates/intent-classification-and-slot-filling.png
+details: |
+  <h1>識別使用者意圖並提取關鍵資訊</h1>
+  <dl>
+    <dt>產業應用</dt>
+    <dd>語音助手、客服機器人、對話AI、任務型對話</dd>
+    <dt>相關模型</dt>
+    <dd>BERT、JointBERT、DIET</dd>
+    <dt>領域術語</dt>
+    <dd>意圖識別、槽位填充、對話系統、NLU</dd>
+  </dl>
+config: |
+  <View>
+    <ParagraphLabels name="entity_slot" toName="dialogue">
+      <Label value="Person" />
+      <Label value="Organization" />
+      <Label value="Location" />
+      <Label value="Datetime" />
+      <Label value="Quantity" />
+    </ParagraphLabels>
+    <Paragraphs name="dialogue" value="$humanMachineDialogue" layout="dialogue" />
+      <Choices name="intent" toName="dialogue"
+           choice="single" showInLine="true">
+          <Choice value="Greeting"/>
+          <Choice value="Customer request"/>
+          <Choice value="Small talk"/>
+      </Choices>
+  </View>
+

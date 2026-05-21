@@ -5,7 +5,9 @@ import { Fragment } from "react";
 import { Hotkey } from "../../core/Hotkey";
 import { ToolbarContext } from "./ToolbarContext";
 
-const hotkeys = Hotkey("SegmentationToolbar", "Segmentation Tools");
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+
+const hotkeys = Hotkey("SegmentationToolbar", i18n.t("editor.tools.segmentation_tools"));
 
 const keysDictionary = {
   plus: "+",

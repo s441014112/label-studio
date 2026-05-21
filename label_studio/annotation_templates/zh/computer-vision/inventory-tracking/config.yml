@@ -1,0 +1,43 @@
+title: "库存追踪"
+type: community
+group: 计算机视觉
+image: /static/templates/inventory-tracking.png
+details: |
+  <h1>跟踪和标注库存物品</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>零售库存、仓库管理、供应链、物流、资产追踪</dd>
+    <dt>相关模型</dt>
+    <dd>YOLO、EfficientDet、Faster R-CNN</dd>
+    <dt>领域术语</dt>
+    <dd>库存管理、物品检测、资产追踪</dd>
+  </dl>
+config: |
+  <View>
+    <View style="display:flex;justify-content:center">
+      <PolygonLabels name="objects" toName="image" value="$objects"/>
+    </View>
+    <Image name="image" value="$image"/>
+  </View>
+  <!-- {
+    "data": {
+      "image": "https://htx-pub.s3.amazonaws.com/templates/inventory-tracking/shelf.jpeg",
+      "objects": [{
+        "value": "CocaCola",
+        "html": "<img width='100' src='https://htx-pub.s3.amazonaws.com/templates/inventory-tracking/cocacola.png'/>"
+      }, {
+        "value": "RedBull",
+        "html": "<img width='100' src='https://htx-pub.s3.amazonaws.com/templates/inventory-tracking/redbull.png'/>"
+      }, {
+        "value": "Burn",
+        "html": "<img width='100' src='https://htx-pub.s3.amazonaws.com/templates/inventory-tracking/burn.png'/>"
+      }, {
+        "value": "Breezer",
+        "html": "<img width='100' src='https://htx-pub.s3.amazonaws.com/templates/inventory-tracking/breezer.png'/>"
+      }, {
+        "value": "Monster",
+        "html": "<img width='100' src='https://htx-pub.s3.amazonaws.com/templates/inventory-tracking/monster.png'/>"
+      }]
+    }
+  } -->
+

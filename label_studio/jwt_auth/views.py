@@ -21,16 +21,28 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import TokenBackendError, TokenError
+from core.translations import get_response_message
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.views import TokenRefreshView, TokenViewBase
 
 logger = logging.getLogger(__name__)
 
 
+def _detect_language(request):
+    lang = None
+    if request:
+        lang = request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return lang
+
+
 class TokenExistsError(APIException):
     status_code = status.HTTP_409_CONFLICT
     default_detail = 'You already have a valid token. Please revoke it before creating a new one.'
     default_code = 'token_exists'
+    translation_key = 'auth.token_already_exists'
 
 
 @method_decorator(
@@ -214,7 +226,7 @@ class LSTokenBlacklistView(TokenViewBase):
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
             logger.error('Token error occurred while trying to blacklist a token: %s', str(e), exc_info=True)
-            return Response({'detail': 'Token is invalid or already blacklisted.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': get_response_message('auth.token_invalid_or_blacklisted', language=_detect_language(request))}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -251,7 +263,7 @@ class LSAPITokenRotateView(TokenViewBase):
         try:
             current_token.blacklist()
         except TokenError:
-            return Response({'detail': 'Token is invalid or already blacklisted.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': get_response_message('auth.token_invalid_or_blacklisted', language=_detect_language(request))}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create a new token for the user
         new_token = self.create_token(request.user)

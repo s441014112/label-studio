@@ -5,6 +5,8 @@ import { cn } from "../../utils/bem";
 
 import "./DraftPanel.scss";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+
 const panel = cn("draft-panel");
 
 export const DraftPanel = observer(({ item }) => {
@@ -22,7 +24,7 @@ export const DraftPanel = observer(({ item }) => {
     <div className={panel}>
       <Tooltip
         alignment="top-left"
-        title={item.draftSelected ? "switch to original result" : "switch to current draft"}
+        title={item.draftSelected ? i18n.t("editor.components.draftPanel.switch_to_original") : i18n.t("editor.components.draftPanel.switch_to_draft")}
       >
         <Button
           type="button"
@@ -32,7 +34,7 @@ export const DraftPanel = observer(({ item }) => {
           className={panel.elem("toggle")}
           aria-label="Toggle draft mode"
         >
-          {item.draftSelected ? "draft" : "original"}
+          {item.draftSelected ? i18n.t("editor.components.draftPanel.draft") : i18n.t("editor.components.draftPanel.original")}
         </Button>
       </Tooltip>
       {saved}

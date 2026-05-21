@@ -2,17 +2,17 @@
 """
 import logging
 
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from iam_auth.decorators import iam_login_required
 
 logger = logging.getLogger(__name__)
 
 
-@login_required
+@iam_login_required
 def project_list(request):
     return render(request, 'projects/list.html')
 
 
-@login_required
+@iam_login_required
 def project_settings(request, pk, sub_path):
     return render(request, 'projects/settings.html')

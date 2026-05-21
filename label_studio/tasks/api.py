@@ -5,6 +5,7 @@ import logging
 from core.feature_flags import flag_set
 from core.mixins import GetParentObjectMixin
 from core.permissions import ViewClassPermission, all_permissions
+from core.translations import get_response_message, TranslatableString as _S
 from core.utils.common import is_community
 from core.utils.params import bool_from_request
 from data_manager.api import TaskListAPI as DMTaskListAPI
@@ -51,19 +52,28 @@ from webhooks.utils import (
 logger = logging.getLogger(__name__)
 
 
+def _detect_lang(request):
+    if request:
+        return request.GET.get('lang') or request.META.get('HTTP_X_LANGUAGE') or (
+            request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(',')[0].split(';')[0].strip()
+            if request.META.get('HTTP_ACCEPT_LANGUAGE') else None
+        )
+    return None
+
+
 # TODO: fix after switch to api/tasks from api/dm/tasks
 @method_decorator(
     name='post',
     decorator=extend_schema(
         tags=['Tasks'],
         summary='Create task',
-        description='Create a new labeling task in Label Studio.',
+        description=_S('schema.action.create_task'),
         request={
             'application/json': task_request_schema,
         },
         responses={
             '201': OpenApiResponse(
-                description='Created task',
+                description=_S('schema.resp.created_task'),
                 response=TaskSerializer,
                 examples=[OpenApiExample(name='response', value=task_response_example, media_type='application/json')],
             )
@@ -86,13 +96,13 @@ logger = logging.getLogger(__name__)
     Retrieve a list of tasks with pagination for a specific view or project, by using filters and ordering.
     """,
         parameters=[
-            OpenApiParameter(name='view', type=OpenApiTypes.INT, location='query', description='View ID'),
-            OpenApiParameter(name='project', type=OpenApiTypes.INT, location='query', description='Project ID'),
+            OpenApiParameter(name='view', type=OpenApiTypes.INT, location='query', description=_S('schema.param.view_id')),
+            OpenApiParameter(name='project', type=OpenApiTypes.INT, location='query', description=_S('schema.param.project_filter')),
             OpenApiParameter(
                 name='resolve_uri',
                 type=OpenApiTypes.BOOL,
                 location='query',
-                description='Resolve task data URIs using Cloud Storage',
+                description=_S('schema.param.resolve_uri'),
             ),
             OpenApiParameter(
                 name='fields',
@@ -100,19 +110,19 @@ logger = logging.getLogger(__name__)
                 enum=['all', 'task_only'],
                 default='task_only',
                 location='query',
-                description='Set to "all" if you want to include annotations and predictions in the response',
+                description=_S('schema.param.include_all'),
             ),
             OpenApiParameter(
                 name='review',
                 type=OpenApiTypes.BOOL,
                 location='query',
-                description='Get tasks for review',
+                description=_S('schema.param.for_review'),
             ),
             OpenApiParameter(
                 name='include',
                 type=OpenApiTypes.STR,
                 location='query',
-                description='Specify which fields to include in the response',
+                description=_S('schema.param.include_fields'),
             ),
             OpenApiParameter(
                 name='query',
@@ -134,7 +144,7 @@ logger = logging.getLogger(__name__)
         ],
         responses={
             '200': OpenApiResponse(
-                description='Tasks list',
+                description=_S('schema.resp.tasks_list'),
                 response={
                     'type': 'object',
                     'properties': {
@@ -186,7 +196,7 @@ class TaskListAPI(DMTaskListAPI):
 
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
-        return queryset.filter(project__organization=self.request.user.active_organization)
+        return queryset.filter(project__created_by=self.request.user)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -213,12 +223,12 @@ class TaskListAPI(DMTaskListAPI):
         Get task data, metadata, annotations and other attributes for a specific labeling task by task ID.
         """,
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description='Task ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description=_S('schema.param.task_id')),
         ],
         request=None,
         responses={
             '200': OpenApiResponse(
-                description='Task',
+                description=_S('schema.resp.task'),
                 response=DataManagerTaskSerializer,
                 examples=[
                     OpenApiExample(name='response', value=dm_task_response_example, media_type='application/json')
@@ -237,16 +247,16 @@ class TaskListAPI(DMTaskListAPI):
     decorator=extend_schema(
         tags=['Tasks'],
         summary='Update task',
-        description='Update the attributes of an existing labeling task.',
+        description=_S('schema.action.update_task'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description='Task ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description=_S('schema.param.task_id')),
         ],
         request={
             'application/json': task_request_schema,
         },
         responses={
             '200': OpenApiResponse(
-                description='Updated task',
+                description=_S('schema.resp.updated_task'),
                 response=TaskSerializer,
                 examples=[OpenApiExample(name='response', value=task_response_example, media_type='application/json')],
             )
@@ -263,9 +273,9 @@ class TaskListAPI(DMTaskListAPI):
     decorator=extend_schema(
         tags=['Tasks'],
         summary='Delete task',
-        description='Delete a task in Label Studio. This action cannot be undone!',
+        description=_S('schema.action.delete_task'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description='Task ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.STR, location='path', description=_S('schema.param.task_id')),
         ],
         request=None,
         extensions={
@@ -376,7 +386,7 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
         # First check permissions using a lightweight query
         # select_related('project') avoids extra query when permission check accesses task.project
         lean_task = generics.get_object_or_404(
-            Task.objects.filter(project__organization=self.request.user.active_organization).select_related('project'),
+            Task.objects.filter(project__created_by=self.request.user).select_related('project'),
             pk=task_id,
         )
         self.check_object_permissions(self.request, lean_task)
@@ -416,7 +426,7 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
         'This is an efficient endpoint that avoids N+1 queries.',
         responses={
             '200': OpenApiResponse(
-                description='Label distribution data',
+                description=_S('schema.resp.label_distribution'),
                 examples=[
                     OpenApiExample(
                         name='response',
@@ -453,7 +463,7 @@ class TaskAgreementAPI(generics.RetrieveAPIView):
     def get(self, request, pk):
         # This endpoint is gated by feature flag
         if not flag_set('fflag_fix_all_fit_720_lazy_load_annotations', user=request.user):
-            raise PermissionDenied('Feature not enabled')
+            raise PermissionDenied(get_response_message('task.feature_not_enabled', language=_detect_lang(request)))
 
         try:
             task = Task.objects.get(pk=pk)
@@ -462,7 +472,7 @@ class TaskAgreementAPI(generics.RetrieveAPIView):
 
         # Check project access using LSO's native permission check
         if not task.project.has_permission(request.user):
-            raise PermissionDenied('You do not have permission to view this task')
+            raise PermissionDenied(get_response_message('task.no_permission_view', language=_detect_lang(request)))
 
         # Get all annotations for this task with their results in a single query
         annotations = Annotation.objects.filter(
@@ -567,11 +577,11 @@ class TaskAgreementAPI(generics.RetrieveAPIView):
     decorator=extend_schema(
         tags=['Annotations'],
         summary='Get annotation by its ID',
-        description='Retrieve a specific annotation for a task using the annotation result ID.',
+        description=_S('schema.action.get_annotation'),
         request=None,
         responses={
             '200': OpenApiResponse(
-                description='Retrieved annotation',
+                description=_S('schema.resp.retrieved_annotation'),
                 response=AnnotationSerializer,
                 examples=[
                     OpenApiExample(name='response', value=annotation_response_example, media_type='application/json')
@@ -590,13 +600,13 @@ class TaskAgreementAPI(generics.RetrieveAPIView):
     decorator=extend_schema(
         tags=['Annotations'],
         summary='Update annotation',
-        description='Update existing attributes on an annotation.',
+        description=_S('schema.action.update_annotation'),
         request={
             'application/json': annotation_request_schema,
         },
         responses={
             '200': OpenApiResponse(
-                description='Updated annotation',
+                description=_S('schema.resp.updated_annotation'),
                 response=AnnotationSerializer,
                 examples=[
                     OpenApiExample(name='response', value=annotation_response_example, media_type='application/json')
@@ -679,14 +689,14 @@ class AnnotationAPI(generics.RetrieveUpdateDestroyAPIView):
     decorator=extend_schema(
         tags=['Annotations'],
         summary='Get all task annotations',
-        description='List all annotations for a task.',
+        description=_S('schema.action.list_annotations'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description='Task ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description=_S('schema.param.task_id')),
         ],
         request=None,
         responses={
             '200': OpenApiResponse(
-                description='Annotation',
+                description=_S('schema.resp.annotation'),
                 response=AnnotationSerializer(many=True),
                 examples=[
                     OpenApiExample(name='response', value=[annotation_response_example], media_type='application/json')
@@ -722,14 +732,14 @@ class AnnotationAPI(generics.RetrieveUpdateDestroyAPIView):
         ```
         """,
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description='Task ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description=_S('schema.param.task_id')),
         ],
         request={
             'application/json': annotation_request_schema,
         },
         responses={
             '201': OpenApiResponse(
-                description='Created annotation',
+                description=_S('schema.resp.created_annotation'),
                 response=AnnotationSerializer,
                 examples=[
                     OpenApiExample(name='response', value=annotation_response_example, media_type='application/json')
@@ -786,7 +796,7 @@ class AnnotationsListAPI(GetParentObjectMixin, generics.ListCreateAPIView):
         is_skipping = was_cancelled_get or was_cancelled_data
 
         if is_skipping and not task.can_be_skipped():
-            raise ValidationError({'detail': 'This task cannot be skipped.'})
+            raise ValidationError({'detail': get_response_message('task.cannot_skip', language=_detect_lang(request))})
 
         # updates history
         result = ser.validated_data.get('result')
@@ -816,7 +826,7 @@ class AnnotationsListAPI(GetParentObjectMixin, generics.ListCreateAPIView):
         if draft:
             # draft permission check
             if draft.task_id != task.id or not draft.has_permission(user) or draft.user_id != user.id:
-                raise PermissionDenied(f'You have no permission to draft id:{draft_id}')
+                raise PermissionDenied(get_response_message('task.no_permission_draft', language=_detect_lang(self.request), draft_id=draft_id))
 
         if draft is not None:
             # if the annotation will be created from draft - get created_at from draft to keep continuity of history
@@ -887,25 +897,25 @@ class AnnotationDraftAPI(generics.RetrieveUpdateDestroyAPIView):
     decorator=extend_schema(
         tags=['Predictions'],
         summary='List predictions',
-        description='List all predictions and their IDs.',
+        description=_S('schema.action.list_predictions'),
         parameters=[
             OpenApiParameter(
                 name='task',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Filter predictions by task ID',
+                description=_S('schema.prediction.filter_task'),
             ),
             OpenApiParameter(
                 name='project',
                 type=OpenApiTypes.INT,
                 location='query',
-                description='Filter predictions by project ID',
+                description=_S('schema.prediction.filter_project'),
             ),
         ],
         request=None,
         responses={
             '200': OpenApiResponse(
-                description='Predictions list',
+                description=_S('schema.resp.predictions_list'),
                 response=PredictionSerializer(many=True),
                 examples=[
                     OpenApiExample(name='response', value=[prediction_response_example], media_type='application/json')
@@ -924,13 +934,13 @@ class AnnotationDraftAPI(generics.RetrieveUpdateDestroyAPIView):
     decorator=extend_schema(
         tags=['Predictions'],
         summary='Create prediction',
-        description='Create a prediction for a specific task.',
+        description=_S('schema.action.create_prediction'),
         request={
             'application/json': prediction_request_schema,
         },
         responses={
             '201': OpenApiResponse(
-                description='Created prediction',
+                description=_S('schema.resp.created_prediction'),
                 response=PredictionSerializer,
                 examples=[
                     OpenApiExample(name='response', value=prediction_response_example, media_type='application/json')
@@ -949,14 +959,14 @@ class AnnotationDraftAPI(generics.RetrieveUpdateDestroyAPIView):
     decorator=extend_schema(
         tags=['Predictions'],
         summary='Get prediction details',
-        description='Get details about a specific prediction by its ID.',
+        description=_S('schema.action.get_prediction'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description='Prediction ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description=_S('schema.param.prediction_id')),
         ],
         request=None,
         responses={
             '200': OpenApiResponse(
-                description='Prediction details',
+                description=_S('schema.resp.prediction_details'),
                 response=PredictionSerializer,
                 examples=[
                     OpenApiExample(name='response', value=prediction_response_example, media_type='application/json')
@@ -975,16 +985,16 @@ class AnnotationDraftAPI(generics.RetrieveUpdateDestroyAPIView):
     decorator=extend_schema(
         tags=['Predictions'],
         summary='Put prediction',
-        description='Overwrite prediction data by prediction ID.',
+        description=_S('schema.action.update_prediction'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description='Prediction ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description=_S('schema.param.prediction_id')),
         ],
         request={
             'application/json': prediction_request_schema,
         },
         responses={
             '200': OpenApiResponse(
-                description='Updated prediction',
+                description=_S('schema.resp.updated_prediction'),
                 response=PredictionSerializer,
                 examples=[
                     OpenApiExample(name='response', value=prediction_response_example, media_type='application/json')
@@ -1001,16 +1011,16 @@ class AnnotationDraftAPI(generics.RetrieveUpdateDestroyAPIView):
     decorator=extend_schema(
         tags=['Predictions'],
         summary='Update prediction',
-        description='Update prediction data by prediction ID.',
+        description=_S('schema.action.partial_update_prediction'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description='Prediction ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description=_S('schema.param.prediction_id')),
         ],
         request={
             'application/json': prediction_request_schema,
         },
         responses={
             '200': OpenApiResponse(
-                description='Updated prediction',
+                description=_S('schema.resp.updated_prediction'),
                 response=PredictionSerializer,
                 examples=[
                     OpenApiExample(name='response', value=prediction_response_example, media_type='application/json')
@@ -1029,9 +1039,9 @@ class AnnotationDraftAPI(generics.RetrieveUpdateDestroyAPIView):
     decorator=extend_schema(
         tags=['Predictions'],
         summary='Delete prediction',
-        description='Delete a prediction by prediction ID.',
+        description=_S('schema.action.delete_prediction'),
         parameters=[
-            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description='Prediction ID'),
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path', description=_S('schema.param.prediction_id')),
         ],
         request=None,
         extensions={
@@ -1048,7 +1058,7 @@ class PredictionAPI(viewsets.ModelViewSet):
     filterset_fields = ['task', 'task__project', 'project']
 
     def get_queryset(self):
-        return Prediction.objects.filter(project__organization=self.request.user.active_organization)
+        return Prediction.objects.filter(project__created_by=self.request.user)
 
 
 @method_decorator(name='get', decorator=extend_schema(exclude=True))
@@ -1057,7 +1067,7 @@ class PredictionAPI(viewsets.ModelViewSet):
     decorator=extend_schema(
         tags=['Annotations'],
         summary='Convert annotation to draft',
-        description='Convert annotation to draft',
+        description=_S('schema.action.convert_draft'),
         extensions={
             'x-fern-audiences': ['internal'],
         },

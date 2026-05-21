@@ -1,4 +1,5 @@
 import AppStore from "./stores/AppStore";
+import i18n from "../../../apps/labelstudio/src/translations/i18n";
 
 // Get environment settings
 const getEnvironment = async () => {
@@ -39,6 +40,7 @@ export const configureStore = async (params, events) => {
   const store = AppStore.create(params, {
     ...env.configureApplication(params),
     events,
+    i18n,
   });
 
   store.initializeStore({

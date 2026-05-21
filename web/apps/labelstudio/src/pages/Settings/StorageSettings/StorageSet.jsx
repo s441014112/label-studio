@@ -12,6 +12,9 @@ import { providers } from "./providers";
 import { StorageCard } from "./StorageCard";
 import { StorageForm } from "./StorageForm";
 
+import "../../../translations/i18n";
+import { useTranslation } from "react-i18next";
+
 export const StorageSet = forwardRef(
   (
     {
@@ -34,11 +37,13 @@ export const StorageSet = forwardRef(
 
     const useNewStorageScreen = ff.isActive(ff.FF_NEW_STORAGES);
 
+    const { t } = useTranslation();
+
     const showStorageFormModal = useCallback(
       (storage) => {
-        const action = storage ? "Edit" : "Connect";
-        const actionTarget = target === "export" ? "Target" : "Source";
-        const title = `${action} ${actionTarget} Storage`;
+        const action = storage ? t("pages.settings.storage_setting.edit") : t("pages.settings.storage_setting.connect");
+        const actionTarget = target === "export" ? t("pages.settings.storage_setting.target"): t("pages.settings.storage_setting.source");
+        const title = `${action}${actionTarget}${t("pages.settings.storage_setting.storage")}`;
 
         const modalRef = modal({
           title,
@@ -104,8 +109,8 @@ export const StorageSet = forwardRef(
     const onDeleteStorage = useCallback(
       async (storage) => {
         confirm({
-          title: "Deleting storage",
-          body: "This action cannot be undone. Are you sure?",
+          title: t("pages.settings.storage_setting.delete_storage"),
+          body: t("pages.settings.storage_setting.delete_storage_confirm"),
           buttonLook: "negative",
           onOk: async () => {
             const response = await api.callApi("deleteStorage", {
@@ -131,7 +136,7 @@ export const StorageSet = forwardRef(
             disabled={loading}
             look="outlined"
             data-testid={`add-${target === "export" ? "target" : "source"}-storage-button`}
-            aria-label={`Add ${target === "export" ? "Target" : "Source"} Storage`}
+            aria-label={ target === "export" ? t("pages.settings.storage_setting.add_target_storage") : t("pages.settings.storage_setting.add_source_storage") }
           >
             {buttonLabel}
           </Button>

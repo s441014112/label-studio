@@ -1,0 +1,30 @@
+title: "视频物体追踪"
+type: community
+group: 视频
+image: /static/templates/video-object-tracking.png
+details: |
+  <h1>在视频中追踪物体</h1>
+  <dl>
+    <dt>行业应用</dt>
+    <dd>自动驾驶、监控、体育分析、交通监测、机器人</dd>
+    <dt>相关模型</dt>
+    <dd>SORT、DeepSORT、ByteTrack、YOLO</dd>
+    <dt>领域术语</dt>
+    <dd>物体追踪、视频追踪、多目标追踪、MOT</dd>
+  </dl>
+config: |
+  <View>
+     <Labels name="videoLabels" toName="video" allowEmpty="true">
+       <Label value="Man" background="blue"/>
+       <Label value="Woman" background="red"/>
+       <Label value="Other" background="green"/>
+     </Labels>
+     
+     <!-- Please specify FPS carefully, it will be used for all project videos -->
+     <Video name="video" value="$video" framerate="25.0"/>
+     <VideoRectangle name="box" toName="video" />
+  </View>
+
+  <!--{
+   "video": "/static/samples/opossum_snow.mp4"
+  }-->

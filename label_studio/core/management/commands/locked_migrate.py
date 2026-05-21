@@ -46,25 +46,28 @@ class Command(MigrateCommand):
 
     def acquire_lock_with_retry(self, lock_connection, lock_id):
         start_time = time.time()
+        vendor = lock_connection.vendor
 
         while True:
             with lock_connection.cursor() as cursor:
-                logger.info(f'Attempting to acquire the postgres advisory transaction lock with id: {lock_id}.')
-
-                # Attempt to acquire the transaction-level lock without blocking
-                cursor.execute(f'SELECT pg_try_advisory_xact_lock({lock_id})')
-                lock_acquired = cursor.fetchone()[0]
+                if vendor == 'mysql':
+                    cursor.execute(f"SELECT GET_LOCK('migrate_lock_{lock_id}', 0)")
+                    lock_acquired = cursor.fetchone()[0] == 1
+                elif vendor == 'postgresql':
+                    cursor.execute(f'SELECT pg_try_advisory_xact_lock({lock_id})')
+                    lock_acquired = cursor.fetchone()[0]
+                else:
+                    logger.info('Skipping advisory lock (unsupported backend %s), proceeding with migration.', vendor)
+                    return
 
                 if lock_acquired:
                     logger.info('Acquired the transaction lock, proceeding with migration.')
-                    return  # Exit the function if the lock is acquired
+                    return
 
-                # Check if the maximum wait time has been reached
                 elapsed_time = time.time() - start_time
                 if elapsed_time >= MAX_WAIT_TIME:
                     logger.info('Could not acquire the transaction lock within the timeout period.')
-                    raise TimeoutError('Failed to acquire PostgreSQL advisory transaction lock within 5 minutes.')
+                    raise TimeoutError(f'Failed to acquire {vendor} transaction lock within 5 minutes.')
 
-                # Wait before retrying
                 logger.info(f'Lock not acquired. Retrying in {RETRY_INTERVAL} seconds...')
                 time.sleep(RETRY_INTERVAL)

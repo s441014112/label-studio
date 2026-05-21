@@ -6,6 +6,7 @@ import ujson as json
 from core.current_request import CurrentContext, get_current_request
 from core.feature_flags import flag_set
 from core.label_config import replace_task_data_undefined_with_config_field
+from core.translations import get_response_message
 from core.utils.common import load_func, retry_database_locked
 from core.utils.db import fast_first
 from core.utils.exceptions import extract_message
@@ -98,14 +99,14 @@ class PredictionSerializer(ModelSerializer):
             return data
 
         if not project:
-            raise ValidationError('Project is required for prediction validation')
+            raise ValidationError(get_response_message('prediction.project_required'))
 
         # Validate prediction using LabelInterface
         li = LabelInterface(project.label_config)
         validation_errors = li.validate_prediction(data, return_errors=True)
 
         if validation_errors:
-            raise ValidationError(f'Error validating prediction: {validation_errors}')
+            raise ValidationError(get_response_message('prediction.validation_error', errors=validation_errors))
 
         return data
 
@@ -164,7 +165,7 @@ class AnnotationSerializer(FlexFieldsModelSerializer):
 
         # check result is list
         if not isinstance(data, list):
-            raise ValidationError('annotation "result" field in annotation must be list')
+            raise ValidationError(get_response_message('annotation.result_must_be_list'))
 
         return data
 
@@ -297,7 +298,7 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
     def to_internal_value(self, data):
         """Body of run_validation for all data items"""
         if data is None:
-            raise ValidationError('All tasks are empty (None)')
+            raise ValidationError(get_response_message('task.all_empty'))
 
         if not isinstance(data, list):
             raise ValidationError({api_settings.NON_FIELD_ERRORS_KEY: 'not a list'}, code='not_a_list')
@@ -346,14 +347,14 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
             # resolve annotators by email
             elif isinstance(completed_by, dict):
                 if 'email' not in completed_by:
-                    raise ValidationError("It's expected to have 'email' field in 'completed_by' data in annotations")
+                    raise ValidationError(get_response_message('annotation.completed_by_email_expected'))
 
                 email = completed_by['email']
                 if email not in members_email_to_id:
                     if settings.ALLOW_IMPORT_TASKS_WITH_UNKNOWN_EMAILS:
                         annotation['completed_by_id'] = default_user.id
                     else:
-                        raise ValidationError(f"Unknown annotator's email {email}")
+                        raise ValidationError(get_response_message('annotation.unknown_annotator_email', email=email))
                 else:
                     # overwrite an actual member ID
                     annotation['completed_by_id'] = members_email_to_id[email]
@@ -361,13 +362,13 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
             # old style annotators specification - try to find them by ID
             elif isinstance(completed_by, int) and completed_by in members_ids:
                 if completed_by not in members_ids:
-                    raise ValidationError(f"Unknown annotator's ID {completed_by}")
+                    raise ValidationError(get_response_message('annotation.unknown_annotator_id', completed_by=completed_by))
                 annotation['completed_by_id'] = completed_by
 
             # in any other cases - import validation error
             else:
                 raise ValidationError(
-                    f"Import data contains completed_by={completed_by} which is not a valid annotator's email or ID"
+                    get_response_message('annotation.import_completed_by_invalid', completed_by=completed_by)
                 )
             annotation.pop('completed_by', None)
 

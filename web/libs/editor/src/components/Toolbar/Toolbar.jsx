@@ -61,14 +61,14 @@ export const Toolbar = inject("store")(
               </div>
             ) : null;
           })}
-          {store.autoAnnotation && <SmartTools tools={smartTools} />}
+          {store.autoAnnotation && <SmartTools tools={smartTools} store={store} />}
         </div>
       </ToolbarProvider>
     );
   }),
 );
 
-const SmartTools = observer(({ tools }) => {
+const SmartTools = observer(({ tools, store }) => {
   const [selectedIndex, setSelectedIndex] = useState(
     Math.max(
       tools.findIndex((t) => t.selected),
@@ -80,12 +80,14 @@ const SmartTools = observer(({ tools }) => {
 
   const hasSelected = tools.some((t) => t.selected);
 
+  const t = store.t;
+
   return (
     tools.length > 0 && (
       <div className={cn("toolbar").elem("group").toClassName()}>
         <Tool
           smart
-          label="Auto-Detect"
+          label={ t("editor.components.toolbar.auto_detect") }
           active={hasSelected}
           icon={selected.iconClass}
           shortcut="tool:auto-detect"

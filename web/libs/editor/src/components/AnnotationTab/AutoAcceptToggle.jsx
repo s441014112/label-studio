@@ -7,6 +7,8 @@ import { cn } from "../../utils/bem";
 
 import "./AutoAcceptToggle.scss";
 
+import i18n from "../../../../../apps/labelstudio/src/translations/i18n";
+
 // we need to inject all of them to trigger rerender on changes to suggestions
 const injector = inject(({ store }) => {
   const annotation = store.annotationStore?.selected;
@@ -34,7 +36,7 @@ export const AutoAcceptToggle = injector(
               {suggestions.size > 0 ? (
                 <Space size="small">
                   <div className={cn("auto-accept").elem("info").toClassName()}>
-                    {suggestions.size} suggestion{suggestions.size > 0 && "s"}
+                    {suggestions.size} {suggestions.size > 0 ? i18n.t("editor.components.annotation.suggestions") : i18n.t("editor.components.annotation.suggestion")}
                   </div>
                   <Button
                     className={cn("auto-accept").elem("action").mod({ type: "reject" }).toClassName()}
@@ -55,7 +57,7 @@ export const AutoAcceptToggle = injector(
                 <Toggle
                   checked={store.autoAcceptSuggestions}
                   onChange={(e) => store.setAutoAcceptSuggestions(e.target.checked)}
-                  label="Auto-Accept Suggestions"
+                  label={ i18n.t("editor.components.annotation.auto_accept") }
                   data-testid="bottombar-auto-accept-toggle"
                 />
               )}
